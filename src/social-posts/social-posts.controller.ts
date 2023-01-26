@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Controller, FileTypeValidator, HttpStatus, NotFoundException, ParseFilePipe,  } from '@nestjs/common';
+import { Controller, FileTypeValidator, HttpException, HttpStatus, NotFoundException, ParseFilePipe, ParseFilePipeBuilder,  } from '@nestjs/common';
 import {
   Body,
   Delete,
@@ -20,14 +20,25 @@ export class SocialPostsController {
 
   //Create Post Route
 
+  // new ParseFilePipe({
+  //   validators:[
+  //     new FileTypeValidator({fileType: (/\.(jpe?g|tiff?|png)$/i)})
+  //   ]
+  // })
+
+  // new ParseFilePipeBuilder()
+  // .addFileTypeValidator({
+  //   fileType:'jpeg'
+  // })
+  // .build({
+  //   fileIsRequired:true
+  // })
+
   @Post('create')
   @UseInterceptors(FilesInterceptor('media',5))
   createPost(@UploadedFiles(
-    new ParseFilePipe({
-      validators:[
-        new FileTypeValidator({fileType: (/\.(jpe?g|tiff?|png)$/i)})
-      ]
-    })) media: Array<Express.Multer.File> ,@Body() data) {
+   
+  ) media: Array<Express.Multer.File> ,@Body() data) {
     data.media= media.map(item=>({
         fileName: item.filename,
         filePath: item.path
@@ -35,11 +46,18 @@ export class SocialPostsController {
     return this.socialPostservice.createPost(data);
   }
 
-  //Retrieve Single Post Route
+  //Retreive Single Post Route
 
   @Get('get/:postId')
   async getPost(@Param('postId') postId){
-    return this.socialPostservice.getPost(postId);
+    if(postId)
+    {
+      return this.socialPostservice.getPost(postId);
+    }
+    else
+    {
+      throw new HttpException("No Post Id was Provided", HttpStatus.BAD_REQUEST)
+    }
   }
 
   //Post Update Route
@@ -93,14 +111,27 @@ export class SocialPostsController {
   @Post('like/:userId')
   postLiked(@Body() data,@Param('userId') userId)
   {
-    console.log("post liked", data)
+    if(data.postId){
     return this.socialPostservice.likePost(userId,data)
+    }
+    else
+    {
+      throw new HttpException("No Post Id was Provided", HttpStatus.BAD_REQUEST)
+    }
   }
 
   //Remove Like Route
 
   @Patch('remove-like/:userId')
-  removeLike(@Param('userId') userId, @Body() postId){
-    this.socialPostservice.removeLike(userId, postId)
+  removeLike(@Param('userId') userId, @Body() data){
+    if(data.postId)
+    {
+    this.socialPostservice.removeLike(userId, data)
+    }
+    else
+    {
+      throw new HttpException("No Post Id was Provided", HttpStatus.BAD_REQUEST)
+    }
+
   }
 }

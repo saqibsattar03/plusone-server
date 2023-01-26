@@ -4,7 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Comment, CommentDocument } from 'src/Schemas/comment.schema';
 import { PostDocument , Post} from 'src/Schemas/post.schema';
-import { LikedPost, LikedPostDocument } from 'src/Schemas/postLiked.schema';
+import { LikedPostDocument } from 'src/Schemas/postLiked.schema';
 import { CreatePostDTO } from './dto/create-post.dto';
 import { PostLikedDTO } from './dto/liked-post.dto';
 
@@ -12,7 +12,7 @@ import { PostLikedDTO } from './dto/liked-post.dto';
 export class SocialPostsService {
   constructor(
     @InjectModel(Post.name) private readonly socialPostModel: Model<PostDocument>,
-    @InjectModel(LikedPost.name) private readonly postLikedModel: Model<LikedPostDocument>,
+    //@InjectModel(LikedPost.name) private readonly postLikedModel: Model<LikedPostDocument>,
     @InjectModel(Comment.name) private readonly commentModel: Model<CommentDocument>
     ){}
 
@@ -42,11 +42,12 @@ export class SocialPostsService {
     async likePost(userId,postLikedDto: PostLikedDTO):Promise<LikedPostDocument>
     {
         const post = await this.socialPostModel.findById(postLikedDto.postId)
-        if(!post)
+        if(!post.likes.includes(userId))
         {
         await post.updateOne({$push:{likes: userId}})
         }
-        else{
+        else
+        {
             console.log("already liked")
         }
         return;
@@ -54,7 +55,14 @@ export class SocialPostsService {
     async removeLike(userId, postLikedDto: PostLikedDTO): Promise<LikedPostDocument>
     {
         const post = await this.socialPostModel.findById(postLikedDto.postId)
+        if(post.likes.includes(userId))
+        {
         await post.updateOne({$pull:{likes:  userId}})
+        }
+        else
+        {
+            console.log("like already removed")
+        }
         return
     }
 
