@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Controller, HttpStatus, NotFoundException } from '@nestjs/common';
+import { Controller, FileTypeValidator, HttpStatus, NotFoundException, ParseFilePipe, ParseFilePipeBuilder } from '@nestjs/common';
 import {
   Body,
   Delete,
@@ -9,12 +9,10 @@ import {
   Post,
   Query,
   Res,
-  UploadedFile,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common/decorators';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { IPost } from './interface/post.interface';
+import {  FileFieldsInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { IPostLiked } from './interface/postLiked.interface';
 import { SocialPostsService } from './social-posts.service';
 
@@ -22,21 +20,21 @@ import { SocialPostsService } from './social-posts.service';
 export class SocialPostsController {
   constructor(private readonly socialPostservice: SocialPostsService) {}
 
-  @Post('create')
-  @UseInterceptors(FileInterceptor('media'))
-  createPost(@UploadedFiles() media ,@Body() data) {
   
-    // data.media= media.map(item=>({
-    //     fileName: item.filename,
-    //     filePath: item.path
-    // }))
-    data.media = {
-      fileName: "demo",
-      filePath:'hello'
-      //fileName: media.filename,
-     // filePath: media.path,
-
-    };
+  @Post('create')
+  @UseInterceptors(FilesInterceptor('media',5))
+  createPost(@UploadedFiles(
+    // new ParseFilePipe({
+    //   validators:[
+    //     new FileTypeValidator({fileType: (/\.(jpe?g|tiff?|png)$/i)})
+    //   ]
+    // })
+    
+  ) media: Array<Express.Multer.File> ,@Body() data) {
+    data.media= media.map(item=>({
+        fileName: item.filename,
+        filePath: item.path
+    }))
     return this.socialPostservice.createPost(data);
   }
 
@@ -44,19 +42,31 @@ export class SocialPostsController {
   async getPost(@Param('postId') postId){
     return this.socialPostservice.getPost(postId);
   }
-
+  // FilesInterceptor('media')
   @Patch('update/:id')
-  @UseInterceptors(FileInterceptor('media'))
-  async updatePost(@UploadedFile() media,@Param('id') id, @Body() data:IPost, @Res() res)
+  @UseInterceptors(FilesInterceptor('media',5))
+  async updatePost(@UploadedFiles(
+    // new ParseFilePipe({
+    //   validators:[
+    //     new FileTypeValidator({fileType: /\.(jpg|jpeg|png)$/})
+    //   ]
+    // })
+    // new ParseFilePipeBuilder()
+    // .addFileTypeValidator({
+    //   fileType: 'jpeg | jpg',
+    // })
+    // // .addMaxSizeValidator({
+    // //   maxSize
+    // // })
+    // .build({
+    //   errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
+    // }),
+  ) media: Array<Express.Multer.File>,@Param('id') id, @Body() data, @Res() res)
   {
-    // data.media = media.map(item=>({
-    //     fileName : item.filename,
-    //     filePath: item.path
-    // }))
-    data.media ={
-        fileName: media.filename,
-        filePath: media.path
-    }
+    data.media = media.map(item=>({
+        fileName : item.filename,
+        filePath: item.path
+    }))
    const post = await  this.socialPostservice.updatePost(id, data)
    if(!post) throw new NotFoundException(' Post does not exist');
         return res.status(HttpStatus.OK).json({

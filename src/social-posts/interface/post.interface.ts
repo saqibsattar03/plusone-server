@@ -6,9 +6,9 @@ export interface IPost extends Document {
     location: string,
     caption: string,
     comments:[],
-    media: {
+    media: [{
         fileName: string,
         filePath: string
-      },
+      }],
 
 }
