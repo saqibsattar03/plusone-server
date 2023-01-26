@@ -3,9 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Comment } from 'src/Schemas/comment.schema';
 import { Post, PostDocument } from 'src/Schemas/post.schema';
-import { IPost } from 'src/social-posts/interface/post.interface';
 import { CreateCommentDTO } from './dto/comment.dto';
-import { IComment } from './interface/comment.interface';
 
 @Injectable()
 export class CommentsService {
@@ -25,6 +23,7 @@ export class CommentsService {
     await post.updateOne({ $push: { comments: comment } });
     return;
   }
+
   async editComment(id, createCommentDto: CreateCommentDTO): Promise<Comment> {
     const updatedComment = await this.commentModel.findByIdAndUpdate(
       id,

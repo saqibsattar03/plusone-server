@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Controller, FileTypeValidator, HttpStatus, NotFoundException, ParseFilePipe, ParseFilePipeBuilder } from '@nestjs/common';
+import { Controller, FileTypeValidator, HttpStatus, NotFoundException, ParseFilePipe,  } from '@nestjs/common';
 import {
   Body,
   Delete,
@@ -18,17 +18,16 @@ import { SocialPostsService } from './social-posts.service';
 export class SocialPostsController {
   constructor(private readonly socialPostservice: SocialPostsService) {}
 
-  
+  //Create Post Route
+
   @Post('create')
   @UseInterceptors(FilesInterceptor('media',5))
   createPost(@UploadedFiles(
-    // new ParseFilePipe({
-    //   validators:[
-    //     new FileTypeValidator({fileType: (/\.(jpe?g|tiff?|png)$/i)})
-    //   ]
-    // })
-    
-  ) media: Array<Express.Multer.File> ,@Body() data) {
+    new ParseFilePipe({
+      validators:[
+        new FileTypeValidator({fileType: (/\.(jpe?g|tiff?|png)$/i)})
+      ]
+    })) media: Array<Express.Multer.File> ,@Body() data) {
     data.media= media.map(item=>({
         fileName: item.filename,
         filePath: item.path
@@ -36,11 +35,15 @@ export class SocialPostsController {
     return this.socialPostservice.createPost(data);
   }
 
+  //Retrieve Single Post Route
+
   @Get('get/:postId')
   async getPost(@Param('postId') postId){
     return this.socialPostservice.getPost(postId);
   }
-  // FilesInterceptor('media')
+
+  //Post Update Route
+
   @Patch('update/:id')
   @UseInterceptors(FilesInterceptor('media',5))
   async updatePost(@UploadedFiles(
@@ -73,6 +76,8 @@ export class SocialPostsController {
         });
   }
 
+  //Delete Post Route
+
   @Delete('remove/:id')
   async removePost(@Param('id') id, @Res() res){
     const post = await this.socialPostservice.removePost(id)
@@ -83,12 +88,16 @@ export class SocialPostsController {
         });
   }
 
+  //Like Post  Route
+
   @Post('like/:userId')
   postLiked(@Body() data,@Param('userId') userId)
   {
     console.log("post liked", data)
     return this.socialPostservice.likePost(userId,data)
   }
+
+  //Remove Like Route
 
   @Patch('remove-like/:userId')
   removeLike(@Param('userId') userId, @Body() postId){

@@ -16,7 +16,7 @@ export class SocialPostsService {
     @InjectModel(Comment.name) private readonly commentModel: Model<CommentDocument>
     ){}
 
-    // Create Post
+    
     async createPost(createPostDto: CreatePostDTO): Promise<PostDocument>
     {
         const post = await new this.socialPostModel(createPostDto) 
