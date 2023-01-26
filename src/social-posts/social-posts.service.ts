@@ -2,19 +2,18 @@
 import { Injectable} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { IComment } from 'src/comments/interface/comment.interface';
+import { Comment, CommentDocument } from 'src/Schemas/comment.schema';
 import { PostDocument , Post} from 'src/Schemas/post.schema';
+import { LikedPost, LikedPostDocument } from 'src/Schemas/postLiked.schema';
 import { CreatePostDTO } from './dto/create-post.dto';
 import { PostLikedDTO } from './dto/liked-post.dto';
-import { IPost } from './interface/post.interface';
-import { IPostLiked } from './interface/postLiked.interface';
 
 @Injectable()
 export class SocialPostsService {
   constructor(
     @InjectModel(Post.name) private readonly socialPostModel: Model<PostDocument>,
-    @InjectModel('PostLiked') private readonly postLikedModel: Model<IPostLiked>,
-    @InjectModel('Comment') private readonly commentModel: Model<IComment>
+    @InjectModel(LikedPost.name) private readonly postLikedModel: Model<LikedPostDocument>,
+    @InjectModel(Comment.name) private readonly commentModel: Model<CommentDocument>
     ){}
 
     // Create Post
@@ -25,7 +24,7 @@ export class SocialPostsService {
     }
 
     async getPost(postId): Promise<PostDocument>{
-        const post = await this.socialPostModel.findById(postId).populate("comments")
+        const post = await this.socialPostModel.findById(postId).populate("comments").populate("likes")
         return post
     }
 
@@ -40,16 +39,23 @@ export class SocialPostsService {
         return deletedPost
     }
 
-    async likePost(postLikedDto: PostLikedDTO):Promise<IPostLiked>
+    async likePost(userId,postLikedDto: PostLikedDTO):Promise<LikedPostDocument>
     {
-        const postLiked = await new this.postLikedModel(postLikedDto)
-        return postLiked.save()
+        const post = await this.socialPostModel.findById(postLikedDto.postId)
+        if(!post)
+        {
+        await post.updateOne({$push:{likes: userId}})
+        }
+        else{
+            console.log("already liked")
+        }
+        return;
     }
-    async unlikePost(userId, postId): Promise<IPostLiked>
+    async removeLike(userId, postLikedDto: PostLikedDTO): Promise<LikedPostDocument>
     {
-        //const unlikedPost = await this.postLikedModel.findByIdAndDelete({_id:userId})
-        const unlikedPost = await this.postLikedModel.findById({userId:userId})
-        return unlikedPost;
+        const post = await this.socialPostModel.findById(postLikedDto.postId)
+        await post.updateOne({$pull:{likes:  userId}})
+        return
     }
 
 }

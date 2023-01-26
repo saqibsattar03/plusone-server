@@ -7,13 +7,11 @@ import {
   Param,
   Patch,
   Post,
-  Query,
   Res,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common/decorators';
-import {  FileFieldsInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { IPostLiked } from './interface/postLiked.interface';
+import {   FilesInterceptor } from '@nestjs/platform-express';
 import { SocialPostsService } from './social-posts.service';
 
 @Controller('post')
@@ -84,14 +82,16 @@ export class SocialPostsController {
             post
         });
   }
-  @Post('like')
-  postLiked(@Body() data: IPostLiked)
+
+  @Post('like/:userId')
+  postLiked(@Body() data,@Param('userId') userId)
   {
     console.log("post liked", data)
-    return this.socialPostservice.likePost(data)
+    return this.socialPostservice.likePost(userId,data)
   }
-  @Post('unlike/:userid')
-  postUnliked(@Param('userid') userId, @Query('postid') postid){
-    this.socialPostservice.unlikePost(userId, postid)
+
+  @Patch('remove-like/:userId')
+  removeLike(@Param('userId') userId, @Body() postId){
+    this.socialPostservice.removeLike(userId, postId)
   }
 }

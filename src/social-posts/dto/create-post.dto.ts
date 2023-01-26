@@ -5,7 +5,6 @@ import {
   IsOptional,
 } from 'class-validator/types/decorator/decorators';
 
-/* eslint-disable prettier/prettier */
 export class CreatePostDTO{
     
     @IsNotEmpty()
@@ -24,6 +23,9 @@ export class CreatePostDTO{
     media:[{
         fileName: string,
         filePath: string
-      }]
+      }];
+
+      like:[]
+
     
 }

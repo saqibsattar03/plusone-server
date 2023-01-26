@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument} from 'mongoose';
+import { User } from './user.schema';
 
 export type PostDocument = HydratedDocument<Post>;
 @Schema({ timestamps: true })
@@ -25,6 +26,9 @@ export class Post {
       filePath: string;
     },
   ];
+
+  @Prop({type:[{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]})
+  likes: User[]
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post)

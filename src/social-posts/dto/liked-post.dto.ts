@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 
 export class PostLikedDTO{
-    userId: string
+    // userId: string
     postId: string
 }
