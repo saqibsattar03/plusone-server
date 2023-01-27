@@ -34,11 +34,11 @@ export class SocialPostsService {
     }
 
     async removePost(postId): Promise<PostDocument>{
-        const deletedPost = await this.socialPostModel.findByIdAndDelete(postId)
-        await this.commentModel.deleteMany({_id:{$in: deletedPost.comments}})
-        return deletedPost
+        const post = await this.socialPostModel.findById(postId)
+        await this.commentModel.deleteMany({_id:{$in: post.comments}})
+        await post.remove()
+        return post ;
     }
-
     async likePost(userId,postLikedDto: PostLikedDTO):Promise<LikedPostDocument>
     {
         const post = await this.socialPostModel.findById(postLikedDto.postId)

@@ -16,7 +16,7 @@ export class CreatePostDTO{
     @ApiProperty({description:'caption for the post', example:'attitude boy'})
     caption: string;
     
-    @ApiProperty({description:"comments object", example:'papa ki pari'})
+    @ApiProperty({description:"comments object", example: Object})
     comments: {object};
     
 
@@ -27,7 +27,7 @@ export class CreatePostDTO{
       }];
 
 
-      @ApiProperty({description:"user id who liked the specific post ",example:'63d2549476e862ed7649bfac'})
+      @ApiProperty({description:"user id who liked the specific post "})
       like:[]
 
     

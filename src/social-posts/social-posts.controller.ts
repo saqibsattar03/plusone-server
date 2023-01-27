@@ -12,7 +12,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common/decorators';
 import {   FilesInterceptor } from '@nestjs/platform-express';
-import { ApiBadRequestResponse, ApiBody, ApiCreatedResponse, ApiResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBody, ApiCreatedResponse, ApiParam} from '@nestjs/swagger';
 import { imageValidation } from './common/image.config';
 import { CreatePostDTO } from './dto/create-post.dto';
 import { SocialPostsService } from './social-posts.service';
@@ -25,8 +25,11 @@ export class SocialPostsController {
   //Create Post Route
 
   @Post('create')
+  @ApiBody({type: CreatePostDTO, description:"Request body to create a post"})
   @ApiCreatedResponse({type:CreatePostDTO, description:'Created post object as response' })
   @ApiBadRequestResponse({description:'can not create post'})
+ 
+ 
   @UseInterceptors(FilesInterceptor('media',5,imageValidation))
   createPost(@UploadedFiles() media: Array<Express.Multer.File> ,@Body() data, @Res() res) {
     
@@ -37,11 +40,6 @@ export class SocialPostsController {
         fileName: item.filename,
         filePath: item.path,
     }))
-
-    // if(data.media[0] === undefined){
-    //  console.log("images")
-    //   return res.send("file extension doest not match")
-    // }
     res.send("images formatted properly")
     return this.socialPostservice.createPost(data);
      
@@ -50,11 +48,16 @@ export class SocialPostsController {
     {
       return res.send("Photos/video must be provided to create a post")
     }
+
   }
 
   //Retreive Single Post Route
 
+
   @Get('get/:postId')
+  @ApiParam({name:'postId', type:'string'})
+  @ApiCreatedResponse({type: CreatePostDTO,description:"post fetched succeessfully"})
+  @ApiBadRequestResponse({description:'could not fetch the post object'})
   async getPost(@Param('postId') postId){
     if(postId)
     {
@@ -68,31 +71,18 @@ export class SocialPostsController {
 
   //Post Update Route
 
-  @Patch('update/:id')
+  @Patch('update/:postId')
+  @ApiParam({name:'postId',type:'string'})
+  @ApiCreatedResponse({type: CreatePostDTO,description:"post updated succeessfully"})
+  @ApiBadRequestResponse({description:'could not update post'})
   @UseInterceptors(FilesInterceptor('media',5, imageValidation))
-  async updatePost(@UploadedFiles(
-    // new ParseFilePipe({
-    //   validators:[
-    //     new FileTypeValidator({fileType: /\.(jpg|jpeg|png)$/})
-    //   ]
-    // })
-    // new ParseFilePipeBuilder()
-    // .addFileTypeValidator({
-    //   fileType: 'jpeg | jpg',
-    // })
-    // // .addMaxSizeValidator({
-    // //   maxSize
-    // // })
-    // .build({
-    //   errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
-    // }),
-  ) media: Array<Express.Multer.File>,@Param('id') id, @Body() data, @Res() res)
+  async updatePost(@UploadedFiles() media: Array<Express.Multer.File>,@Param('postId') postId, @Body() data, @Res() res)
   {
     data.media = media.map(item=>({
         fileName : item.filename,
         filePath: item.path
     }))
-   const post = await  this.socialPostservice.updatePost(id, data)
+   const post = await  this.socialPostservice.updatePost(postId, data)
    if(!post) throw new NotFoundException(' Post does not exist');
         return res.status(HttpStatus.OK).json({
             messsage: 'customer updated successfully',
@@ -102,19 +92,27 @@ export class SocialPostsController {
 
   //Delete Post Route
 
-  @Delete('remove/:id')
-  async removePost(@Param('id') id, @Res() res){
-    const post = await this.socialPostservice.removePost(id)
-   if(!post) throw new NotFoundException(' Post does not exist');
+  @Delete('remove/:postId')
+  @ApiParam({name:"postId", type:"string"})
+  @ApiCreatedResponse({description:"post deleted succeessfully"})
+  @ApiBadRequestResponse({description:'could not delete post'})
+
+  async removePost(@Param('postId') postId, @Res() res){
+    const post = await this.socialPostservice.removePost(postId)
         return res.status(HttpStatus.OK).json({
-            messsage: 'customer updated successfully',
+            messsage: 'post deleted successfully',
             post
         });
+
   }
 
   //Like Post  Route
 
   @Post('like/:userId')
+  @ApiParam({name:"userId", type:"string"})
+  @ApiCreatedResponse({description:"post liked succeessfully"})
+  @ApiBody({description:'post id is required in body'})
+  @ApiBadRequestResponse({description:'could not like post'})
   postLiked(@Body() data,@Param('userId') userId)
   {
     if(data.postId){
@@ -129,6 +127,10 @@ export class SocialPostsController {
   //Remove Like Route
 
   @Patch('remove-like/:userId')
+  @ApiParam({name:"userId", type:"string"})
+  @ApiCreatedResponse({description:"post unliked succeessfully"})
+  @ApiBody({description:'post id is required in body'})
+  @ApiBadRequestResponse({description:'could not unlike post'})
   removeLike(@Param('userId') userId, @Body() data){
     if(data.postId)
     {
