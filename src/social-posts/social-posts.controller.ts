@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Controller, FileTypeValidator, HttpException, HttpStatus, NotFoundException, ParseFilePipe, ParseFilePipeBuilder,  } from '@nestjs/common';
+import {  Controller,  HttpException, HttpStatus, NotFoundException} from '@nestjs/common';
 import {
   Body,
   Delete,
@@ -12,7 +12,11 @@ import {
   UseInterceptors,
 } from '@nestjs/common/decorators';
 import {   FilesInterceptor } from '@nestjs/platform-express';
+import { ApiBadRequestResponse, ApiBody, ApiCreatedResponse, ApiResponse } from '@nestjs/swagger';
+import { imageValidation } from './common/image.config';
+import { CreatePostDTO } from './dto/create-post.dto';
 import { SocialPostsService } from './social-posts.service';
+
 
 @Controller('post')
 export class SocialPostsController {
@@ -20,30 +24,32 @@ export class SocialPostsController {
 
   //Create Post Route
 
-  // new ParseFilePipe({
-  //   validators:[
-  //     new FileTypeValidator({fileType: (/\.(jpe?g|tiff?|png)$/i)})
-  //   ]
-  // })
-
-  // new ParseFilePipeBuilder()
-  // .addFileTypeValidator({
-  //   fileType:'jpeg'
-  // })
-  // .build({
-  //   fileIsRequired:true
-  // })
-
   @Post('create')
-  @UseInterceptors(FilesInterceptor('media',5))
-  createPost(@UploadedFiles(
-   
-  ) media: Array<Express.Multer.File> ,@Body() data) {
-    data.media= media.map(item=>({
+  @ApiCreatedResponse({type:CreatePostDTO, description:'Created post object as response' })
+  @ApiBadRequestResponse({description:'can not create post'})
+  @UseInterceptors(FilesInterceptor('media',5,imageValidation))
+  createPost(@UploadedFiles() media: Array<Express.Multer.File> ,@Body() data, @Res() res) {
+    
+    if(media.length){
+     
+     
+      data.media= media.map(item=>({
         fileName: item.filename,
-        filePath: item.path
+        filePath: item.path,
     }))
+
+    // if(data.media[0] === undefined){
+    //  console.log("images")
+    //   return res.send("file extension doest not match")
+    // }
+    res.send("images formatted properly")
     return this.socialPostservice.createPost(data);
+     
+    }
+    else
+    {
+      return res.send("Photos/video must be provided to create a post")
+    }
   }
 
   //Retreive Single Post Route
@@ -63,7 +69,7 @@ export class SocialPostsController {
   //Post Update Route
 
   @Patch('update/:id')
-  @UseInterceptors(FilesInterceptor('media',5))
+  @UseInterceptors(FilesInterceptor('media',5, imageValidation))
   async updatePost(@UploadedFiles(
     // new ParseFilePipe({
     //   validators:[
