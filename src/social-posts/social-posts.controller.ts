@@ -12,7 +12,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common/decorators';
 import {   FilesInterceptor } from '@nestjs/platform-express';
-import { ApiBadRequestResponse, ApiBody, ApiCreatedResponse, ApiParam} from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBody, ApiConsumes, ApiCreatedResponse, ApiParam} from '@nestjs/swagger';
 import { imageValidation } from './common/image.config';
 import { CreatePostDTO } from './dto/create-post.dto';
 import { SocialPostsService } from './social-posts.service';
@@ -28,8 +28,23 @@ export class SocialPostsController {
   @ApiBody({type: CreatePostDTO, description:"Request body to create a post"})
   @ApiCreatedResponse({type:CreatePostDTO, description:'Created post object as response' })
   @ApiBadRequestResponse({description:'can not create post'})
- 
- 
+  @ApiConsumes('multipart/form-data')
+
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        username:{type: 'string'},
+        location:{type: 'string'},
+        caption:{type: 'string'},
+        media: { 
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+
   @UseInterceptors(FilesInterceptor('media',5,imageValidation))
   createPost(@UploadedFiles() media: Array<Express.Multer.File> ,@Body() data, @Res() res) {
     
@@ -58,6 +73,8 @@ export class SocialPostsController {
   @ApiParam({name:'postId', type:'string'})
   @ApiCreatedResponse({type: CreatePostDTO,description:"post fetched succeessfully"})
   @ApiBadRequestResponse({description:'could not fetch the post object'})
+  
+  
   async getPost(@Param('postId') postId){
     if(postId)
     {
@@ -75,6 +92,24 @@ export class SocialPostsController {
   @ApiParam({name:'postId',type:'string'})
   @ApiCreatedResponse({type: CreatePostDTO,description:"post updated succeessfully"})
   @ApiBadRequestResponse({description:'could not update post'})
+  
+  @ApiConsumes('multipart/form-data')
+
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        username:{type: 'string'},
+        location:{type: 'string'},
+        caption:{type: 'string'},
+        media: { 
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  
   @UseInterceptors(FilesInterceptor('media',5, imageValidation))
   async updatePost(@UploadedFiles() media: Array<Express.Multer.File>,@Param('postId') postId, @Body() data, @Res() res)
   {

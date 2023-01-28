@@ -32,8 +32,12 @@ export class CommentsService {
     return updatedComment;
   }
 
-  async deleteComment(id): Promise<Comment> {
-    const deletedComment = await this.commentModel.findByIdAndDelete(id);
-    return deletedComment;
+  async deleteComment(commentId, postId): Promise<Comment> {
+    await this.socialPostModel.findByIdAndUpdate(
+      { _id: postId },
+      { $pull: { comments: commentId } },
+    );
+    await this.commentModel.findByIdAndDelete(commentId);
+    return;
   }
 }

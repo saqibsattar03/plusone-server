@@ -40,13 +40,14 @@ export class CommentsController {
   }
 
   //remove comment route
-  @Delete('remove/:commentId')
+  @Delete('remove/:commentId/:postId')
   @ApiParam({ name: 'commentId', type: 'string' })
+  @ApiParam({ name: 'postId', type: 'string' })
   @ApiCreatedResponse({
     description: 'Comment removed succeessfully',
   })
   @ApiBadRequestResponse({ description: 'comment could not removed' })
-  async removeComment(@Param('commentId') commentId) {
-    return this.commentService.deleteComment(commentId);
+  async removeComment(@Param('commentId') commentId, @Param('postId') postId) {
+    return this.commentService.deleteComment(commentId, postId);
   }
 }

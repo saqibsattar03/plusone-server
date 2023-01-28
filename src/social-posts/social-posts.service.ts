@@ -39,6 +39,9 @@ export class SocialPostsService {
         await post.remove()
         return post ;
     }
+
+
+    
     async likePost(userId,postLikedDto: PostLikedDTO):Promise<LikedPostDocument>
     {
         const post = await this.socialPostModel.findById(postLikedDto.postId)
