@@ -24,10 +24,9 @@ export class VoucherService {
   }
 
   async getAllVouchesByRestaurant(restaurantId): Promise<any> {
+    const oid = new mongoose.Types.ObjectId(restaurantId);
     const allVouchers = await this.voucherModel
-      .find({
-        restaurantId: restaurantId,
-      })
+      .find({ restaurantId: oid })
       .exec();
     console.log('res = ', allVouchers);
     return allVouchers;

@@ -21,6 +21,14 @@ export class RestaurantService {
     return restaurant;
   }
 
+  async getAllRestaurants(): Promise<any> {
+    return this.restaurantModel.find();
+  }
+
+  async getRestaurantById(restaurantId): Promise<RestaurantDocument> {
+    return this.restaurantModel.findById({ _id: restaurantId });
+  }
+
   async editRestaurant(restaurantId, data): Promise<RestaurantDocument> {
     const updatedRestaurant = await this.restaurantModel.findByIdAndUpdate(
       { _id: restaurantId },
