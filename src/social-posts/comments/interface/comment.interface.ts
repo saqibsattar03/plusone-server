@@ -1,8 +1,9 @@
-/* eslint-disable prettier/prettier */
 import { Document } from 'mongoose';
 
 export interface IComment extends Document {
+  // postId: string;
+  comment: {
     userId: string;
-    postId: string,
-    comment: string,
+    commentText: string;
+  };
 }

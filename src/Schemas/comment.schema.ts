@@ -1,34 +1,28 @@
-/* eslint-disable prettier/prettier */
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
+import { Post } from './post.schema';
+import { Profile } from './Profile.schema';
 
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import mongoose, { HydratedDocument } from "mongoose";
-import { Post } from "./post.schema";
+export type CommentDocument = HydratedDocument<Comment>;
 
-export type CommentDocument = HydratedDocument<Post>;
+@Schema()
+export class Comment {
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Post' })
+  postId: Post;
 
-@Schema({ timestamps: true })
-export class Comment{
-   
-    @Prop()
-    userId: string;
-
-    @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'Post' })
-    postId: Post;
-
-    @Prop()
-    comment: string;
-
-
-
+  @Prop()
+  commentObject: [CommentStructure];
 }
-export const CommentSchema = SchemaFactory.createForClass(Comment)
 
+@Schema({ timestamps: true, _id: true })
+export class CommentStructure {
+  @Prop()
+  _id: mongoose.Schema.Types.ObjectId;
 
-// import * as mongoose from 'mongoose'
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Profile' })
+  userId: Profile;
 
-// export const CommentSchema = new mongoose.Schema({
-//     userId: String,
-//     postId: {type: mongoose.Schema.Types.ObjectId, ref:"Post"},
-//     comment: String,
-//     created_at: { type: Date, default: Date.now },
-// });
+  @Prop({ type: String })
+  commentText: string;
+}
+export const CommentSchema = SchemaFactory.createForClass(Comment);

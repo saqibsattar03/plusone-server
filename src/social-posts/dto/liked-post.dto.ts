@@ -1,12 +1,12 @@
-/* eslint-disable prettier/prettier */
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty } from 'class-validator';
 
-import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty } from "class-validator";
+export class PostLikedDTO {
+  @ApiProperty()
+  @IsNotEmpty()
+  userId: object;
 
-export class PostLikedDTO{
-    // userId: string
-
-    @ApiProperty()
-    @IsNotEmpty()
-    postId: string
+  @ApiProperty()
+  @IsNotEmpty()
+  postId: object;
 }

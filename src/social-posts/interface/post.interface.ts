@@ -2,10 +2,9 @@
 import { Document } from 'mongoose';
 
 export interface IPost extends Document {
-    username: string;
+    userId: object;
     location: string,
     caption: string,
-    comments:[],
     media: [{
         fileName: string,
         filePath: string

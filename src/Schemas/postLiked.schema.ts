@@ -1,20 +1,17 @@
-/* eslint-disable prettier/prettier */
-
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { HydratedDocument } from "mongoose";
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
+import { Profile } from './Profile.schema';
+import { Post } from './post.schema';
 
 export type LikedPostDocument = HydratedDocument<LikedPost>;
 
 @Schema({ timestamps: true })
+export class LikedPost {
+  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Profile' }] })
+  userId: Profile[];
 
-export class LikedPost{
-
-  // @Prop()
-  // userId: string;
-  
-  @Prop()
-  postId: string;
+  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }] })
+  postId: Post;
 }
 
-export const LikedPostSchema = SchemaFactory.createForClass(LikedPost)
-
+export const LikedPostSchema = SchemaFactory.createForClass(LikedPost);

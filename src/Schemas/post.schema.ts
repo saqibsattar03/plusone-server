@@ -1,25 +1,23 @@
 /* eslint-disable prettier/prettier */
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument} from 'mongoose';
-import { User } from './user.schema';
+import { Profile } from "./Profile.schema";
 
 export type PostDocument = HydratedDocument<Post>;
 @Schema({ timestamps: true })
 export class Post {
 
-  @Prop()
-  username: string;
+ @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Profile' }] })
+  userId: Profile;
 
   @Prop()
-  locations: string;
+  location: string;
 
   @Prop()
   caption: string;
 
-  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }] })
-  comments: Comment[];
 
-  @Prop({required: true})
+  @Prop()
   media: [
     {
       fileName: string;
@@ -27,25 +25,12 @@ export class Post {
     },
   ];
 
-  @Prop({type:[{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]})
-  likes: User[]
+  @Prop({type : Number, default:0 })
+  likesCount: number;
+
+  @Prop({type: Number, default:0})
+  commentCount:number
+
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post)
-
-// import * as mongoose from 'mongoose'
-
-// export const PostSchema = new mongoose.Schema({
-//     username: String,
-//     location: String,
-//     caption: String,
-//     comments:[{
-//       type: mongoose.Schema.Types.ObjectId,
-//       ref:'Comment'
-//     }],
-//     media:[{
-//         fileName: String,
-//         filePath: String
-//       }],
-//     created_at: { type: Date, default: Date.now },
-// });
