@@ -5,8 +5,10 @@ import { User } from './user.schema';
 export type ProfileDocument = HydratedDocument<Profile>;
 @Schema({ timestamps: true })
 export class Profile {
-  // @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] })
-  // user: User;
+  @Prop()
+  email: string;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+  user: User;
 
   @Prop()
   bio: string;
@@ -53,6 +55,7 @@ export class Profile {
   favoriteChef: [string];
   @Prop({ type: Number, default: '' })
   voucherVerificationCode: number;
+
 }
 
 export const ProfileSchema = SchemaFactory.createForClass(Profile);

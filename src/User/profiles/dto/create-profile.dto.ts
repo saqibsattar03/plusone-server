@@ -3,6 +3,10 @@ export class CreateProfileDto {
     type: string;
     unique: true;
   };
+  email: {
+    type: string,
+    unique: true
+  };
   bio: string;
   accountType: { type: string; enum: ['public', 'private']; default: 'public' };
   accountHolderType: {

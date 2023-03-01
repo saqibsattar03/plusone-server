@@ -11,6 +11,11 @@ import { RestaurantReviewModule } from './restaurant/restaurant-review/restauran
 import { ChatModule } from './chat/chat.module';
 import { RestaurantModule } from './restaurant/restaurant/restaurant.module';
 import { VoucherModule } from './restaurant/voucher/voucher.module';
+import { QuoteModule } from './quote/quote.module';
+import { CustomerServiceModule } from './customer-service/customer-service.module';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
+import { AuthService } from "./auth/auth.service";
 
 @Module({
   imports: [
@@ -26,6 +31,10 @@ import { VoucherModule } from './restaurant/voucher/voucher.module';
     ChatModule,
     RestaurantModule,
     VoucherModule,
+    QuoteModule,
+    CustomerServiceModule,
+    AuthModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],

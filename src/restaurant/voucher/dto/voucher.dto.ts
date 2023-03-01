@@ -1,7 +1,10 @@
 export class VoucherDto {
   restaurantId: any;
-  discount: number;
-  text: string;
-  voucherType: string;
-  voucherCode: number;
+  voucherObject: {
+    _id: any;
+    discount: number;
+    description: string;
+    voucherType: string;
+    voucherCode: number;
+  };
 }

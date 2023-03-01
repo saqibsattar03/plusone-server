@@ -6,9 +6,13 @@ import { Get, Post } from '@nestjs/common/decorators';
 export class VoucherController {
   constructor(private readonly voucherService: VoucherService) {}
 
-  @Post('create')
-  createVoucher(@Body() data) {
-    return this.voucherService.createVoucher(data);
+  @Post('create-for-student')
+  createStudentVoucher(@Body() data) {
+    return this.voucherService.createStudentVoucher(data);
+  }
+@Post('create-for-non-student')
+  createNonStudentVoucher(@Body() data) {
+    return this.voucherService.createNonStudentVoucher(data);
   }
 
   @Get('get-all-vouchers-by-restaurant')
@@ -20,8 +24,12 @@ export class VoucherController {
     return this.voucherService.editVoucher(voucherId, data);
   }
 
-  @Delete('remove')
-  deleteVoucher(@Query('voucherId') voucherId) {
-    return this.voucherService.deleteVoucher(voucherId);
+  @Delete('remove-single')
+  deleteSingleVoucher(@Query('voucherObjectId') voucherObjectId){
+    return this.voucherService.deleteSingleVoucher(voucherObjectId)
+  }
+  @Delete('remove-all')
+  deleteAllVoucher(@Query('voucherId') voucherId) {
+    return this.voucherService.deleteAllVoucher(voucherId);
   }
 }
