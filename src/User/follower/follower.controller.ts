@@ -1,4 +1,4 @@
-import { Controller, Param, Patch, Post, Query } from '@nestjs/common';
+import { Controller, Post, Query } from '@nestjs/common';
 import { FollowerService } from './follower.service';
 import { Get } from '@nestjs/common/decorators';
 

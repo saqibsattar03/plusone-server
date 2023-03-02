@@ -31,7 +31,7 @@ import { SocialPostsService } from './social-posts.service';
 
 @Controller('post')
 export class SocialPostsController {
-  constructor(private readonly socialPostservice: SocialPostsService) {}
+  constructor(private readonly socialPostService: SocialPostsService) {}
 
   //Create Post Route
 
@@ -72,24 +72,24 @@ export class SocialPostsController {
         filePath: item.path,
       }));
       res.send('images formatted properly');
-      return this.socialPostservice.createPost(data);
+      return this.socialPostService.createPost(data);
     } else {
       return res.send('Photos/video must be provided to create a post');
     }
   }
 
-  //Retreive Single Post Route
+  //Retrieve Single Post Route
 
   @Get('get/:postId')
   @ApiParam({ name: 'postId', type: 'string' })
   @ApiCreatedResponse({
     type: CreatePostDTO,
-    description: 'post fetched succeessfully',
+    description: 'post fetched successfully',
   })
   @ApiBadRequestResponse({ description: 'could not fetch the post object' })
   async getPost(@Param('postId') postId) {
     if (postId) {
-      return this.socialPostservice.getPost(postId);
+      return this.socialPostService.getPost(postId);
     } else {
       throw new HttpException(
         'No Post Id was Provided',
@@ -104,7 +104,7 @@ export class SocialPostsController {
   @ApiParam({ name: 'postId', type: 'string' })
   @ApiCreatedResponse({
     type: CreatePostDTO,
-    description: 'post updated succeessfully',
+    description: 'post updated successfully',
   })
   @ApiBadRequestResponse({ description: 'could not update post' })
   @ApiConsumes('multipart/form-data')
@@ -133,10 +133,10 @@ export class SocialPostsController {
       fileName: item.filename,
       filePath: item.path,
     }));
-    const post = await this.socialPostservice.updatePost(postId, data);
+    const post = await this.socialPostService.updatePost(postId, data);
     if (!post) throw new NotFoundException(' Post does not exist');
     return res.status(HttpStatus.OK).json({
-      messsage: 'customer updated successfully',
+      message: 'customer updated successfully',
       post,
     });
   }
@@ -148,7 +148,7 @@ export class SocialPostsController {
   @ApiCreatedResponse({ description: 'post deleted successfully' })
   @ApiBadRequestResponse({ description: 'could not delete post' })
   async removePost(@Param('postId') postId, @Res() res) {
-    const post = await this.socialPostservice.removePost(postId);
+    const post = await this.socialPostService.removePost(postId);
     return res.status(HttpStatus.OK).json({
       message: 'post deleted successfully',
       post,
@@ -170,7 +170,7 @@ export class SocialPostsController {
   @ApiBadRequestResponse({ description: 'could not like post' })
   postLiked(@Query('userId') userId, @Query('postId') postId) {
     if (postId) {
-      return this.socialPostservice.likePost(userId, postId);
+      return this.socialPostService.likePost(userId, postId);
     } else {
       throw new HttpException(
         'No Post Id was Provided',
@@ -191,7 +191,7 @@ export class SocialPostsController {
   @ApiBadRequestResponse({ description: 'could not unlike post' })
   removeLike(@Query('userId') userId, @Query('postId') postId) {
     if (postId) {
-      return this.socialPostservice.removeLike(userId, postId);
+      return this.socialPostService.removeLike(userId, postId);
     } else {
       throw new HttpException(
         'No Post Id was Provided',

@@ -1,7 +1,6 @@
 import { Controller, Delete, Patch, Query } from '@nestjs/common';
 import { QuoteService } from './quote.service';
 import { Body, Get, Post } from '@nestjs/common/decorators';
-import { Quotes } from '../Schemas/quotes.schema';
 
 @Controller('quote')
 export class QuoteController {

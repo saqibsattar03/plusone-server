@@ -10,7 +10,7 @@ export class VoucherController {
   createStudentVoucher(@Body() data) {
     return this.voucherService.createStudentVoucher(data);
   }
-@Post('create-for-non-student')
+  @Post('create-for-non-student')
   createNonStudentVoucher(@Body() data) {
     return this.voucherService.createNonStudentVoucher(data);
   }
@@ -25,11 +25,26 @@ export class VoucherController {
   }
 
   @Delete('remove-single')
-  deleteSingleVoucher(@Query('voucherObjectId') voucherObjectId){
-    return this.voucherService.deleteSingleVoucher(voucherObjectId)
+  deleteSingleVoucher(@Query('voucherObjectId') voucherObjectId) {
+    return this.voucherService.deleteSingleVoucher(voucherObjectId);
   }
   @Delete('remove-all')
   deleteAllVoucher(@Query('voucherId') voucherId) {
     return this.voucherService.deleteAllVoucher(voucherId);
+  }
+
+  @Post('redeem')
+  redeemVoucher(
+    @Query('userId') userId,
+    @Query('voucherId') voucherId,
+    @Query('restaurantId') restaurantId,
+  ) {
+    console.log('called');
+    return this.voucherService.redeemVoucher(userId, voucherId, restaurantId);
+  }
+
+  @Get('all-redeemed-by-user')
+  getAllVoucherRedeemedByUser(@Query('userId') userId) {
+    return this.voucherService.getAllVoucherRedeemedByUser(userId);
   }
 }

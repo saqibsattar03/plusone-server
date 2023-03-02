@@ -4,14 +4,17 @@ import {
   Restaurant,
   RestaurantDocument,
 } from '../../Schemas/restaurant.schema';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { RestaurantDto } from './dto/restaurant.dto';
+import { RedeemVoucher } from '../../Schemas/redeemVoucher.schema';
 
 @Injectable()
 export class RestaurantService {
   constructor(
     @InjectModel(Restaurant.name)
     private readonly restaurantModel: Model<RestaurantDocument>,
+    @InjectModel(RedeemVoucher.name)
+    private readonly redeemVoucherModel: Model<RedeemVoucher>,
   ) {}
 
   async createRestaurant(
@@ -50,5 +53,11 @@ export class RestaurantService {
 
   async deleteRestaurant(restaurantId): Promise<any> {
     return this.restaurantModel.findByIdAndDelete({ _id: restaurantId });
+  }
+
+  async getUserWhoRedeemVoucher(voucherId): Promise<any> {
+    const oid = new mongoose.Types.ObjectId(voucherId);
+    console.log(oid);
+    return this.redeemVoucherModel.find({ voucherId: oid });
   }
 }

@@ -1,11 +1,13 @@
-/* eslint-disable no-use-before-define */
-
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Voucher, VoucherDocument } from '../../Schemas/voucher.schema';
 import mongoose, { Model } from 'mongoose';
 import { VoucherDto } from './dto/voucher.dto';
-import { RestaurantDocument } from '../../Schemas/restaurant.schema';
+import {
+  RedeemVoucher,
+  RedeemVoucherDocument,
+} from '../../Schemas/redeemVoucher.schema';
+import { Profile, ProfileDocument } from '../../Schemas/Profile.schema';
 
 @Injectable()
 export class VoucherService {
@@ -14,8 +16,11 @@ export class VoucherService {
   constructor(
     @InjectModel(Voucher.name)
     private readonly voucherModel: Model<VoucherDocument>,
-  ) {
-  }
+    @InjectModel(RedeemVoucher.name)
+    private readonly redeemVoucherModel: Model<RedeemVoucherDocument>,
+    @InjectModel(Profile.name)
+    private readonly profileModel: Model<ProfileDocument>,
+  ) {}
 
   async createStudentVoucher(voucherDto: VoucherDto): Promise<any> {
     const oid = new mongoose.Types.ObjectId(voucherDto.voucherObject._id);
@@ -59,12 +64,10 @@ export class VoucherService {
             },
           },
         });
-
       } else {
         return 'you can not create more than 3 vouchers for students or type might be wrong ';
       }
     }
-
   }
   async createNonStudentVoucher(voucherDto: VoucherDto): Promise<any> {
     const oid = new mongoose.Types.ObjectId(voucherDto.voucherObject._id);
@@ -97,7 +100,7 @@ export class VoucherService {
       //   if(result[i].voucherObject.voucherType == 'non-student')this.nonStudentVoucherCount++
       // }
       if (this.nonStudentVoucherCount < 3) {
-       this.nonStudentVoucherCount++;
+        this.nonStudentVoucherCount++;
         await res.updateOne({
           $push: {
             voucherObject: {
@@ -113,7 +116,6 @@ export class VoucherService {
         return 'you can not create more than 3 vouchers for non students or type might be wrong ';
       }
     }
-
   }
   async getAllVouchesByRestaurant(restaurantId): Promise<any> {
     const oid = new mongoose.Types.ObjectId(restaurantId);
@@ -124,9 +126,9 @@ export class VoucherService {
     return allVouchers;
   }
   async editVoucher(voucherId, data): Promise<any> {
-    const oid= new mongoose.Types.ObjectId(voucherId)
+    const oid = new mongoose.Types.ObjectId(voucherId);
     const voucher = await this.voucherModel.updateOne(
-      {'voucherObject._id':oid},
+      { 'voucherObject._id': oid },
       {
         $set: {
           'voucherObject.$.discount': data.discount,
@@ -139,27 +141,60 @@ export class VoucherService {
     return voucher;
   }
 
-  async deleteSingleVoucher(voucherObjectId):Promise<VoucherDocument>{
-   const oid = new mongoose.Types.ObjectId(voucherObjectId);
+  async deleteSingleVoucher(voucherObjectId): Promise<VoucherDocument> {
+    const oid = new mongoose.Types.ObjectId(voucherObjectId);
     const result = await this.voucherModel.aggregate([
       { $unwind: '$voucherObject' },
       { $match: { 'voucherObject._id': oid } },
       // { $count: 'student voucher count' },
     ]);
-    if(result[0].voucherObject.voucherType=='student'){
-      this.studentVoucherCount--
-    }else{this.nonStudentVoucherCount--}
+    if (result[0].voucherObject.voucherType == 'student') {
+      this.studentVoucherCount--;
+    } else {
+      this.nonStudentVoucherCount--;
+    }
     const res = result[0].voucherObject._id;
-    await this.voucherModel.updateOne({$pull:{
+    await this.voucherModel.updateOne({
+      $pull: {
         voucherObject: {
-          _id: oid,}
-      }})
-    console.log("res" ,res)
-      return ;
+          _id: oid,
+        },
+      },
+    });
+    console.log('res', res);
+    return;
   }
   async deleteAllVoucher(voucherId) {
-    this.studentVoucherCount = 0
-    this.nonStudentVoucherCount = 0
+    this.studentVoucherCount = 0;
+    this.nonStudentVoucherCount = 0;
     return this.voucherModel.findByIdAndDelete({ _id: voucherId });
+  }
+
+  async redeemVoucher(userId, voucherId, restaurantId): Promise<any> {
+    const oid = new mongoose.Types.ObjectId(voucherId);
+    const user = await this.profileModel.findOne({ _id: userId });
+    const voucher = await this.voucherModel.findOne(
+      {
+        restaurantId: restaurantId,
+      },
+      { voucherObject: { $elemMatch: { _id: oid } } },
+    );
+    console.log('voucher = ', voucher.voucherObject[0].voucherType);
+    console.log('user = ', user.accountHolderType);
+    if (voucher.voucherObject[0].voucherType == user.accountHolderType) {
+      const res = await this.redeemVoucherModel.findOne({
+        userId: userId,
+        voucherId: voucherId,
+      });
+      if (!res) {
+        return this.redeemVoucherModel.create({
+          userId: userId,
+          voucherId: voucherId,
+        });
+      } else return 'already redeemed';
+    } else return 'voucher type does not match';
+  }
+  async getAllVoucherRedeemedByUser(userId): Promise<any> {
+    return this.redeemVoucherModel.find({ userId: userId });
   }
 }

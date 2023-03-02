@@ -21,6 +21,12 @@ export class RestaurantController {
     return this.restaurantService.getRestaurantById(restaurantId);
   }
 
+  @Get('all-user-redeemed-voucher')
+  getUserWhoRedeemVoucher() {
+    console.log('voucherId  =');
+    // return this.restaurantService.getUserWhoRedeemVoucher(voucherId);
+  }
+
   @Patch('edit')
   editRestaurant(@Query('restaurantId') restaurantId, @Body() data) {
     return this.restaurantService.editRestaurant(restaurantId, data);

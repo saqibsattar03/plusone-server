@@ -43,17 +43,4 @@ export class ProfilesController {
       profile,
     });
   }
-
-  @Post('redeem-restaurant')
-  redeemedRestaurants(
-    @Query('userId') userId,
-    @Query('restaurantId') restaurantId,
-    @Query('voucherId') voucherId,
-  ) {
-    return this.profileService.redeemedRestaurants(
-      userId,
-      restaurantId,
-      voucherId,
-    );
-  }
 }

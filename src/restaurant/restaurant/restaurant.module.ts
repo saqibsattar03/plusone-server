@@ -4,6 +4,10 @@ import { RestaurantService } from './restaurant.service';
 import { Mongoose } from 'mongoose';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Restaurant, RestaurantSchema } from '../../Schemas/restaurant.schema';
+import {
+  RedeemVoucher,
+  RedeemVoucherSchema,
+} from '../../Schemas/redeemVoucher.schema';
 
 @Module({
   imports: [
@@ -11,6 +15,10 @@ import { Restaurant, RestaurantSchema } from '../../Schemas/restaurant.schema';
       {
         name: Restaurant.name,
         schema: RestaurantSchema,
+      },
+      {
+        name: RedeemVoucher.name,
+        schema: RedeemVoucherSchema,
       },
     ]),
   ],
