@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { nanoid } from 'nanoid';
+import { PointSchema } from './point.schema';
 
 export type RestaurantDocument = HydratedDocument<Restaurant>;
 @Schema({ timestamps: true })
@@ -18,8 +18,8 @@ export class Restaurant {
   //   filename: string;
   //   filepath: string;
   // };
-  @Prop()
-  location: string;
+  @Prop({ type: PointSchema })
+  location: PointSchema;
   @Prop()
   tags: [string];
   @Prop()
@@ -38,8 +38,13 @@ export class Restaurant {
   })
   uniqueCode: number;
 
+  @Prop({ type: Number, default: null })
+  verificationCode: number;
+
   @Prop({ type: Boolean, default: false })
   isSponsored: boolean;
 }
 
 export const RestaurantSchema = SchemaFactory.createForClass(Restaurant);
+RestaurantSchema.index({ location: '2dsphere' });
+RestaurantSchema.index({ description: 'text' });

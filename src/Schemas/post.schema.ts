@@ -7,7 +7,7 @@ export type PostDocument = HydratedDocument<Post>;
 @Schema({ timestamps: true })
 export class Post {
 
- @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Profile' }] })
+ @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Profile' })
   userId: Profile;
 
   @Prop()
@@ -16,6 +16,12 @@ export class Post {
   @Prop()
   caption: string;
 
+  @Prop({
+    type: String,
+    enum: ['public', 'friends', 'only-me'],
+    default: 'public',
+  })
+  postAudiencePreference: string;
 
   @Prop()
   media: [

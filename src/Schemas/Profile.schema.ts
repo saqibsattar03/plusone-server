@@ -1,10 +1,12 @@
 import mongoose, { HydratedDocument } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { User } from './user.schema';
+import { User, UserSchema } from './user.schema';
+import { PointSchema } from './point.schema';
+import { ImageSchema } from './image.schema';
 
 export type ProfileDocument = HydratedDocument<Profile>;
 @Schema({ timestamps: true })
-export class Profile {
+export class Profile extends User {
   @Prop()
   email: string;
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
@@ -23,25 +25,27 @@ export class Profile {
 
   @Prop({
     type: String,
+    enum: ['public', 'friends', 'only-me'],
+    default: 'public',
+  })
+  postAudiencePreference: string;
+
+  @Prop({
+    type: String,
     unique: true,
     required: [true, 'user name is required'],
   })
   userName: string;
 
-  // @Prop()
-  // profileImage: {
-  //   filename: string;
-  //   filepath: string;
-  // };
+  @Prop({ type: String })
+  profileImage: ImageSchema;
 
   @Prop({
     type: String,
-    enum: ['student', 'nonStudent'],
-    default: 'nonStudent',
+    enum: ['STUDENT', 'NON-STUDENT'],
+    default: 'NON-STUDENT',
   })
   accountHolderType: string;
-  // @Prop({ type: Boolean, default: false })
-  // isStudentAccount: boolean;
 
   @Prop()
   dietRequirements: [string];
@@ -53,9 +57,9 @@ export class Profile {
 
   @Prop()
   favoriteChef: [string];
-  @Prop({ type: Number, default: '' })
-  voucherVerificationCode: number;
 
+  // @Prop()
+  // location: PointSchema;
 }
 
 export const ProfileSchema = SchemaFactory.createForClass(Profile);

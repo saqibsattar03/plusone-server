@@ -5,8 +5,8 @@ import { Profile } from './Profile.schema';
 export type FollowingDocument = HydratedDocument<Following>;
 @Schema({ timestamps: true })
 export class Following {
-  @Prop()
-  userId: string;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Profile' })
+  userId: Profile;
 
   @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Profile' }] })
   followings: Profile[];

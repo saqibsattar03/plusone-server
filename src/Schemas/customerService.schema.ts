@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
+import { ImageSchema } from './image.schema';
 
 export type CustomerServiceDocument = HydratedDocument<CustomerService>;
 @Schema({ timestamps: true })
@@ -11,6 +12,8 @@ export class CustomerService {
   astPhoneNumber: number;
   @Prop()
   customerQuery: string;
+  @Prop({ type: String })
+  image: ImageSchema;
 }
 export const CustomerServiceSchema =
   SchemaFactory.createForClass(CustomerService);

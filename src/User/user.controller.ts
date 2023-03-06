@@ -1,6 +1,6 @@
-import { Controller, Param, Patch, Query, UseGuards } from '@nestjs/common';
+import { Controller, Param, Patch, Query } from '@nestjs/common';
 import { UserService } from './user.service';
-import { Body, Get, Post, Request } from '@nestjs/common/decorators';
+import { Body, Get, Post } from '@nestjs/common/decorators';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from '../auth/auth.service';
 
@@ -11,16 +11,10 @@ export class UserController {
     private readonly authService: AuthService,
   ) {}
   @Post('signup')
-  async createUser(
-    @Body('password') userPassword: string,
-    @Body('email') email: string,
-  ) {
+  async createUser(@Body() data) {
     const saltOrRounds = 10;
-    const hashPassword = await bcrypt.hash(userPassword, saltOrRounds);
-    const result = await this.userService.createUser(email, hashPassword);
-    return {
-      msg: 'User successfully registered',
-    };
+    data.password = await bcrypt.hash(data.password, saltOrRounds);
+    return this.userService.createUser(data);
   }
 
   @Get('verify/:confirmationCode')

@@ -4,6 +4,9 @@ import { ProfilesService } from './profiles.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Profile, ProfileSchema } from '../../Schemas/Profile.schema';
 import {} from '../../Schemas/redeemVoucher.schema';
+import { Restaurant, RestaurantSchema } from '../../Schemas/restaurant.schema';
+import { User, UserSchema } from '../../Schemas/user.schema';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
@@ -12,7 +15,18 @@ import {} from '../../Schemas/redeemVoucher.schema';
         name: Profile.name,
         schema: ProfileSchema,
       },
+      {
+        name: Restaurant.name,
+        schema: RestaurantSchema,
+      },
+      {
+        name: User.name,
+        schema: UserSchema,
+      },
     ]),
+    MulterModule.register({
+      dest: '../uploads',
+    }),
   ],
   controllers: [ProfilesController],
   providers: [ProfilesService],

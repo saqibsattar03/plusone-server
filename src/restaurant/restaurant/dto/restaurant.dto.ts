@@ -6,6 +6,10 @@ export class RestaurantDto {
   // image:[]
   location: string;
   tags: [string];
+  verificationCode: {
+    type: number;
+    default: null;
+  };
   culinaryOptions: [string];
   dietaryRestrictions: [string];
   uniqueCode: number;

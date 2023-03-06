@@ -141,6 +141,18 @@ export class SocialPostsController {
     });
   }
 
+  @Patch('update-post-audience-preference')
+  updatePostPreference(
+    @Query('userId') userId,
+    @Query('postId') postId,
+    @Query('preference') preference,
+  ) {
+    return this.socialPostService.updatePostPreference(
+      userId,
+      postId,
+      preference,
+    );
+  }
   //Delete Post Route
 
   @Delete('remove/:postId')

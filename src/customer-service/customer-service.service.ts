@@ -3,7 +3,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import {
   CustomerService,
   CustomerServiceDocument,
-  CustomerServiceSchema,
 } from '../Schemas/customerService.schema';
 import { Model } from 'mongoose';
 import { CustomerServiceDto } from './dto/customerService.dto';
@@ -18,8 +17,8 @@ export class CustomerServiceService {
   async createCustomerQuery(
     customerServiceDto: CustomerServiceDto,
   ): Promise<CustomerServiceDocument> {
-    const customerQuery = await this.customerModel.create(customerServiceDto);
-    return customerQuery;
+    console.log('here1');
+    return this.customerModel.create(customerServiceDto);
   }
 
   async getAllQueries(): Promise<CustomerServiceDocument[]> {
@@ -31,7 +30,7 @@ export class CustomerServiceService {
   }
 
   async editQuery(queryId, data): Promise<CustomerServiceDocument> {
-    const query = await this.customerModel.findByIdAndUpdate(
+    return this.customerModel.findByIdAndUpdate(
       { _id: queryId },
       {
         $set: {
@@ -39,7 +38,6 @@ export class CustomerServiceService {
         },
       },
     );
-    return query;
   }
 
   async deleteQuery(queryId): Promise<CustomerServiceDocument> {

@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
+import { Prop } from "@nestjs/mongoose";
 
 
 export class CreatePostDTO{
@@ -21,6 +22,8 @@ export class CreatePostDTO{
         fileName: string,
         filePath: string
       }];
+
+    postAudiencePreference: string;
 
 
     

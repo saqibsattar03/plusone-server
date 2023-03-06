@@ -1,16 +1,20 @@
-import { Injectable, NotAcceptableException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotAcceptableException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UserService } from '../User/user.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ProfilesService } from '../User/profiles/profiles.service';
 import { InjectModel } from '@nestjs/mongoose';
-import * as crypto from 'crypto';
 import {
   ForgotPassword,
   ForgotPasswordDocument,
 } from '../Schemas/forgotPassword.schema';
 import { Model } from 'mongoose';
-import { UserDocument } from '../Schemas/user.schema';
 
 @Injectable()
 export class AuthService {
@@ -36,9 +40,11 @@ export class AuthService {
   }
 
   async login(user: any) {
-    // if (user.status != "active") {
-    //   return "Pending Account. Please Verify Your Email!"
-    // }
+    user = await this.profileService.getUserByEmailOrUserName(user);
+    if (user.status != 'active') {
+      throw new UnauthorizedException('Account is pending state');
+      // return ;
+    }
     return {
       access_token: await this.jwtService.signAsync({
         email: user.email,
@@ -47,6 +53,7 @@ export class AuthService {
     };
   }
   async profile(user: any) {
+    console.log(user);
     return {
       profile: await this.profileService.fetchProfileUsingToken(user),
     };
@@ -54,7 +61,7 @@ export class AuthService {
 
   async forgotPassword(email: string): Promise<any> {
     const user = await this.userService.getUser(email);
-    if (!user) return 'no such user found';
+    if (!user) throw new HttpException('User Not Found', HttpStatus.NOT_FOUND);
     let token = await this.forgotModel.findOne({ userId: user._id });
     const characters =
       '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';

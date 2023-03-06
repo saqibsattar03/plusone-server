@@ -6,5 +6,9 @@ export class VoucherDto {
     description: string;
     voucherType: string;
     voucherCode: number;
+    voucherImage: {
+      fileName: string;
+      filePath: string;
+    };
   };
 }

@@ -15,7 +15,7 @@ import { QuoteModule } from './quote/quote.module';
 import { CustomerServiceModule } from './customer-service/customer-service.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
-import { AuthService } from "./auth/auth.service";
+import { FilterModule } from './filter/filter.module';
 
 @Module({
   imports: [
@@ -35,6 +35,7 @@ import { AuthService } from "./auth/auth.service";
     CustomerServiceModule,
     AuthModule,
     UserModule,
+    FilterModule,
   ],
   controllers: [AppController],
   providers: [AppService],

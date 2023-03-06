@@ -6,27 +6,46 @@ import {
   Param,
   Patch,
   Query,
+  UploadedFile,
 } from '@nestjs/common';
 import { ProfilesService } from './profiles.service';
-import { Body, Get, Post, Res } from '@nestjs/common/decorators';
+import { Body, Get, Res, UseInterceptors } from '@nestjs/common/decorators';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { imageValidation } from '../../common/image.config';
 
 @Controller('profile')
 export class ProfilesController {
   constructor(private readonly profileService: ProfilesService) {}
-  @Post('create')
-  createProfile(@Body() data) {
-    return this.profileService.createProfile(data);
-  }
 
   @Get('get-single-user')
   getSingleProfile(@Query('userId') userId) {
     return this.profileService.getSingleProfile(userId);
   }
 
+  @Get('get-nearby-restaurant')
+  getNearByRestaurant(
+    @Query('longitude') longitude,
+    @Query('latitude') latitude,
+  ) {
+    return this.profileService.getNearByRestaurant(longitude, latitude);
+  }
+
   @Patch('update/:profileId')
-  async updateProfile(@Param('profileId') profileId, @Body() data, @Res() res) {
+  @UseInterceptors(FileInterceptor('media', imageValidation))
+  async updateProfile(
+    @Param('profileId') profileId,
+    @Body() data,
+    @Res() res,
+    @UploadedFile() media,
+  ) {
+    const filename = media.originalname.trim();
+    const filePath = media.path;
+    const fileInfo = {
+      fileName: filename,
+      filePath: filePath,
+    };
+    data.profileImage = fileInfo.filePath;
     const profile = await this.profileService.updateProfile(data, profileId);
-    console.log('profile = ', profile);
     if (!profile) throw new NotFoundException(' Profile does not exist');
     return res.status(HttpStatus.OK).json({
       message: 'profile updated successfully',
@@ -42,5 +61,10 @@ export class ProfilesController {
       message: 'profile deleted successfully',
       profile,
     });
+  }
+
+  @Get('all-public')
+  getAllPublicProfile() {
+    return this.profileService.getAllPublicProfile();
   }
 }

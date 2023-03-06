@@ -3,9 +3,11 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder } from '@nestjs/swagger';
 import { SwaggerModule } from '@nestjs/swagger/dist';
 import { AppModule } from './app.module';
+import { join } from 'path';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -14,9 +16,13 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('social-module')
+    .setTitle('Plus-One')
     .setVersion('1.0')
     .build();
+
+  app.useStaticAssets(join(__dirname, '..', '..', 'uploads'), {
+    prefix: '/uploads/',
+  });
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);

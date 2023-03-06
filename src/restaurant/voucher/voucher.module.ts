@@ -8,6 +8,8 @@ import {
   RedeemVoucherSchema,
 } from '../../Schemas/redeemVoucher.schema';
 import { Profile, ProfileSchema } from '../../Schemas/Profile.schema';
+import { Restaurant, RestaurantSchema } from '../../Schemas/restaurant.schema';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
@@ -24,7 +26,14 @@ import { Profile, ProfileSchema } from '../../Schemas/Profile.schema';
         name: Profile.name,
         schema: ProfileSchema,
       },
+      {
+        name: Restaurant.name,
+        schema: RestaurantSchema,
+      },
     ]),
+    MulterModule.register({
+      dest: '../uploads',
+    }),
   ],
   controllers: [VoucherController],
   providers: [VoucherService],

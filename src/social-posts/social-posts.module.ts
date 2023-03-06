@@ -7,6 +7,7 @@ import { LikedPost, LikedPostSchema } from 'src/Schemas/postLiked.schema';
 import { User, UserSchema } from 'src/Schemas/user.schema';
 import { SocialPostsController } from './social-posts.controller';
 import { SocialPostsService } from './social-posts.service';
+import { Profile, ProfileSchema } from '../Schemas/Profile.schema';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { SocialPostsService } from './social-posts.service';
       { name: Post.name, schema: PostSchema },
       { name: LikedPost.name, schema: LikedPostSchema },
       { name: Comment.name, schema: CommentSchema },
-      { name: User.name, schema: UserSchema },
+      { name: Profile.name, schema: ProfileSchema },
     ]),
     MulterModule.register({
       dest: '../uploads',
