@@ -9,7 +9,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { CreateVoucherDto } from './dto/CerateVoucher.dto';
+import { CreateVoucherDto } from './dto/create-voucher.dto';
 import { UpdateVoucherDto } from './dto/update-voucher.dto';
 
 @ApiTags('Voucher')

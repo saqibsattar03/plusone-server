@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Voucher, VoucherDocument } from '../../Schemas/voucher.schema';
 import mongoose, { Model } from 'mongoose';
-import { CreateVoucherDto } from './dto/CerateVoucher.dto';
+import { CreateVoucherDto } from './dto/create-voucher.dto';
 import {
   RedeemVoucher,
   RedeemVoucherDocument,
