@@ -2,12 +2,13 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { Profile } from './Profile.schema';
 import any = jasmine.any;
+import { Restaurant } from './restaurant.schema';
 
 export type RestaurantReviewDocument = HydratedDocument<RestaurantReview>;
 @Schema()
 export class RestaurantReview {
-  @Prop()
-  restaurantId: string;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Restaurant' })
+  restaurantId: Restaurant;
 
   @Prop()
   reviewObject: [ReviewStructure];

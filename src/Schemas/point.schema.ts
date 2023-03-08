@@ -7,7 +7,6 @@ export class PointSchema {
       type: string;
       enum: ['Point'];
       default: 'Point';
-      required: true;
     };
     coordinates: {
       type: [number];

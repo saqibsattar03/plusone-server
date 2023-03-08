@@ -12,6 +12,7 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
+      forbidUnknownValues: false,
     }),
   );
 
@@ -25,9 +26,9 @@ async function bootstrap() {
   });
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('Plus-One-api', app, document);
   const port = 3000;
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
   console.log(`App is running on ${port}`);
 }
 bootstrap();

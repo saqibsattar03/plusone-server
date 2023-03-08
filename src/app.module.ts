@@ -16,6 +16,7 @@ import { CustomerServiceModule } from './customer-service/customer-service.modul
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { FilterModule } from './filter/filter.module';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
@@ -36,6 +37,9 @@ import { FilterModule } from './filter/filter.module';
     AuthModule,
     UserModule,
     FilterModule,
+    MulterModule.register({
+      dest: '../uploads',
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

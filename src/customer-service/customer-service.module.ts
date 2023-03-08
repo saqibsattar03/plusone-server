@@ -16,9 +16,6 @@ import { MulterModule } from '@nestjs/platform-express';
         schema: CustomerServiceSchema,
       },
     ]),
-    MulterModule.register({
-      dest: '../uploads',
-    }),
   ],
   controllers: [CustomerServiceController],
   providers: [CustomerServiceService],

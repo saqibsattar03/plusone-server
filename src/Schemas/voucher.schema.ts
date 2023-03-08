@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { Restaurant } from './restaurant.schema';
-import { ImageSchema } from './image.schema';
 
 export type VoucherDocument = HydratedDocument<Voucher>;
 @Schema({ timestamps: true })
@@ -30,7 +29,7 @@ export class VoucherStructure {
   @Prop({ type: Number, required: true, unique: true })
   voucherCode: number;
   @Prop({ type: String })
-  voucherImage: ImageSchema;
+  voucherImage: string;
 }
 
 export const VoucherSchema = SchemaFactory.createForClass(Voucher);

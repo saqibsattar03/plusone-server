@@ -5,6 +5,6 @@ export class ImageSchema {
   @Prop({ type: String })
   fileName: string;
 
-  @Prop({ type: String })
-  filePath: string;
+  // @Prop({ type: String })
+  // filePath: string;
 }

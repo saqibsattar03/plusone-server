@@ -10,7 +10,7 @@ export class LikedPost {
   @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Profile' }] })
   userId: Profile[];
 
-  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }] })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Post' })
   postId: Post;
 }
 

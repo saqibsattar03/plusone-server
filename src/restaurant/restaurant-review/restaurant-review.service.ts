@@ -5,7 +5,7 @@ import {
   RestaurantReviewDocument,
 } from '../../Schemas/restaurantReview.schema';
 import mongoose, { Model } from 'mongoose';
-import { RestaurantReviewDto } from '../dto/restaurantReview.dto';
+import { CreateRestaurantReviewDto } from './dto/CreateRestaurantReviewDto.dto';
 
 @Injectable()
 export class RestaurantReviewService {
@@ -14,7 +14,9 @@ export class RestaurantReviewService {
     private readonly restaurantReviewModel: Model<RestaurantReviewDocument>,
   ) {}
 
-  async createReview(restaurantReviewDto: RestaurantReviewDto): Promise<any> {
+  async createReview(
+    restaurantReviewDto: CreateRestaurantReviewDto,
+  ): Promise<any> {
     restaurantReviewDto.reviewObject._id = new mongoose.Types.ObjectId(
       restaurantReviewDto.reviewObject._id,
     );

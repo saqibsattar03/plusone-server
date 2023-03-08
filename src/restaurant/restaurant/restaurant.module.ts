@@ -8,6 +8,10 @@ import {
   RedeemVoucher,
   RedeemVoucherSchema,
 } from '../../Schemas/redeemVoucher.schema';
+import {
+  RestaurantReview,
+  RestaurantReviewSchema,
+} from '../../Schemas/restaurantReview.schema';
 
 @Module({
   imports: [
@@ -19,6 +23,10 @@ import {
       {
         name: RedeemVoucher.name,
         schema: RedeemVoucherSchema,
+      },
+      {
+        name: RestaurantReview.name,
+        schema: RestaurantReviewSchema,
       },
     ]),
   ],

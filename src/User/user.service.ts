@@ -40,6 +40,7 @@ export class UserService {
       userName: createUserDto.userName,
       email: createUserDto.email,
       password: createUserDto.password,
+      accountHolderType: createUserDto.accountHolderType,
       confirmationCode: token,
     });
     await newUser.save();

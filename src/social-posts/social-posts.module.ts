@@ -1,10 +1,8 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { MulterModule } from '@nestjs/platform-express';
 import { Comment, CommentSchema } from 'src/Schemas/comment.schema';
 import { Post, PostSchema } from 'src/Schemas/post.schema';
 import { LikedPost, LikedPostSchema } from 'src/Schemas/postLiked.schema';
-import { User, UserSchema } from 'src/Schemas/user.schema';
 import { SocialPostsController } from './social-posts.controller';
 import { SocialPostsService } from './social-posts.service';
 import { Profile, ProfileSchema } from '../Schemas/Profile.schema';
@@ -17,9 +15,6 @@ import { Profile, ProfileSchema } from '../Schemas/Profile.schema';
       { name: Comment.name, schema: CommentSchema },
       { name: Profile.name, schema: ProfileSchema },
     ]),
-    MulterModule.register({
-      dest: '../uploads',
-    }),
   ],
   controllers: [SocialPostsController],
   providers: [SocialPostsService],

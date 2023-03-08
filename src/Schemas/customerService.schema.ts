@@ -13,7 +13,7 @@ export class CustomerService {
   @Prop()
   customerQuery: string;
   @Prop({ type: String })
-  image: ImageSchema;
+  image: string;
 }
 export const CustomerServiceSchema =
   SchemaFactory.createForClass(CustomerService);

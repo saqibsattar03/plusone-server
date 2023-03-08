@@ -24,11 +24,14 @@ import {
   ApiCreatedResponse,
   ApiParam,
   ApiQuery,
+  ApiTags,
 } from '@nestjs/swagger';
 import { imageValidation } from '../common/image.config';
 import { CreatePostDTO } from './dto/create-post.dto';
 import { SocialPostsService } from './social-posts.service';
+import { UpdatePostDTO } from './dto/update-post.dto';
 
+@ApiTags('Social Post')
 @Controller('post')
 export class SocialPostsController {
   constructor(private readonly socialPostService: SocialPostsService) {}
@@ -45,37 +48,13 @@ export class SocialPostsController {
     description: 'Created post object as response',
   })
   @ApiBadRequestResponse({ description: 'can not create post' })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        username: { type: 'string' },
-        location: { type: 'string' },
-        caption: { type: 'string' },
-        media: {
-          type: 'string',
-          format: 'binary',
-        },
-      },
-    },
-  })
-  @UseInterceptors(FilesInterceptor('media', 5, imageValidation))
-  createPost(
-    @UploadedFiles() media: Array<Express.Multer.File>,
-    @Body() data,
-    @Res() res,
-  ) {
-    if (media.length) {
-      data.media = media.map((item) => ({
-        fileName: item.filename,
-        filePath: item.path,
-      }));
-      res.send('images formatted properly');
-      return this.socialPostService.createPost(data);
-    } else {
-      return res.send('Photos/video must be provided to create a post');
-    }
+  createPost(@Body() data) {
+    if (data.media.length > 0) return this.socialPostService.createPost(data);
+    else
+      throw new HttpException(
+        'Photos/video must be provided to create a post',
+        HttpStatus.BAD_REQUEST,
+      );
   }
 
   //Retrieve Single Post Route
@@ -100,45 +79,26 @@ export class SocialPostsController {
 
   //Post Update Route
 
-  @Patch('update/:postId')
-  @ApiParam({ name: 'postId', type: 'string' })
+  @Patch('')
+  @ApiQuery({ name: 'postId', type: String })
+  @ApiQuery({ name: 'userId', type: String })
+  @ApiBody({
+    type: UpdatePostDTO,
+    description: 'Request body to update post',
+  })
   @ApiCreatedResponse({
-    type: CreatePostDTO,
+    type: UpdatePostDTO,
     description: 'post updated successfully',
   })
   @ApiBadRequestResponse({ description: 'could not update post' })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        username: { type: 'string' },
-        location: { type: 'string' },
-        caption: { type: 'string' },
-        media: {
-          type: 'string',
-          format: 'binary',
-        },
-      },
-    },
-  })
-  @UseInterceptors(FilesInterceptor('media', 5, imageValidation))
   async updatePost(
-    @UploadedFiles() media: Array<Express.Multer.File>,
-    @Param('postId') postId,
+    @Query('postId') postId,
+    @Query('userId') userId,
     @Body() data,
-    @Res() res,
   ) {
-    data.media = media.map((item) => ({
-      fileName: item.filename,
-      filePath: item.path,
-    }));
-    const post = await this.socialPostService.updatePost(postId, data);
+    const post = await this.socialPostService.updatePost(postId, userId, data);
     if (!post) throw new NotFoundException(' Post does not exist');
-    return res.status(HttpStatus.OK).json({
-      message: 'customer updated successfully',
-      post,
-    });
+    return post;
   }
 
   @Patch('update-post-audience-preference')

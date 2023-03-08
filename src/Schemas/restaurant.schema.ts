@@ -13,11 +13,9 @@ export class Restaurant {
   description: string;
   @Prop({ type: Number, default: 6 })
   voucherCount: number;
-  // @Prop()
-  // images: {
-  //   filename: string;
-  //   filepath: string;
-  // };
+  @Prop({ type: [String] })
+  media: string[];
+
   @Prop({ type: PointSchema })
   location: PointSchema;
   @Prop()

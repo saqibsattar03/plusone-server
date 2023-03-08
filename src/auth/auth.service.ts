@@ -54,9 +54,7 @@ export class AuthService {
   }
   async profile(user: any) {
     console.log(user);
-    return {
-      profile: await this.profileService.fetchProfileUsingToken(user),
-    };
+    return this.profileService.fetchProfileUsingToken(user);
   }
 
   async forgotPassword(email: string): Promise<any> {
@@ -77,21 +75,21 @@ export class AuthService {
       }).save();
     }
     // const link = `${process.env.BASE_URL}/password-reset/${user._id}/${token.token}`;
-    return user;
+    return token;
   }
 
   async resetPassword(userId, token, password) {
     const user = await this.userService.getUserById(userId);
-    console.log(user._id);
-    if (!user) return 'invalid link or expired';
+    if (!user) throw new HttpException('User Not Found', HttpStatus.NOT_FOUND);
     const res = await this.forgotModel.findOne({
       userId: user._id,
       token: token,
     });
-    if (!res) return 'invalid link or expired';
+    if (!res)
+      throw new HttpException('Invalid token or expired', HttpStatus.NOT_FOUND);
     await this.userService.resetPassword(user, password);
     await res.delete();
-    return 'password updated successfully';
+    throw new HttpException('password reset successfully ', HttpStatus.OK);
   }
   // async logout(user: any) {
   //   return await this.userService.logout(user.userId);

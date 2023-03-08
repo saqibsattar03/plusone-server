@@ -5,8 +5,12 @@ import {
   RestaurantDocument,
 } from '../../Schemas/restaurant.schema';
 import mongoose, { Model } from 'mongoose';
-import { RestaurantDto } from './dto/restaurant.dto';
+import { CreateRestaurantDto } from './dto/create-restaurant.dto';
 import { RedeemVoucher } from '../../Schemas/redeemVoucher.schema';
+import {
+  RestaurantReview,
+  RestaurantReviewDocument,
+} from '../../Schemas/restaurantReview.schema';
 
 @Injectable()
 export class RestaurantService {
@@ -15,13 +19,15 @@ export class RestaurantService {
     private readonly restaurantModel: Model<RestaurantDocument>,
     @InjectModel(RedeemVoucher.name)
     private readonly redeemVoucherModel: Model<RedeemVoucher>,
+
+    @InjectModel(RestaurantReview.name)
+    private readonly restaurantReviewModel: Model<RestaurantReviewDocument>,
   ) {}
 
   async createRestaurant(
-    restaurantDto: RestaurantDto,
+    restaurantDto: CreateRestaurantDto,
   ): Promise<RestaurantDocument> {
-    const restaurant = await this.restaurantModel.create(restaurantDto);
-    return restaurant;
+    return this.restaurantModel.create(restaurantDto);
   }
 
   async getAllRestaurants(): Promise<any> {
@@ -52,7 +58,10 @@ export class RestaurantService {
   }
 
   async deleteRestaurant(restaurantId): Promise<any> {
-    return this.restaurantModel.findByIdAndDelete({ _id: restaurantId });
+    await this.restaurantReviewModel.findOneAndDelete({
+      restaurantId: restaurantId,
+    });
+    await this.restaurantModel.findByIdAndDelete({ _id: restaurantId });
   }
 
   async getUserWhoRedeemVoucher(voucherId): Promise<any> {

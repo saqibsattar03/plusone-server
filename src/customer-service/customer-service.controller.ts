@@ -3,21 +3,23 @@ import { CustomerServiceService } from './customer-service.service';
 import { Body, Get, Post, UseInterceptors } from '@nestjs/common/decorators';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { imageValidation } from '../common/image.config';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Customer Service')
 @Controller('customer-service')
 export class CustomerServiceController {
   constructor(private readonly customerService: CustomerServiceService) {}
 
   @Post('create')
-  @UseInterceptors(FileInterceptor('media', imageValidation))
-  createCustomerQuery(@Body() data, @UploadedFile() media) {
-    const filename = media.originalname.trim();
-    const filePath = media.path;
-    const fileInfo = {
-      fileName: filename,
-      filePath: filePath,
-    };
-    data.image = fileInfo.filePath;
+  // @UseInterceptors(FileInterceptor('media', imageValidation))
+  createCustomerQuery(@Body() data) {
+    // const filename = media.originalname.trim();
+    // const filePath = media.path;
+    // const fileInfo = {
+    //   fileName: filename,
+    //   filePath: filePath,
+    // };
+    // data.image = fileInfo.filePath;
     return this.customerService.createCustomerQuery(data);
   }
 

@@ -1,13 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Profile, ProfileDocument } from '../../Schemas/Profile.schema';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import {
   Restaurant,
   RestaurantDocument,
 } from '../../Schemas/restaurant.schema';
 import { User, UserDocument } from '../../Schemas/user.schema';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Injectable()
 export class ProfilesService {
@@ -19,20 +20,6 @@ export class ProfilesService {
     @InjectModel(User.name)
     private readonly userModel: Model<UserDocument>,
   ) {}
-
-  //*** create profile route not needed anymore ***/
-  // async createProfile(createProfileDto: CreateProfileDto): Promise<any> {
-  //   const user = await this.profileModel.findOne({
-  //     userName: createProfileDto.userName,
-  //   });
-  //   console.log('user name = ', user);
-  //   if (!user) {
-  //     return this.profileModel.create(createProfileDto);
-  //   } else {
-  //     return 'user name and email must be unique.This user name or email already taken';
-  //   }
-  // }
-
   async getSingleProfile(userId): Promise<ProfileDocument> {
     return this.profileModel.findById({ _id: userId });
   }
@@ -52,27 +39,27 @@ export class ProfilesService {
     }
     return fetchedUser;
   }
-  async updateProfile(data: any, id): Promise<ProfileDocument> {
-    console.log('data = ', data);
-    return this.profileModel.findByIdAndUpdate(id, data);
+  async updateProfile(
+    data: UpdateProfileDto,
+    profileId,
+  ): Promise<ProfileDocument> {
+    const profile = await this.profileModel.findById({ _id: profileId });
+    if (!profile) throw new NotFoundException(' Profile does not exist');
+
+    return this.profileModel.findByIdAndUpdate(profileId, data);
   }
   async removeProfile(profileId): Promise<ProfileDocument> {
     const profile = await this.profileModel.findById(profileId);
     await profile.remove();
     return profile;
   }
-  async getNearByRestaurant(longitude: number, latitude: number): Promise<any> {
-    console.log('longitude = ', longitude);
-    console.log('latitude = ', latitude);
-    const distance = [];
-    distance[0] = longitude;
-    distance[1] = latitude;
+  async getNearByRestaurant(longitude, latitude): Promise<any> {
     return this.restaurantModel.aggregate([
       {
         $geoNear: {
           near: {
             type: 'Point',
-            coordinates: [distance[0], distance[1]],
+            coordinates: [parseFloat(longitude), parseFloat(latitude)],
           },
           distanceField: 'distanceFromMe',
           maxDistance: 1000 * 1609.34,

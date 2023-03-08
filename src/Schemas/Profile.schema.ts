@@ -1,8 +1,7 @@
 import mongoose, { HydratedDocument } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { User, UserSchema } from './user.schema';
+import { User } from './user.schema';
 import { PointSchema } from './point.schema';
-import { ImageSchema } from './image.schema';
 
 export type ProfileDocument = HydratedDocument<Profile>;
 @Schema({ timestamps: true })
@@ -15,18 +14,16 @@ export class Profile extends User {
   @Prop()
   bio: string;
 
-  @Prop({ type: String, enum: ['public', 'private'], default: 'public' })
+  @Prop({ type: String, enum: ['PUBLIC', 'PRIVATE'], default: 'PUBLIC' })
   accountType: string;
-  // @Prop({ type: Boolean, default: false })
-  // isPrivate: boolean;
 
   @Prop()
   links: [string];
 
   @Prop({
     type: String,
-    enum: ['public', 'friends', 'only-me'],
-    default: 'public',
+    enum: ['PUBLIC', 'FRIENDS', 'ONLY-ME'],
+    default: 'PUBLIC',
   })
   postAudiencePreference: string;
 
@@ -38,19 +35,12 @@ export class Profile extends User {
   userName: string;
 
   @Prop({ type: String })
-  profileImage: ImageSchema;
-
-  @Prop({
-    type: String,
-    enum: ['STUDENT', 'NON-STUDENT'],
-    default: 'NON-STUDENT',
-  })
-  accountHolderType: string;
+  profileImage: string;
 
   @Prop()
   dietRequirements: [string];
   @Prop()
-  answers: [string];
+  favoriteRestaurant: [string];
 
   @Prop()
   favoriteCuisine: [string];
@@ -58,8 +48,11 @@ export class Profile extends User {
   @Prop()
   favoriteChef: [string];
 
-  // @Prop()
-  // location: PointSchema;
+  @Prop()
+  location: PointSchema;
+
+  @Prop({ type: Number, default: 0 })
+  rewardPoints: number;
 }
 
 export const ProfileSchema = SchemaFactory.createForClass(Profile);

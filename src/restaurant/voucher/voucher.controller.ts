@@ -1,62 +1,58 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Patch,
-  Query,
-  UploadedFile,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Patch, Query } from '@nestjs/common';
 import { VoucherService } from './voucher.service';
-import { Get, Post, UseInterceptors } from '@nestjs/common/decorators';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { imageValidation } from '../../common/image.config';
+import { Get, Post } from '@nestjs/common/decorators';
 
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiCreatedResponse,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
+import { CreateVoucherDto } from './dto/CerateVoucher.dto';
+import { UpdateVoucherDto } from './dto/update-voucher.dto';
+
+@ApiTags('Voucher')
 @Controller('voucher')
 export class VoucherController {
   constructor(private readonly voucherService: VoucherService) {}
 
   @Post('create-for-student')
-  @UseInterceptors(FileInterceptor('media', imageValidation))
-  createStudentVoucher(@Body() data, @UploadedFile() media) {
-    const filename = media.originalname.trim();
-    const filePath = media.path;
-    const fileInfo = {
-      fileName: filename,
-      filePath: filePath,
-    };
-    if (media) {
-      data.voucherObject = {
-        discount: data.discount,
-        description: data.description,
-        voucherType: data.voucherType,
-        voucherCode: data.voucherCode,
-        voucherImage: fileInfo,
-      };
+  @ApiBody({
+    type: CreateVoucherDto,
+    description: 'Request body to create a Voucher for student',
+  })
+  @ApiCreatedResponse({
+    type: CreateVoucherDto,
+    description: 'Created Voucher object as response',
+  })
+  @ApiBadRequestResponse({ description: 'can not create voucher' })
+  createStudentVoucher(@Body() data) {
+    if (data.voucherObject.voucherImage) {
       return this.voucherService.createStudentVoucher(data);
     } else return 'Picture must be provided to create voucher';
   }
   @Post('create-for-non-student')
-  @UseInterceptors(FileInterceptor('media', imageValidation))
-  createNonStudentVoucher(@Body() data, @UploadedFile() media) {
-    const filename = media.originalname.trim();
-    const filePath = media.path;
-    const fileInfo = {
-      fileName: filename,
-      filePath: filePath,
-    };
-    if (media) {
-      data.voucherObject = {
-        discount: data.discount,
-        description: data.description,
-        voucherType: data.voucherType,
-        voucherCode: data.voucherCode,
-        voucherImage: fileInfo,
-      };
+  @ApiBody({
+    type: CreateVoucherDto,
+    description: 'Request body to create a Voucher for non-student',
+  })
+  @ApiCreatedResponse({
+    type: CreateVoucherDto,
+    description: 'Created Voucher object as response',
+  })
+  @ApiBadRequestResponse({ description: 'can not create voucher' })
+  createNonStudentVoucher(@Body() data) {
+    if (data.voucherObject.voucherImage) {
       return this.voucherService.createNonStudentVoucher(data);
     } else return 'Picture must be provided to create voucher';
   }
 
   @Get('get-all-vouchers-by-restaurant')
+  @ApiQuery({ type: 'string', name: 'restaurantId' })
+  @ApiQuery({ type: 'string', name: 'voucherType' })
+  @ApiCreatedResponse({ type: CreateVoucherDto })
+  @ApiBadRequestResponse({ description: 'can not fetch voucher' })
   getAllVouchersByRestaurant(
     @Query('restaurantId') restaurantId,
     @Query('voucherType') voucherType,
@@ -66,41 +62,39 @@ export class VoucherController {
       voucherType,
     );
   }
-  @Patch('edit')
-  @UseInterceptors(FileInterceptor('media', imageValidation))
-  editVoucher(
-    @Body() data,
-    @UploadedFile() media,
-    @Query('voucherId') voucherId,
-  ) {
-    const filename = media.originalname.trim();
-    const filePath = media.path;
-    const fileInfo = {
-      fileName: filename,
-      filePath: filePath,
-    };
-    if (media) {
-      data.voucherObject = {
-        discount: data.discount,
-        description: data.description,
-        voucherType: data.voucherType,
-        voucherCode: data.voucherCode,
-        voucherImage: fileInfo,
-      };
-      return this.voucherService.editVoucher(voucherId, data);
-    } else return 'provide valid data';
+  @Patch('')
+  @ApiQuery({ type: 'string', name: 'voucherId' })
+  @ApiBody({ type: UpdateVoucherDto })
+  @ApiCreatedResponse({ type: CreateVoucherDto })
+  @ApiBadRequestResponse({ description: 'can not update voucher' })
+  editVoucher(@Body() data, @Query('voucherId') voucherId) {
+    return this.voucherService.editVoucher(voucherId, data);
   }
 
   @Delete('remove-single')
+  @ApiQuery({ type: 'string', name: 'voucherObjectId' })
+  @ApiCreatedResponse({
+    description: 'single voucher object deleted successfully',
+  })
+  @ApiBadRequestResponse({ description: 'can not delete voucher' })
   deleteSingleVoucher(@Query('voucherObjectId') voucherObjectId) {
     return this.voucherService.deleteSingleVoucher(voucherObjectId);
   }
   @Delete('remove-all')
+  @ApiQuery({ type: 'string', name: 'voucherId' })
+  @ApiCreatedResponse({
+    description: 'all vouchers of restaurant deleted successfully',
+  })
+  @ApiBadRequestResponse({ description: 'can not delete voucher' })
   deleteAllVoucher(@Query('voucherId') voucherId) {
     return this.voucherService.deleteAllVoucher(voucherId);
   }
 
   @Post('redeem')
+  @ApiQuery({ type: 'string', name: 'userId' })
+  @ApiQuery({ type: 'string', name: 'voucherId' })
+  @ApiQuery({ type: 'string', name: 'restaurantId' })
+  @ApiQuery({ type: 'string', name: 'verificationCode' })
   redeemVoucher(
     @Query('userId') userId,
     @Query('voucherId') voucherId,
@@ -121,10 +115,17 @@ export class VoucherController {
   }
 
   @Get('ask-for-restaurant-code')
+  @ApiQuery({ type: 'string', name: 'restaurantId' })
+  @ApiCreatedResponse({ type: 'object' })
+  @ApiBadRequestResponse({ description: 'can not retrieve code' })
   askForRestaurantCode(@Query('restaurantId') restaurantId) {
     return this.voucherService.askForRestaurantCode(restaurantId);
   }
   @Post('verify-restaurant-code')
+  @ApiQuery({ type: 'string', name: 'restaurantId' })
+  @ApiQuery({ type: 'string', name: 'restaurantCode' })
+  @ApiCreatedResponse({ type: Number })
+  @ApiBadRequestResponse({ description: 'can not verify restaurant code' })
   verifyRestaurantCode(
     @Query('restaurantId') restaurantId,
     @Query('restaurantCode') restaurantCode,

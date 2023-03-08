@@ -1,11 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
 
-export class FollowingDto {
+export class ImageDto {
   @ApiProperty({ type: String })
   @IsNotEmpty()
-  userId: string;
-  @ApiProperty({ type: String })
-  @IsNotEmpty()
-  followings: any;
+  fileName: string;
 }

@@ -31,9 +31,6 @@ import { MulterModule } from '@nestjs/platform-express';
         schema: RestaurantSchema,
       },
     ]),
-    MulterModule.register({
-      dest: '../uploads',
-    }),
   ],
   controllers: [VoucherController],
   providers: [VoucherService],

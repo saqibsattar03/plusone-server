@@ -24,9 +24,6 @@ import { MulterModule } from '@nestjs/platform-express';
         schema: UserSchema,
       },
     ]),
-    MulterModule.register({
-      dest: '../uploads',
-    }),
   ],
   controllers: [ProfilesController],
   providers: [ProfilesService],

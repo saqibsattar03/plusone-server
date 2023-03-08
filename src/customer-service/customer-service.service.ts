@@ -17,7 +17,6 @@ export class CustomerServiceService {
   async createCustomerQuery(
     customerServiceDto: CustomerServiceDto,
   ): Promise<CustomerServiceDocument> {
-    console.log('here1');
     return this.customerModel.create(customerServiceDto);
   }
 
