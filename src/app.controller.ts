@@ -3,6 +3,8 @@ import {
   HttpException,
   HttpStatus,
   Patch,
+  Post,
+  Query,
   UploadedFile,
 } from '@nestjs/common';
 import { Get, UploadedFiles, UseInterceptors } from '@nestjs/common/decorators';
@@ -18,7 +20,7 @@ export class AppController {
     return 'hello world';
   }
 
-  @Patch('upload-image')
+  @Post('upload-image')
   @UseInterceptors(FileInterceptor('media', imageValidation))
   async uploadProfileImage(
     @UploadedFile() media: Express.Multer.File,
@@ -29,13 +31,12 @@ export class AppController {
     throw new HttpException('no image uploaded', HttpStatus.NOT_FOUND);
   }
 
-  @Patch('upload-multiple-image')
+  @Post('upload-multiple-image')
   @UseInterceptors(FilesInterceptor('media', 5, imageValidation))
   async uploadMultipleProfileImage(
     @UploadedFiles() media: Array<Express.Multer.File>,
   ): Promise<any> {
     if (media.length > 0) {
-      console.log('media = ', media);
       const name = [];
       for (let i = 0; i < media.length; i++) {
         name.push(media[i].filename);
@@ -44,7 +45,6 @@ export class AppController {
     }
     throw new HttpException('no image uploaded', HttpStatus.NOT_FOUND);
   }
-
   // @Delete('remove-profile-pic')
   // async removeProfileImage(imageName: string): Promise<any> {
   //   return u;

@@ -21,9 +21,9 @@ async function bootstrap() {
     .setVersion('1.0')
     .build();
 
-  app.useStaticAssets(join(__dirname, '..', '..', 'uploads'), {
-    prefix: '/uploads/',
-  });
+  // app.useStaticAssets(join(__dirname, '..', '..', 'uploads'), {
+  //   prefix: '/uploads/',
+  // });
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('Plus-One-api', app, document);

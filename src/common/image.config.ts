@@ -1,25 +1,74 @@
-/* eslint-disable prettier/prettier */
-import { v4 as uuidv4 } from 'uuid';
+import { extname } from 'path';
+import { existsSync, mkdirSync } from 'fs';
+import { diskStorage } from 'multer';
+import { v4 as uuid } from 'uuid';
+import { HttpException, HttpStatus } from '@nestjs/common';
 
-// import fs from 'fs';
-// import fileType from 'file-type';
+// Multer configuration
+export const multerConfig = {
+  // dest: process.env.UPLOAD_LOCATION,
+  dest: function (req, file, callback) {
+    callback('/uploads/');
+  },
+};
 
-// import path = require('path')
-
-type validFileExtension = 'png' | 'jpg' | 'jpeg';
-type validMimeType = 'image/png' | 'image/jpg' | 'image/jpeg';
-
-const valiFileExtensions: validFileExtension[] = ['png', 'jpg', 'jpeg'];
-const validMimeTypes: validMimeType[] = [
-  'image/jpeg',
-  'image/jpg',
-  'image/png',
-];
+// Multer upload options
 
 export const imageValidation = {
-    fileFilter: (req, file, cb) => {
-    const allowedMimeTypes: validMimeType[] = validMimeTypes;
-    console.log("files = ",file)
-    allowedMimeTypes.includes(file.mimetype) ? cb(null, true) : cb(null,false);
+  // Enable file size limits
+  limits: {
+    // fileSize: +process.env.MAX_FILE_SIZE,
+    fileSize: 1048576, // 10 Mb,
   },
+  // Check the mimetypes to allow for upload
+  fileFilter: (req: any, file: any, cb: any) => {
+    const fileSize = parseInt(req.headers['content-length']);
+    if (file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
+      if (fileSize > 1 * 1000 * 1000) {
+        cb(
+          new HttpException(
+            'Image size is too large',
+            HttpStatus.NOT_ACCEPTABLE,
+          ),
+        );
+      }
+      // Allow storage of file
+      cb(null, true);
+    } else if (file.mimetype.match(/\/(mp4)$/)) {
+      if (fileSize > 1048576) {
+        cb(
+          new HttpException(
+            'video size is too large',
+            HttpStatus.NOT_ACCEPTABLE,
+          ),
+        );
+      }
+      cb(null, true);
+    } else {
+      // Reject file
+      cb(
+        new HttpException(
+          `Unsupported file type ${extname(file.originalname)}`,
+          HttpStatus.BAD_REQUEST,
+        ),
+        false,
+      );
+    }
+  },
+  // Storage properties
+  storage: diskStorage({
+    // Destination storage path details
+    destination: function (req: any, file: any, callback: any) {
+      // const uploadPath = multerConfig.dest;
+      if (!existsSync('/uploads/')) {
+        mkdirSync('/uploads/');
+      }
+      callback(null, '/uploads/');
+    },
+    // File modification details
+    filename: (req: any, file: any, cb: any) => {
+      // Calling the callback passing the random name generated with the original extension name
+      cb(null, `${uuid()}${extname(file.originalname)}`);
+    },
+  }),
 };
