@@ -1,6 +1,7 @@
 import {
   Controller,
   Delete,
+  HttpException,
   HttpStatus,
   NotFoundException,
   Param,
@@ -37,21 +38,7 @@ export class ProfilesController {
     return this.profileService.getSingleProfile(userId);
   }
 
-  @Get('get-nearby-restaurant')
-  @ApiQuery({ name: 'longitude', type: Number })
-  @ApiQuery({ name: 'latitude', type: Number })
-  @ApiCreatedResponse()
-  @ApiBadRequestResponse({
-    description: 'could not fetch the list of nearby restaurant',
-  })
-  getNearByRestaurant(
-    @Query('longitude') longitude,
-    @Query('latitude') latitude,
-  ) {
-    return this.profileService.getNearByRestaurant(longitude, latitude);
-  }
-
-  @Patch('update')
+  @Patch('')
   @ApiQuery({ name: 'profileId', type: String })
   @ApiBody({ type: UpdateProfileDto })
   @ApiCreatedResponse({
@@ -70,10 +57,7 @@ export class ProfilesController {
   async removeProfile(@Param('profileId') profileId, @Res() res) {
     const profile = await this.profileService.removeProfile(profileId);
     if (!profile) throw new NotFoundException(' Profile does not exist');
-    return res.status(HttpStatus.OK).json({
-      message: 'profile deleted successfully',
-      profile,
-    });
+    else throw new HttpException('profile deleted successfully', HttpStatus.OK);
   }
 
   @Get('all-public')

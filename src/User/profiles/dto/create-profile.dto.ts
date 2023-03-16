@@ -112,6 +112,9 @@ export class CreateProfileDto {
   })
   location: LocationDto;
 
+  // @ApiProperty({ type: Boolean, default: false })
+  // isPremium: boolean;
+
   @ApiProperty()
   createdAt: Date;
   @ApiProperty()

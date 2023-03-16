@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Following, FollowingDocument } from '../../Schemas/following.schema';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 
 @Injectable()
 export class FollowingService {
@@ -20,27 +20,56 @@ export class FollowingService {
         await this.followingModel.updateOne({
           $push: { followings: followeeId },
         });
-      } else {
-        console.log('already following');
-      }
+      } else
+        throw new HttpException('already following', HttpStatus.BAD_REQUEST);
     }
-    return res;
+    throw new HttpException('follwee added successfully', HttpStatus.OK);
   }
   async removeFollowee(userId, followeeId): Promise<any> {
     const res = await this.followingModel.findOne({ userId: userId });
-    if (!res) return 'no such user found';
+    if (!res)
+      throw new HttpException('no such user found', HttpStatus.NOT_FOUND);
     else if (res) {
       if (res.followings.includes(followeeId)) {
         await this.followingModel.updateOne({
           $pull: { followings: followeeId },
         });
-      } else return 'no such followee found';
+      } else
+        throw new HttpException('no such followee found', HttpStatus.NOT_FOUND);
     }
-    return res;
+    throw new HttpException('Followee Removed Successfully', HttpStatus.OK);
   }
   async getAllFollowees(userId): Promise<any> {
-    return this.followingModel
-      .findOne({ useId: userId })
-      .populate('followings', 'userName');
+    const oid = new mongoose.Types.ObjectId(userId);
+    return this.followingModel.aggregate([
+      {
+        $match: { userId: oid },
+      },
+      {
+        $lookup: {
+          from: 'profiles',
+          let: { followeeId: '$followings' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $in: ['$_id', '$$followeeId'] },
+              },
+            },
+          ],
+          as: 'followings',
+        },
+      },
+      {
+        $project: {
+          'followings._id': 1,
+          'followings.firstName': 1,
+          'followings.surName': 1,
+          'followings.profileImage': 1,
+        },
+      },
+      {
+        $unset: ['_id'],
+      },
+    ]);
   }
 }

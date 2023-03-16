@@ -53,6 +53,9 @@ export class Profile extends User {
 
   @Prop({ type: Number, default: 0 })
   rewardPoints: number;
+
+  @Prop({ type: Boolean, default: false })
+  isPremium: boolean;
 }
 
 export const ProfileSchema = SchemaFactory.createForClass(Profile);

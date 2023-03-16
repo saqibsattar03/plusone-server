@@ -17,6 +17,7 @@ import {
 } from '@nestjs/swagger';
 import { CommentsService } from './comments.service';
 import { CreateCommentDTO } from './dto/comment.dto';
+import { Get } from '@nestjs/common/decorators';
 
 @ApiTags('Comments')
 @Controller('comment')
@@ -25,7 +26,7 @@ export class CommentsController {
 
   //create comment route
 
-  @Post('create/:postId')
+  @Post(':postId')
   @ApiParam({ name: 'postId', type: 'string' })
   @ApiBody({ type: CreateCommentDTO, description: 'create comment' })
   @ApiCreatedResponse({
@@ -37,8 +38,13 @@ export class CommentsController {
     return this.commentService.postComment(data, postId);
   }
 
+  @Get()
+  getPostComment(@Query('postId') postId) {
+    return this.commentService.getPostComment(postId);
+  }
+
   //update comment route
-  @Patch('edit/:postId')
+  @Patch(':postId')
   @ApiParam({ name: 'postId', type: 'string' })
   @ApiBadRequestResponse({ description: 'comment could not update' })
   async editComment(@Param('postId') postId, @Body() data) {

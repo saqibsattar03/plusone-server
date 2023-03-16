@@ -6,11 +6,15 @@ import {
 } from '../../Schemas/restaurant.schema';
 import mongoose, { Model } from 'mongoose';
 import { CreateRestaurantDto } from './dto/create-restaurant.dto';
-import { RedeemVoucher } from '../../Schemas/redeemVoucher.schema';
+import {
+  RedeemVoucher,
+  RedeemVoucherDocument,
+} from '../../Schemas/redeemVoucher.schema';
 import {
   RestaurantReview,
   RestaurantReviewDocument,
 } from '../../Schemas/restaurantReview.schema';
+import { Voucher, VoucherDocument } from '../../Schemas/voucher.schema';
 
 @Injectable()
 export class RestaurantService {
@@ -18,7 +22,10 @@ export class RestaurantService {
     @InjectModel(Restaurant.name)
     private readonly restaurantModel: Model<RestaurantDocument>,
     @InjectModel(RedeemVoucher.name)
-    private readonly redeemVoucherModel: Model<RedeemVoucher>,
+    private readonly redeemVoucherModel: Model<RedeemVoucherDocument>,
+
+    @InjectModel(Voucher.name)
+    private readonly voucherModel: Model<VoucherDocument>,
 
     @InjectModel(RestaurantReview.name)
     private readonly restaurantReviewModel: Model<RestaurantReviewDocument>,
@@ -39,7 +46,7 @@ export class RestaurantService {
   }
 
   async editRestaurant(restaurantId, data): Promise<RestaurantDocument> {
-    const updatedRestaurant = await this.restaurantModel.findByIdAndUpdate(
+    return this.restaurantModel.findByIdAndUpdate(
       { _id: restaurantId },
       {
         $set: {
@@ -54,7 +61,6 @@ export class RestaurantService {
         },
       },
     );
-    return updatedRestaurant;
   }
 
   async deleteRestaurant(restaurantId): Promise<any> {
@@ -62,11 +68,13 @@ export class RestaurantService {
       restaurantId: restaurantId,
     });
     await this.restaurantModel.findByIdAndDelete({ _id: restaurantId });
+    await this.voucherModel.findOneAndDelete({
+      restaurantId: restaurantId,
+    });
   }
 
   async getUserWhoRedeemVoucher(voucherId): Promise<any> {
     const oid = new mongoose.Types.ObjectId(voucherId);
-    console.log(oid);
     return this.redeemVoucherModel.find({ voucherId: oid });
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   RestaurantReview,
@@ -50,17 +50,25 @@ export class RestaurantReviewService {
         },
       });
       return res;
-    } else return 'no such restaurant found';
+    } else
+      throw new HttpException(
+        'no such restaurant found',
+        HttpStatus.BAD_REQUEST,
+      );
   }
 
   async editReview(data, restaurantId): Promise<any> {
     const res = await this.restaurantReviewModel.findOne({
       restaurantId: restaurantId,
     });
-    if (!res) return 'no such restaurant found';
+    if (!res)
+      throw new HttpException(
+        'no such restaurant found',
+        HttpStatus.BAD_REQUEST,
+      );
     else if (res) {
       const oid = mongoose.Types.ObjectId.createFromHexString(data._id);
-      const r = await this.restaurantReviewModel.findOneAndUpdate(
+      await this.restaurantReviewModel.findOneAndUpdate(
         {
           restaurantId: restaurantId,
           'reviewObject._id': oid,
@@ -79,25 +87,30 @@ export class RestaurantReviewService {
           ],
         },
       );
-      return r;
-    } else return 'no such review found';
+      throw new HttpException('review added successfully', HttpStatus.OK);
+    } else
+      throw new HttpException('no such review found', HttpStatus.BAD_REQUEST);
   }
 
   async deleteReview(reviewId, restaurantId): Promise<any> {
     const res = await this.restaurantReviewModel.findOne({
       restaurantId: restaurantId,
     });
-    if (!res) return 'no such restaurant found';
+    if (!res)
+      throw new HttpException(
+        'no such restaurant found',
+        HttpStatus.BAD_REQUEST,
+      );
     else if (res) {
       const oid = mongoose.Types.ObjectId.createFromHexString(reviewId);
-
-      const r = await this.restaurantReviewModel.updateOne(
+      await this.restaurantReviewModel.updateOne(
         { restaurantId: restaurantId },
         { $pull: { reviewObject: { _id: oid } } },
         { safe: true },
       );
 
-      return r;
-    } else return 'no such comment found';
+      throw new HttpException('review deleted successfully', HttpStatus.OK);
+    } else
+      throw new HttpException('no such comment found', HttpStatus.BAD_REQUEST);
   }
 }

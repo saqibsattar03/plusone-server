@@ -29,10 +29,9 @@ export class SocialPostsService {
   }
 
   async getPost(postId): Promise<PostDocument> {
-    return this.socialPostModel
-      .findById(postId)
-      .populate('comments')
-      .populate('likes');
+    return this.socialPostModel.findById(postId);
+    // .populate('comments')
+    // .populate('likes');
   }
 
   async updatePost(
@@ -73,7 +72,7 @@ export class SocialPostsService {
     await this.commentModel.findOneAndDelete({ postId: postId });
     await this.postLikedModel.findOneAndDelete({ postId: postId });
     await post.remove();
-    return post;
+    throw new HttpException('post deleted successfully', HttpStatus.OK);
   }
 
   async likePost(userId, postId): Promise<LikedPostDocument> {
@@ -92,28 +91,23 @@ export class SocialPostsService {
         await this.socialPostModel.updateOne({
           $set: { likesCount: this.likesCount },
         });
-      } else {
-        console.log('already liked');
-      }
+      } else throw new HttpException('already liked', HttpStatus.BAD_REQUEST);
     }
-    return res;
+    throw new HttpException('post liked successfully', HttpStatus.OK);
   }
   async removeLike(userId, postId): Promise<any> {
     const res = await this.postLikedModel.findOne({ postId: postId });
-    if (!res) return 'no such like found';
+    if (!res) throw new HttpException('no post found', HttpStatus.NOT_FOUND);
     if (res) {
       if (res.userId.includes(userId)) {
-        console.log('count in dislike condition = ', this.likesCount);
         this.likesCount--;
-        console.log('count after disliking = ', this.likesCount);
         await res.updateOne({ $pull: { userId: userId } });
         await this.socialPostModel.updateOne({
           $set: { likesCount: this.likesCount },
         });
-      } else {
-        return 'like already removed';
       }
+      throw new HttpException('like already removed', HttpStatus.NOT_FOUND);
     }
-    return res;
+    throw new HttpException('like removed', HttpStatus.OK);
   }
 }

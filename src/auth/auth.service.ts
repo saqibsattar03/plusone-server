@@ -42,8 +42,7 @@ export class AuthService {
   async login(user: any) {
     user = await this.profileService.getUserByEmailOrUserName(user);
     if (user.status != 'active') {
-      throw new UnauthorizedException('Account is pending state');
-      // return ;
+      throw new UnauthorizedException('Account is in pending state');
     }
     return {
       access_token: await this.jwtService.signAsync({

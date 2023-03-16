@@ -115,16 +115,12 @@ export class SocialPostsController {
   }
   //Delete Post Route
 
-  @Delete('remove/:postId')
+  @Delete(':postId')
   @ApiParam({ name: 'postId', type: 'string' })
   @ApiCreatedResponse({ description: 'post deleted successfully' })
   @ApiBadRequestResponse({ description: 'could not delete post' })
-  async removePost(@Param('postId') postId, @Res() res) {
-    const post = await this.socialPostService.removePost(postId);
-    return res.status(HttpStatus.OK).json({
-      message: 'post deleted successfully',
-      post,
-    });
+  removePost(@Param('postId') postId) {
+    return this.socialPostService.removePost(postId);
   }
 
   //Like Post  Route

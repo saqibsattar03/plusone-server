@@ -30,7 +30,7 @@ export class Restaurant {
     type: Number,
     required: true,
     default: function () {
-      return 455 * 12 + Math.floor(Math.random() * 100);
+      return Math.floor(Math.random() * 1834 + 1573);
     },
     index: { unique: true },
   })

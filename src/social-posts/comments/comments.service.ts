@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { Comment } from 'src/Schemas/comment.schema';
 import { Post, PostDocument } from 'src/Schemas/post.schema';
 import { CreateCommentDTO } from './dto/comment.dto';
+import * as moment from 'moment';
 
 @Injectable()
 export class CommentsService {
@@ -30,6 +31,7 @@ export class CommentsService {
             _id: createCommentDto.commentObject._id,
             userId: createCommentDto.commentObject.userId,
             commentText: createCommentDto.commentObject.commentText,
+            updatedAt: moment().format(),
           },
         },
       });
@@ -44,6 +46,7 @@ export class CommentsService {
             _id: createCommentDto.commentObject._id,
             userId: createCommentDto.commentObject.userId,
             commentText: createCommentDto.commentObject.commentText,
+            updatedAt: moment().format(),
           },
         },
       });
@@ -59,7 +62,8 @@ export class CommentsService {
     const res = await this.commentModel.findOne({
       postId: postId,
     });
-    if (!res) return 'no such post found';
+    if (!res)
+      throw new HttpException('no such Post found', HttpStatus.NOT_FOUND);
     else if (res) {
       const oid = mongoose.Types.ObjectId.createFromHexString(data._id);
       const r = await this.commentModel.findOneAndUpdate(
@@ -77,14 +81,46 @@ export class CommentsService {
         },
       );
       return r;
-    } else return 'no such comment found';
+    }
+    throw new HttpException('no such comment found', HttpStatus.NOT_FOUND);
+  }
+
+  async getPostComment(postId): Promise<any> {
+    const oid = new mongoose.Types.ObjectId(postId);
+    return this.commentModel.aggregate([
+      {
+        $match: { postId: oid },
+      },
+      {
+        $unwind: '$commentObject',
+      },
+      {
+        $lookup: {
+          from: 'profiles',
+          localField: 'commentObject.userId',
+          foreignField: '_id',
+          as: 'users',
+        },
+      },
+      {
+        $project: {
+          'users.firstName': 1,
+          'users.surName': 1,
+          'user.profileImage': 1,
+          'commentObject.commentText': 1,
+          'commentObject.updatedAt': 1,
+        },
+      },
+    ]);
+    // return this.commentModel.findOne({ postId: postId }, 'commentObject');
   }
 
   async deleteComment(commentId, postId): Promise<any> {
     const res = await this.commentModel.findOne({
       postId: postId,
     });
-    if (!res) return 'no such Post found';
+    if (!res)
+      throw new HttpException('no such Post found', HttpStatus.NOT_FOUND);
     else if (res) {
       const oid = mongoose.Types.ObjectId.createFromHexString(commentId);
 
@@ -98,6 +134,7 @@ export class CommentsService {
         $set: { commentCount: this.commentCount },
       });
       return r;
-    } else return 'no such comment found';
+    }
+    throw new HttpException('no such comment found', HttpStatus.NOT_FOUND);
   }
 }

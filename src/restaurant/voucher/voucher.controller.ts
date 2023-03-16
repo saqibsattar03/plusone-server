@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Patch, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  HttpException,
+  HttpStatus,
+  Patch,
+  Query,
+} from '@nestjs/common';
 import { VoucherService } from './voucher.service';
 import { Get, Post } from '@nestjs/common/decorators';
 
@@ -45,7 +53,11 @@ export class VoucherController {
   createNonStudentVoucher(@Body() data) {
     if (data.voucherObject.voucherImage) {
       return this.voucherService.createNonStudentVoucher(data);
-    } else return 'Picture must be provided to create voucher';
+    }
+    throw new HttpException(
+      'Picture must be provided to create voucher',
+      HttpStatus.BAD_REQUEST,
+    );
   }
 
   @Get('get-all-vouchers-by-restaurant')
@@ -90,6 +102,28 @@ export class VoucherController {
     return this.voucherService.deleteAllVoucher(voucherId);
   }
 
+  @Get('ask-for-restaurant-code')
+  @ApiQuery({ type: 'string', name: 'restaurantId' })
+  @ApiCreatedResponse({ type: 'object' })
+  @ApiBadRequestResponse({ description: 'can not retrieve code' })
+  askForRestaurantCode(@Query('restaurantId') restaurantId) {
+    return this.voucherService.askForRestaurantCode(restaurantId);
+  }
+  @Post('verify-restaurant-code')
+  @ApiQuery({ type: 'string', name: 'restaurantId' })
+  @ApiQuery({ type: 'string', name: 'restaurantCode' })
+  @ApiCreatedResponse({ type: Number })
+  @ApiBadRequestResponse({ description: 'can not verify restaurant code' })
+  verifyRestaurantCode(
+    @Query('restaurantId') restaurantId,
+    @Query('restaurantCode') restaurantCode,
+  ) {
+    return this.voucherService.verifyRestaurantCode(
+      restaurantId,
+      restaurantCode,
+    );
+  }
+
   @Post('redeem')
   @ApiQuery({ type: 'string', name: 'userId' })
   @ApiQuery({ type: 'string', name: 'voucherId' })
@@ -112,27 +146,5 @@ export class VoucherController {
   @Get('all-redeemed-by-user')
   getAllVoucherRedeemedByUser(@Query('userId') userId) {
     return this.voucherService.getAllVoucherRedeemedByUser(userId);
-  }
-
-  @Get('ask-for-restaurant-code')
-  @ApiQuery({ type: 'string', name: 'restaurantId' })
-  @ApiCreatedResponse({ type: 'object' })
-  @ApiBadRequestResponse({ description: 'can not retrieve code' })
-  askForRestaurantCode(@Query('restaurantId') restaurantId) {
-    return this.voucherService.askForRestaurantCode(restaurantId);
-  }
-  @Post('verify-restaurant-code')
-  @ApiQuery({ type: 'string', name: 'restaurantId' })
-  @ApiQuery({ type: 'string', name: 'restaurantCode' })
-  @ApiCreatedResponse({ type: Number })
-  @ApiBadRequestResponse({ description: 'can not verify restaurant code' })
-  verifyRestaurantCode(
-    @Query('restaurantId') restaurantId,
-    @Query('restaurantCode') restaurantCode,
-  ) {
-    return this.voucherService.verifyRestaurantCode(
-      restaurantId,
-      restaurantCode,
-    );
   }
 }

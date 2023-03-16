@@ -10,7 +10,6 @@ import * as http from 'http';
 @Injectable()
 export class UserService {
   constructor(
-    // @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
     @InjectModel(Profile.name)
     private readonly profileModel: Model<ProfileDocument>,
   ) {}
@@ -20,7 +19,7 @@ export class UserService {
     });
     if (userName)
       throw new HttpException(
-        'User Name already taken',
+        'Username already taken',
         HttpStatus.UNAUTHORIZED,
       );
     const user = await this.profileModel.findOne({
@@ -44,8 +43,11 @@ export class UserService {
       confirmationCode: token,
     });
     await newUser.save();
-    // // sendConfirmationEmail(newUser.email, newUser.confirmationCode);
-    return 'Account Created Successfully. Please confirm your email to Active your account. check your email for confirmation';
+    // sendConfirmationEmail(newUser.email, newUser.confirmationCode);
+    throw new HttpException(
+      'Account Created Successfully. Please Confirm Your Email to Active Your Account. Check Your Email for Confirmation',
+      HttpStatus.OK,
+    );
   }
 
   async verifyUser(confirmationCode: string): Promise<any> {
@@ -55,8 +57,12 @@ export class UserService {
     if (verified) {
       await verified.updateOne({ status: 'active' });
       await verified.updateOne({ confirmationCode: null });
-      return 'Account Activated Successfully';
-    } else return 'confirmation code does not match';
+      throw new HttpException('Account Activated Successfully', HttpStatus.OK);
+    } else
+      throw new HttpException(
+        'confirmation code does not match',
+        HttpStatus.BAD_REQUEST,
+      );
   }
   async getUser(email: string) {
     // return this.userModel.findOne({ email: email });
@@ -78,19 +84,23 @@ export class UserService {
   }
   async changePassword(email: string, oldPassword, newPassword): Promise<any> {
     const user = await this.profileModel.findOne({ email: email });
-    if (!user) {
-      return 'user not found';
-    }
+    if (!user) throw new HttpException('use not found', HttpStatus.NOT_FOUND);
     const isValidPassword = await bcrypt.compare(oldPassword, user.password);
-    if (!isValidPassword) {
-      return 'Old Password is incorrect';
-    }
+    if (!isValidPassword)
+      throw new HttpException(
+        'Old Password is incorrect',
+        HttpStatus.FORBIDDEN,
+      );
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     const differentPassword = await bcrypt.compare(oldPassword, hashedPassword);
     if (!differentPassword) {
       user.password = hashedPassword;
       return user.save();
-    } else return 'old password and new password can not be same';
+    } else
+      throw new HttpException(
+        'old password and new password can not be same',
+        HttpStatus.NOT_ACCEPTABLE,
+      );
   }
 
   // async logout(id: string): Promise<any> {

@@ -13,6 +13,8 @@ import {
   RestaurantDocument,
 } from '../../Schemas/restaurant.schema';
 
+import * as moment from 'moment';
+
 @Injectable()
 export class VoucherService {
   studentVoucherCount = 0;
@@ -89,6 +91,7 @@ export class VoucherService {
           HttpStatus.UNAUTHORIZED,
         );
     }
+    throw new HttpException('voucher created Successfully', HttpStatus.OK);
   }
   async createNonStudentVoucher(voucherDto: CreateVoucherDto): Promise<any> {
     const oid = new mongoose.Types.ObjectId(voucherDto.voucherObject._id);
@@ -151,6 +154,7 @@ export class VoucherService {
           HttpStatus.UNAUTHORIZED,
         );
     }
+    throw new HttpException('voucher created successfully', HttpStatus.OK);
   }
   async getAllVouchersByRestaurant(restaurantId, voucherType): Promise<any> {
     const oid = new mongoose.Types.ObjectId(restaurantId);
@@ -163,7 +167,6 @@ export class VoucherService {
     ]);
   }
   async editVoucher(voucherId, data): Promise<any> {
-    console.log(data);
     const oid = new mongoose.Types.ObjectId(voucherId);
     return this.voucherModel.updateOne(
       { 'voucherObject._id': oid },
@@ -189,7 +192,6 @@ export class VoucherService {
     } else {
       this.nonStudentVoucherCount--;
     }
-    const res = result[0].voucherObject._id;
     await this.voucherModel.updateOne({
       $pull: {
         voucherObject: {
@@ -197,8 +199,7 @@ export class VoucherService {
         },
       },
     });
-    console.log('res', res);
-    return;
+    throw new HttpException('voucher deleted successfully', HttpStatus.OK);
   }
   async deleteAllVoucher(voucherId) {
     this.studentVoucherCount = 0;
@@ -221,10 +222,8 @@ export class VoucherService {
       .select('uniqueCode -_id');
     // eslint-disable-next-line prefer-const
     isVerified = res.uniqueCode == restaurantCode;
-    console.log('outside if verified');
     if (isVerified) {
       const verificationCode = await this.fourDigitCode();
-      console.log('inside if verified');
       await this.restaurantModel.findOneAndUpdate(
         { _id: restaurantId },
         {
@@ -248,47 +247,106 @@ export class VoucherService {
     const restaurant = await this.restaurantModel.findOne({
       _id: restaurantId,
     });
-    if (restaurant.verificationCode == verificationCode) {
-      const oid = new mongoose.Types.ObjectId(voucherId);
-      const user = await this.profileModel.findOne({ _id: userId });
-      const voucher = await this.voucherModel.findOne(
-        {
-          restaurantId: restaurantId,
-        },
-        { voucherObject: { $elemMatch: { _id: oid } } },
-      );
-      if (voucher.voucherObject[0].voucherType == user.accountHolderType) {
-        const res = await this.redeemVoucherModel.findOne({
+    const user = await this.profileModel.findOne({ _id: userId });
+
+    // checking if user already bought subscription //
+
+    if (user.isPremium) {
+      //checking if user at the right restaurant through restaurant's verification code //
+      if (restaurant.verificationCode == verificationCode) {
+        const oid = new mongoose.Types.ObjectId(voucherId);
+
+        // fetching restaurant's voucher //
+
+        const voucher = await this.voucherModel.findOne(
+          {
+            restaurantId: restaurantId,
+          },
+          { voucherObject: { $elemMatch: { _id: oid } } },
+        );
+
+        const voucherDetails = await this.redeemVoucherModel.findOne({
           userId: userId,
           voucherId: voucherId,
         });
-        if (!res) {
-          await this.redeemVoucherModel.create({
+
+        // checking if exactly 1 year past //
+        if (voucherDetails) {
+          const year = moment().diff(voucherDetails.updatedAt, 'year');
+          if (year >= 1) {
+            if (
+              voucher.voucherObject[0].voucherType == user.accountHolderType
+            ) {
+              await this.redeemVoucherModel.findOneAndUpdate({
+                userId: userId,
+                voucherId: voucherId,
+              });
+              // await this.restaurantModel.findOneAndDelete(
+              //   {
+              //     restaurantId: restaurantId,
+              //   },
+              //   { verificationCode: verificationCode },
+              // );
+            }
+            throw new HttpException(
+              'Voucher Redeemed Again. Come Back Next Year!!',
+              HttpStatus.ACCEPTED,
+            );
+          }
+        }
+        // checking if the voucher and customer type matches //
+        if (voucher.voucherObject[0].voucherType == user.accountHolderType) {
+          const res = await this.redeemVoucherModel.findOne({
             userId: userId,
             voucherId: voucherId,
           });
-          // this.rewardPoints++;
-          // await this.reward(userId, this.rewardPoints, this.profileModel);
-          // if (this.rewardPoints == 10) {
-          //   throw new HttpException('you get a free voucher', HttpStatus.OK);
-          // }
-          await this.profileModel
-            .findById({ _id: userId })
-            .updateOne({ rewardPoints: this.rewardPoints });
+
+          // saving user details about voucher redemption in database if not already in database //
+
+          if (!res) {
+            await this.redeemVoucherModel.create({
+              userId: userId,
+              voucherId: voucherId,
+              restaurantId: restaurantId, //*** storing restaurantId to get popular restaurants ***//
+            });
+            await this.restaurantModel.findOneAndUpdate(
+              {
+                restaurantId: restaurantId,
+              },
+              { $unset: { verificationCode: '' } },
+            );
+            // this.rewardPoints++;
+            // await this.reward(userId, this.rewardPoints, this.profileModel);
+            // if (this.rewardPoints == 10) {
+            //   throw new HttpException('you get a free voucher', HttpStatus.OK);
+            // }
+            // await this.profileModel
+            //   .findById({ _id: userId })
+            //   .updateOne({ rewardPoints: this.rewardPoints });
+            throw new HttpException(
+              'voucher Redeemed Successfully',
+              HttpStatus.OK,
+            );
+          }
+          // if voucher already redeemed //
+          else
+            throw new HttpException(
+              'already redeemed',
+              HttpStatus.NOT_ACCEPTABLE,
+            );
+        } else
           throw new HttpException(
-            'voucher Redeemed Successfully',
-            HttpStatus.OK,
+            'voucher type does not match',
+            HttpStatus.NOT_ACCEPTABLE,
           );
-        }
-        throw new HttpException('already redeemed', HttpStatus.NOT_ACCEPTABLE);
       } else
         throw new HttpException(
-          'voucher type does not match',
-          HttpStatus.NOT_ACCEPTABLE,
+          'verification code does not match',
+          HttpStatus.FORBIDDEN,
         );
     } else
       throw new HttpException(
-        'verification code does not match',
+        'You must buy subscription to redeem the voucher',
         HttpStatus.FORBIDDEN,
       );
   }
@@ -299,24 +357,63 @@ export class VoucherService {
     console.log(profileModel);
   }
   async getAllVoucherRedeemedByUser(userId): Promise<any> {
-    console.log(userId);
     const oid = new mongoose.Types.ObjectId(userId);
-    const allVouchers = await this.redeemVoucherModel
-      .findOne({ userId: oid })
-      .populate('userId');
-
-    // const allVouchers = await this.redeemVoucherModel.aggregate([
-    //   {
-    //     $match: { userId: oid },
-    //   },
-    //   // { $unwind: '$voucherObject' },
-    //   // { $match: { 'voucherObject._id': oid } },
-    // ]);
-    console.log(allVouchers);
-    return allVouchers;
+    return this.redeemVoucherModel.aggregate([
+      {
+        $match: { userId: oid },
+      },
+      {
+        $lookup: {
+          from: 'vouchers',
+          let: { voucherId: '$voucherId' },
+          as: 'voucher',
+          pipeline: [
+            {
+              $unwind: '$voucherObject',
+            },
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$voucherObject._id', '$$voucherId'],
+                },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: 'profiles',
+          // let: { userId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', oid],
+                },
+              },
+            },
+          ],
+          as: 'users',
+        },
+      },
+      {
+        $project: {
+          'users._id': 1,
+          'users.firstName': 1,
+          'users.surName': 1,
+          'users.profileImage': 1,
+          'voucher.voucherObject.voucherCode': 1,
+          'voucher.voucherObject.voucherType': 1,
+          'voucher.voucherObject.description': 1,
+          'voucher.voucherObject.discount': 1,
+          'voucher.voucherObject.voucherImage': 1,
+        },
+      },
+    ]);
   }
 
   async fourDigitCode() {
-    return 155 * 8 + Math.floor(Math.random() * 100);
+    return Math.floor(Math.random() * 7291 + 1000);
   }
 }

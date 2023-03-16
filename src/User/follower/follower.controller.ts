@@ -33,7 +33,7 @@ export class FollowerController {
   removeFollower(@Query('followerId') followerId, @Query('userId') userId) {
     return this.followerService.removeFollower(userId, followerId);
   }
-  @Get('get-all-followers')
+  @Get('all')
   @ApiQuery({ name: 'userId', type: String })
   @ApiResponse({ description: 'Following fetched Successfully' })
   @ApiBadRequestResponse({

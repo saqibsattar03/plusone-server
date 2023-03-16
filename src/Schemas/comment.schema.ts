@@ -14,7 +14,7 @@ export class Comment {
   commentObject: [CommentStructure];
 }
 
-@Schema({ timestamps: true, _id: true })
+@Schema({ timestamps: true })
 export class CommentStructure {
   @Prop()
   _id: mongoose.Schema.Types.ObjectId;
@@ -24,5 +24,8 @@ export class CommentStructure {
 
   @Prop({ type: String })
   commentText: string;
+
+  @Prop({ type: () => Date, description: 'Updated At' })
+  updatedAt?: Date;
 }
 export const CommentSchema = SchemaFactory.createForClass(Comment);

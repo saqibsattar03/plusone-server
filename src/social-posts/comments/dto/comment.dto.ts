@@ -16,5 +16,6 @@ export class CreateCommentDTO {
     _id: any;
     userId: any;
     commentText: string;
+    updatedAt: Date;
   };
 }

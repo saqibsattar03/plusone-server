@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Profile, ProfileDocument } from '../../Schemas/Profile.schema';
-import mongoose, { Model } from 'mongoose';
-import { CreateProfileDto } from './dto/create-profile.dto';
+import { Model } from 'mongoose';
+
 import {
   Restaurant,
   RestaurantDocument,
@@ -53,23 +53,6 @@ export class ProfilesService {
     await profile.remove();
     return profile;
   }
-  async getNearByRestaurant(longitude, latitude): Promise<any> {
-    return this.restaurantModel.aggregate([
-      {
-        $geoNear: {
-          near: {
-            type: 'Point',
-            coordinates: [parseFloat(longitude), parseFloat(latitude)],
-          },
-          distanceField: 'distanceFromMe',
-          maxDistance: 1000 * 1609.34,
-          distanceMultiplier: 1 / 1609.34,
-          spherical: true,
-        },
-      },
-    ]);
-  }
-
   async getAllPublicProfile(): Promise<ProfileDocument[]> {
     return this.profileModel.find({ accountType: 'public' });
   }
