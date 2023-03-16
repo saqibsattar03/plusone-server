@@ -41,7 +41,7 @@ export class AuthService {
 
   async login(user: any) {
     user = await this.profileService.getUserByEmailOrUserName(user);
-    if (user.status != 'active') {
+    if (user.status != 'ACTIVE') {
       throw new UnauthorizedException('Account is in pending state');
     }
     return {
@@ -52,7 +52,6 @@ export class AuthService {
     };
   }
   async profile(user: any) {
-    console.log(user);
     return this.profileService.fetchProfileUsingToken(user);
   }
 
@@ -61,7 +60,7 @@ export class AuthService {
     if (!user) throw new HttpException('User Not Found', HttpStatus.NOT_FOUND);
     let token = await this.forgotModel.findOne({ userId: user._id });
     const characters =
-      '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      '0123456789abcdefghijklmnopqrstuvwxyz*-+/+!@#$%^&*}{)(|~ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let generateToken = '';
     for (let i = 0; i < 25; i++) {
       generateToken +=
@@ -73,6 +72,8 @@ export class AuthService {
         token: generateToken,
       }).save();
     }
+    // *** send this link to email service ***//
+
     // const link = `${process.env.BASE_URL}/password-reset/${user._id}/${token.token}`;
     return token;
   }
@@ -88,7 +89,7 @@ export class AuthService {
       throw new HttpException('Invalid token or expired', HttpStatus.NOT_FOUND);
     await this.userService.resetPassword(user, password);
     await res.delete();
-    throw new HttpException('password reset successfully ', HttpStatus.OK);
+    throw new HttpException('Password Reset Successfully ', HttpStatus.OK);
   }
   // async logout(user: any) {
   //   return await this.userService.logout(user.userId);

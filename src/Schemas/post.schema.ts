@@ -1,18 +1,15 @@
-/* eslint-disable prettier/prettier */
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument} from 'mongoose';
-import { Profile } from "./Profile.schema";
-import { PointSchema } from "./point.schema";
-import { ImageSchema } from "./image.schema";
+import mongoose, { HydratedDocument } from 'mongoose';
+import { Profile } from './Profile.schema';
+import { PointSchema } from './point.schema';
 
 export type PostDocument = HydratedDocument<Post>;
 @Schema({ timestamps: true })
 export class Post {
-
- @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Profile' })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Profile' })
   userId: Profile;
 
-  @Prop({type: PointSchema})
+  @Prop({ type: PointSchema })
   location: PointSchema;
 
   @Prop()
@@ -26,14 +23,13 @@ export class Post {
   postAudiencePreference: string;
 
   @Prop({ type: [String] })
-  media: string[]
+  media: string[];
 
-  @Prop({type : Number, default:0 })
+  @Prop({ type: Number, default: 0 })
   likesCount: number;
 
-  @Prop({type: Number, default:0})
-  commentCount:number
-
+  @Prop({ type: Number, default: 0 })
+  commentCount: number;
 }
 
-export const PostSchema = SchemaFactory.createForClass(Post)
+export const PostSchema = SchemaFactory.createForClass(Post);

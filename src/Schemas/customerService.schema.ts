@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { ImageSchema } from './image.schema';
 
 export type CustomerServiceDocument = HydratedDocument<CustomerService>;
 @Schema({ timestamps: true })

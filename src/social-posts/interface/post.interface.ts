@@ -5,9 +5,6 @@ export interface IPost extends Document {
     userId: object;
     location: string,
     caption: string,
-    media: [{
-        fileName: string,
-        filePath: string
-      }],
+    media: [string]
 
 }

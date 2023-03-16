@@ -22,6 +22,10 @@ export class CommentsService {
     createCommentDto.commentObject._id = new mongoose.Types.ObjectId(
       createCommentDto.commentObject._id,
     );
+
+    createCommentDto.commentObject.userId = new mongoose.Types.ObjectId(
+      createCommentDto.commentObject.userId,
+    );
     const res = await this.commentModel.findOne({ postId: postId });
     if (!res) {
       const r = await this.commentModel.create({ postId: postId });
@@ -55,7 +59,7 @@ export class CommentsService {
         $set: { commentCount: this.commentCount },
       });
     }
-    return res;
+    throw new HttpException('comment created ', HttpStatus.OK);
   }
 
   async editComment(postId, data): Promise<any> {
@@ -66,7 +70,7 @@ export class CommentsService {
       throw new HttpException('no such Post found', HttpStatus.NOT_FOUND);
     else if (res) {
       const oid = mongoose.Types.ObjectId.createFromHexString(data._id);
-      const r = await this.commentModel.findOneAndUpdate(
+      return this.commentModel.findOneAndUpdate(
         {
           postId: postId,
           'commentObject._id': oid,
@@ -80,7 +84,6 @@ export class CommentsService {
           ],
         },
       );
-      return r;
     }
     throw new HttpException('no such comment found', HttpStatus.NOT_FOUND);
   }
@@ -112,7 +115,6 @@ export class CommentsService {
         },
       },
     ]);
-    // return this.commentModel.findOne({ postId: postId }, 'commentObject');
   }
 
   async deleteComment(commentId, postId): Promise<any> {

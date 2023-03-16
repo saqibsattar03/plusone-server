@@ -39,7 +39,7 @@ export class UpdateProfileDto {
     description: 'Diet Requirements',
     type: [String],
   })
-  dieRequirement: [string];
+  dietRequirement: [string];
 
   @ApiProperty({ description: 'images/video for the post' })
   profileImage: string;

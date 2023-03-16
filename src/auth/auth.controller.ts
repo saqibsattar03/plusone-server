@@ -1,4 +1,4 @@
-import { Controller, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Query, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Body, Get, Post, Request } from '@nestjs/common/decorators';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -15,7 +15,7 @@ import {
 } from '@nestjs/swagger';
 import { CreateProfileDto } from '../User/profiles/dto/create-profile.dto';
 
-@ApiTags('auth')
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -47,7 +47,7 @@ export class AuthController {
     description: 'Get Profile from access token',
   })
   @ApiBadRequestResponse({ description: 'token is not valid' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorize' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @UseGuards(JwtAuthGuard)
   profile(@Request() request: any): Promise<any> {
     return this.authService.profile(request.user.email);

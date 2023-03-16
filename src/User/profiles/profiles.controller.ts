@@ -1,15 +1,6 @@
-import {
-  Controller,
-  Delete,
-  HttpException,
-  HttpStatus,
-  NotFoundException,
-  Param,
-  Patch,
-  Query,
-} from '@nestjs/common';
+import { Controller, Delete, Param, Patch, Query } from '@nestjs/common';
 import { ProfilesService } from './profiles.service';
-import { Body, Get, Res } from '@nestjs/common/decorators';
+import { Body, Get } from '@nestjs/common/decorators';
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -54,10 +45,8 @@ export class ProfilesController {
   @ApiParam({ name: 'profileId', type: Number })
   @ApiResponse({ description: 'Profile deleted successfully' })
   @ApiBadRequestResponse({ description: 'could not delete Profile' })
-  async removeProfile(@Param('profileId') profileId, @Res() res) {
-    const profile = await this.profileService.removeProfile(profileId);
-    if (!profile) throw new NotFoundException(' Profile does not exist');
-    else throw new HttpException('profile deleted successfully', HttpStatus.OK);
+  async removeProfile(@Param('profileId') profileId) {
+    return this.profileService.removeProfile(profileId);
   }
 
   @Get('all-public')

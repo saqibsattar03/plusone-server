@@ -101,7 +101,7 @@ export class CreateProfileDto {
     example: '["Halal"]',
   })
   @IsNotEmpty()
-  dieRequirement: string[];
+  dietRequirement: string[];
 
   @ApiProperty({ description: 'images/video for the post', type: String })
   profileImage: string;

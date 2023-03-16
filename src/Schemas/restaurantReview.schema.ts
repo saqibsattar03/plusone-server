@@ -5,7 +5,7 @@ import any = jasmine.any;
 import { Restaurant } from './restaurant.schema';
 
 export type RestaurantReviewDocument = HydratedDocument<RestaurantReview>;
-@Schema()
+@Schema({ versionKey: false })
 export class RestaurantReview {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Restaurant' })
   restaurantId: Restaurant;

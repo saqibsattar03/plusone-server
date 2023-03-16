@@ -1,6 +1,5 @@
 import {
   Controller,
-  Delete,
   HttpException,
   HttpStatus,
   Patch,
@@ -9,7 +8,9 @@ import {
 import { Get, UploadedFiles, UseInterceptors } from '@nestjs/common/decorators';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { imageValidation } from './common/image.config';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Main')
 @Controller()
 export class AppController {
   @Get('/')

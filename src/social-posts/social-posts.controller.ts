@@ -26,7 +26,6 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { imageValidation } from '../common/image.config';
 import { CreatePostDTO } from './dto/create-post.dto';
 import { SocialPostsService } from './social-posts.service';
 import { UpdatePostDTO } from './dto/update-post.dto';
@@ -38,7 +37,7 @@ export class SocialPostsController {
 
   //Create Post Route
 
-  @Post('create')
+  @Post('')
   @ApiBody({
     type: CreatePostDTO,
     description: 'Request body to create a post',
@@ -59,7 +58,7 @@ export class SocialPostsController {
 
   //Retrieve Single Post Route
 
-  @Get('get/:postId')
+  @Get(':postId')
   @ApiParam({ name: 'postId', type: 'string' })
   @ApiCreatedResponse({
     type: CreatePostDTO,

@@ -55,17 +55,16 @@ export class UserService {
       confirmationCode: confirmationCode,
     });
     if (verified) {
-      await verified.updateOne({ status: 'active' });
+      await verified.updateOne({ status: 'ACTIVE' });
       await verified.updateOne({ confirmationCode: null });
       throw new HttpException('Account Activated Successfully', HttpStatus.OK);
     } else
       throw new HttpException(
-        'confirmation code does not match',
+        'confirmation code expired or invalid',
         HttpStatus.BAD_REQUEST,
       );
   }
   async getUser(email: string) {
-    // return this.userModel.findOne({ email: email });
     return this.profileModel.findOne({
       $or: [{ email: email }, { userName: email }],
     });

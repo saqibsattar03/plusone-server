@@ -24,8 +24,9 @@ export class SocialPostsService {
 
   async createPost(createPostDto: CreatePostDTO): Promise<PostDocument> {
     this.likesCount = 0;
-    const post = await new this.socialPostModel(createPostDto);
-    return post.save();
+    const post = await this.socialPostModel.create(createPostDto);
+    console.log(post);
+    return post;
   }
 
   async getPost(postId): Promise<PostDocument> {
