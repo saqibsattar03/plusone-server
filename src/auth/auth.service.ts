@@ -29,7 +29,9 @@ export class AuthService {
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.userService.getUser(email);
     if (!user) {
-      throw new NotAcceptableException('could not find user');
+      throw new NotAcceptableException(
+        'User Does Not Exist. Please Sign Up First',
+      );
     }
     const passwordValid = await bcrypt.compare(password, user.password);
     if (user && passwordValid) {
@@ -40,14 +42,22 @@ export class AuthService {
   }
 
   async login(user: any) {
-    user = await this.profileService.getUserByEmailOrUserName(user);
-    if (user.status != 'ACTIVE') {
+    const fetchedUser = await this.profileService.getUserByEmailOrUserName(
+      user,
+    );
+    if (fetchedUser.accountHolderType != user.accountHolderType) {
+      throw new HttpException(
+        'User Account Type Does Not Match',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+    if (fetchedUser.status != 'ACTIVE') {
       throw new UnauthorizedException('Account is in pending state');
     }
     return {
       access_token: await this.jwtService.signAsync({
-        email: user.email,
-        sub: user._id,
+        email: fetchedUser.email,
+        sub: fetchedUser._id,
       }),
     };
   }

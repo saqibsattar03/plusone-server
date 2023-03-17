@@ -1,6 +1,5 @@
 export class CustomerServiceDto {
-  astEmail: string;
-  astPhoneNumber: number;
+  subject: string;
   customerQuery: string;
-  image: string;
+  file: string;
 }
