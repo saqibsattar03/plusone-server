@@ -14,7 +14,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common/decorators';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { imageValidation } from './common/image.config';
+import { imageValidation } from './common/auth/configs/image.config';
 import {
   ApiBadRequestResponse,
   ApiBody,

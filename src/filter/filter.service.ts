@@ -1,12 +1,15 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Restaurant, RestaurantDocument } from '../Schemas/restaurant.schema';
+import {
+  Restaurant,
+  RestaurantDocument,
+} from '../data/schemas/restaurant.schema';
 import { Model } from 'mongoose';
-import { Profile, ProfileDocument } from '../Schemas/Profile.schema';
+import { Profile, ProfileDocument } from '../data/schemas/Profile.schema';
 import {
   RedeemVoucher,
   RedeemVoucherDocument,
-} from '../Schemas/redeemVoucher.schema';
+} from '../data/schemas/redeemVoucher.schema';
 
 @Injectable()
 export class FilterService {
