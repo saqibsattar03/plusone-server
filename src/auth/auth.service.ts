@@ -30,7 +30,7 @@ export class AuthService {
     const user = await this.userService.getUser(email);
     if (!user) {
       throw new NotAcceptableException(
-        'User Does Not Exist. Please Sign Up First',
+        'An account with these credentials does not exist, Please create your account first.',
       );
     }
     const passwordValid = await bcrypt.compare(password, user.password);

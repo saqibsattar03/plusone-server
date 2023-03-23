@@ -5,10 +5,16 @@ import { PointSchema } from './point.schema';
 export type RestaurantDocument = HydratedDocument<Restaurant>;
 @Schema({ timestamps: true })
 export class Restaurant {
+  @Prop({ type: String })
+  restaurantName: string;
+
   @Prop()
   phoneNumber: number;
   @Prop()
   menu: [string];
+  @Prop({ type: String })
+  profileImage: string;
+
   @Prop()
   description: string;
   @Prop({ type: Number, default: 6 })
@@ -39,8 +45,16 @@ export class Restaurant {
   @Prop({ type: Number, default: null })
   verificationCode: number;
 
+  @Prop({ type: String, default: 'ACTIVE', enum: ['ACTIVE', 'DISABLED'] })
+  status: string;
+
   @Prop({ type: Boolean, default: false })
   isSponsored: boolean;
+
+  @Prop({ type: Number, default: 0 })
+  reviewCount: number;
+  @Prop({ type: Number, default: 0 })
+  totalVoucherCreated: number;
 }
 
 export const RestaurantSchema = SchemaFactory.createForClass(Restaurant);

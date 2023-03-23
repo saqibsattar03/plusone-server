@@ -151,9 +151,4 @@ export class FilterService {
     ]);
     // return res;
   }
-
-  // async filterSingleRestaurant(
-  //   longitude,
-  //   latitude,
-  // ): Promise<RestaurantDocument> {}
 }

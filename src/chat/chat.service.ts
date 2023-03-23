@@ -4,6 +4,16 @@ import { Chat, ChatDocument } from '../Schemas/chat.schema';
 import { Model } from 'mongoose';
 import { ChatDto } from './dto/chat.dto';
 
+// MODULE-1
+// - create() Model-1
+//    create a Model-2 first
+
+// - model2 = Model-2.service.create()
+// - create model1
+// MODULE-2
+// - create() Model-2
+//    first create model
+
 @Injectable()
 export class ChatService {
   constructor(

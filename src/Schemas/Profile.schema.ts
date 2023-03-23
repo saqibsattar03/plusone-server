@@ -48,8 +48,8 @@ export class Profile extends User {
   @Prop()
   favoriteChef: [string];
 
-  @Prop()
-  location: PointSchema;
+  // @Prop()
+  // location: PointSchema;
 
   @Prop({ type: Number, default: 0 })
   rewardPoints: number;

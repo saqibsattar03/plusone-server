@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
-import { LocationDto } from './location.dto';
 
 export class CreateProfileDto {
   @ApiProperty({ description: 'Object Id' })
@@ -106,11 +105,11 @@ export class CreateProfileDto {
   @ApiProperty({ description: 'images/video for the post', type: String })
   profileImage: string;
 
-  @ApiProperty({
-    description:
-      'a field named type that specifies the GeoJSON object type for example "Point" and in coordinates property longitude and latitude should be given  ',
-  })
-  location: LocationDto;
+  // @ApiProperty({
+  //   description:
+  //     'a field named type that specifies the GeoJSON object type for example "Point" and in coordinates property longitude and latitude should be given  ',
+  // })
+  // location: LocationDto;
 
   // @ApiProperty({ type: Boolean, default: false })
   // isPremium: boolean;

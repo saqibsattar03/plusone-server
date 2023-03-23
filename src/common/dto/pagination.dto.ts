@@ -1,4 +1,4 @@
-import { IsOptional, IsPositive } from 'class-validator';
+import { IsOptional, IsPositive, validate } from 'class-validator';
 
 export class PaginationDto {
   @IsPositive()
@@ -6,6 +6,6 @@ export class PaginationDto {
   limit: number;
 
   @IsOptional()
-  @IsPositive()
+  // @IsPositive()
   offset: number;
 }

@@ -26,8 +26,6 @@ import {
 } from '@nestjs/swagger';
 import * as fs from 'fs';
 import * as path from 'path';
-import { ImageSchema } from './Schemas/image.schema';
-import { ImageDto } from './User/profiles/dto/image.dto';
 
 @ApiTags('Main')
 @Controller()
@@ -69,7 +67,7 @@ export class AppController {
       type: 'object',
       properties: {
         media: {
-          type: 'array', // 👈  array of files
+          type: 'array', //   array of files
           items: {
             type: 'string',
             format: 'binary',

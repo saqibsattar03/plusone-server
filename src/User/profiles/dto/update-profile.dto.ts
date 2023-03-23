@@ -44,6 +44,6 @@ export class UpdateProfileDto {
   @ApiProperty({ description: 'images/video for the post' })
   profileImage: string;
 
-  @ApiProperty({ description: 'location' })
-  location: LocationDto;
+  // @ApiProperty({ description: 'location' })
+  // location: LocationDto;
 }
