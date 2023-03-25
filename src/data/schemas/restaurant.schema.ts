@@ -1,18 +1,22 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
 import { PointSchema } from './point.schema';
+import { Profile } from './profile.schema';
 
 export type RestaurantDocument = HydratedDocument<Restaurant>;
 @Schema({ timestamps: true })
 export class Restaurant {
-  @Prop({ type: String })
+  @Prop({ type: mongoose.Types.ObjectId, ref: 'Profile', required: true })
+  userId: Profile;
+
+  @Prop({ type: String, required: true })
   restaurantName: string;
 
-  @Prop()
+  @Prop({ type: Number, required: true })
   phoneNumber: number;
   @Prop()
   menu: [string];
-  @Prop({ type: String })
+  @Prop({ type: String, required: true })
   profileImage: string;
 
   @Prop()

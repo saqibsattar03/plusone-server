@@ -3,28 +3,31 @@ import { IsNotEmpty } from 'class-validator';
 
 export class ProfileDto {
   @ApiProperty({ description: 'Object Id' })
-  @IsNotEmpty()
   _id: string;
   @ApiProperty({ description: 'First Name', example: 'abc' })
   @IsNotEmpty()
-  firstName: string;
+  firstname: string;
 
   @ApiProperty({ description: 'Sur Name', example: 'xyz' })
   @IsNotEmpty()
-  surName: string;
+  surname: string;
 
   @ApiProperty({ description: 'user Name', example: 'abc123' })
   @IsNotEmpty()
-  userName: string;
+  username: string;
 
   @ApiProperty({ description: 'email', example: 'abc@gmail.com' })
   @IsNotEmpty()
   email: string;
+
+  @ApiProperty({ type: String })
+  @IsNotEmpty()
+  password: string;
+
   @ApiProperty({
     description: 'Bio',
     example: 'Happiness depends upon ourselves – Aristotle',
   })
-  @IsNotEmpty()
   bio: string;
 
   @ApiProperty({
@@ -43,7 +46,6 @@ export class ProfileDto {
     example: 'PUBLIC',
     enum: ['PUBLIC', 'FRIENDS', 'ONLY-ME'],
   })
-  @IsNotEmpty()
   postAudiencePreference: {
     type: string;
     default: 'ONLY-ME';
@@ -67,93 +69,95 @@ export class ProfileDto {
     description: 'Links of other social media account',
     example: '["www.tiktok.com"]',
   })
-  @IsNotEmpty()
-  links: string[];
+  socialLinks: string[];
 
   @ApiProperty({
     type: () => [String],
     description: 'Favorite Restaurant',
     example: '["monal"]',
   })
-  @IsNotEmpty()
-  favoriteRestaurant: string[];
+  favoriteRestaurants: string[];
 
   @ApiProperty({
     type: () => [String],
     description: 'Favorite Cuisine',
     example: '["Thai", "Chinese"]',
   })
-  @IsNotEmpty()
-  favoriteCuisine: [string];
+  favoriteCuisines: [string];
 
   @ApiProperty({
     type: () => [String],
     description: 'Favorite Chef',
     example: '["abc", "xyz"]',
   })
-  @IsNotEmpty()
-  favoriteChef: string[];
+  favoriteChefs: string[];
 
   @ApiProperty({
     type: () => [String],
     description: 'Preferred Food type',
     example: '["Halal"]',
   })
-  @IsNotEmpty()
-  dietRequirement: string[];
+  dietRequirements: string[];
 
   @ApiProperty({ description: 'images/video for the post', type: String })
   profileImage: string;
 
-  // @ApiProperty({
-  //   description:
-  //     'a field named type that specifies the GeoJSON object type for example "Point" and in coordinates property longitude and latitude should be given  ',
-  // })
-  // location: LocationDto;
+  @ApiProperty({ type: Number, default: 0 })
+  rewardPoints: number;
 
-  // @ApiProperty({ type: Boolean, default: false })
-  // isPremium: boolean;
+  @ApiProperty({ type: Boolean, default: false })
+  isPremium: boolean;
+
+  @ApiProperty({ type: [String] })
+  scopes: [string];
+
+  @ApiProperty({ type: Boolean, default: false })
+  isSkip: boolean;
 
   @ApiProperty()
   createdAt: Date;
   @ApiProperty()
   updatedAt: Date;
+
+  @ApiProperty({ type: String })
+  role: string;
 }
 
-export class UserDto {
-  @ApiProperty({ description: 'First Name' })
-  @IsNotEmpty()
-  firstName: string;
-
-  @ApiProperty({ description: 'Sur Name' })
-  @IsNotEmpty()
-  surName: string;
-
-  @ApiProperty({ description: 'user Name' })
-  @IsNotEmpty()
-  userName: string;
-
-  @ApiProperty({ description: 'email' })
-  @IsNotEmpty()
-  email: string;
-
-  @ApiProperty({ description: 'Password' })
-  @IsNotEmpty()
-  password: string;
-
-  @ApiProperty()
-  accountHolderType: string;
-}
+// export class UserDto {
+//   @ApiProperty({ description: 'First Name' })
+//   @IsNotEmpty()
+//   firstName: string;
+//
+//   @ApiProperty({ description: 'Sur Name' })
+//   @IsNotEmpty()
+//   surName: string;
+//
+//   @ApiProperty({ description: 'user Name' })
+//   @IsNotEmpty()
+//   userName: string;
+//
+//   @ApiProperty({ description: 'email' })
+//   @IsNotEmpty()
+//   email: string;
+//
+//   @ApiProperty({ description: 'Password' })
+//   @IsNotEmpty()
+//   password: string;
+//
+//   @ApiProperty()
+//   accountHolderType: string;
+//
+//   @ApiProperty({
+//     type: String,
+//     enum: ['USER', 'ADMIN', 'MERCHANT'],
+//     default: 'USER',
+//   })
+//   role: string;
+// }
 
 export class UpdateProfileDto {
   @ApiProperty({ description: 'Bio', type: String })
   bio: { type: 'string' };
-  // @ApiProperty({
-  //   description: 'Account Holder Type',
-  //   type: String,
-  //   enum: ['STUDENT', 'NON-STUDENT'],
-  //   default: 'NON-STUDENT',
-  // })
   accountHolderType: string;
   @ApiProperty({
     description: 'Account Type',
@@ -167,27 +171,27 @@ export class UpdateProfileDto {
     description: 'Other Social media account links',
     type: [String],
   })
-  links: [string];
+  socialLinks: [string];
   @ApiProperty({
     description: 'Favorite Restaurants',
     type: [String],
   })
-  favoriteRestaurant: [string];
+  favoriteRestaurants: [string];
   @ApiProperty({
     description: 'Favorite Cuisines',
     type: [String],
   })
-  favoriteCuisine: [string];
+  favoriteCuisines: [string];
 
   @ApiProperty({
     description: 'Diet Requirements',
     type: [String],
   })
-  dietRequirement: [string];
+  dietRequirements: [string];
 
   @ApiProperty({ description: 'images/video for the post' })
   profileImage: string;
 
-  // @ApiProperty({ description: 'location' })
-  // location: LocationDto;
+  @ApiProperty({ type: Boolean })
+  isSkip: boolean;
 }

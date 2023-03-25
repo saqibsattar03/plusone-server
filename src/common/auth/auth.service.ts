@@ -5,10 +5,9 @@ import {
   NotAcceptableException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UserService } from '../../modules/user/user.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { ProfilesService } from '../../modules/user/profiles/profiles.service';
+import { ProfilesService } from '../../modules/profiles/profiles.service';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   ForgotPassword,
@@ -19,7 +18,6 @@ import { Model } from 'mongoose';
 @Injectable()
 export class AuthService {
   constructor(
-    private userService: UserService,
     private profileService: ProfilesService,
     private jwtService: JwtService,
     @InjectModel(ForgotPassword.name)
@@ -27,7 +25,7 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
-    const user = await this.userService.getUser(email);
+    const user = await this.profileService.getUser(email);
     if (!user) {
       throw new NotAcceptableException(
         'An account with these credentials does not exist, Please create your account first.',
@@ -57,6 +55,7 @@ export class AuthService {
     return {
       access_token: await this.jwtService.signAsync({
         email: fetchedUser.email,
+        role: fetchedUser.role,
         sub: fetchedUser._id,
       }),
     };
@@ -66,7 +65,7 @@ export class AuthService {
   }
 
   async forgotPassword(email: string): Promise<any> {
-    const user = await this.userService.getUser(email);
+    const user = await this.profileService.getUser(email);
     if (!user) throw new HttpException('user Not Found', HttpStatus.NOT_FOUND);
     let token = await this.forgotModel.findOne({ userId: user._id });
     const characters =
@@ -89,7 +88,7 @@ export class AuthService {
   }
 
   async resetPassword(userId, token, password) {
-    const user = await this.userService.getUserById(userId);
+    const user = await this.profileService.getSingleProfile(userId);
     if (!user) throw new HttpException('user Not Found', HttpStatus.NOT_FOUND);
     const res = await this.forgotModel.findOne({
       userId: user._id,
@@ -97,7 +96,7 @@ export class AuthService {
     });
     if (!res)
       throw new HttpException('Invalid token or expired', HttpStatus.NOT_FOUND);
-    await this.userService.resetPassword(user, password);
+    await this.profileService.resetPassword(user, password);
     await res.delete();
     throw new HttpException('Password Reset Successfully ', HttpStatus.OK);
   }

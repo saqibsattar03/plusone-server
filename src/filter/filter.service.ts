@@ -5,7 +5,7 @@ import {
   RestaurantDocument,
 } from '../data/schemas/restaurant.schema';
 import { Model } from 'mongoose';
-import { Profile, ProfileDocument } from '../data/schemas/Profile.schema';
+import { Profile, ProfileDocument } from '../data/schemas/profile.schema';
 import {
   RedeemVoucher,
   RedeemVoucherDocument,
@@ -98,24 +98,24 @@ export class FilterService {
   async filterRestaurantBasedOnCaption(keyword: string): Promise<any> {
     return this.restaurantModel.find({ $text: { $search: keyword } });
   }
-  async filterNearByRestaurant(longitude, latitude): Promise<any> {
-    const METERS_PER_MILE = 1609.34;
-    return this.restaurantModel.aggregate([
-      {
-        $geoNear: {
-          near: {
-            type: 'Point',
-            coordinates: [parseFloat(longitude), parseFloat(latitude)],
-          },
-          distanceField: 'distanceFromMe',
-          maxDistance: 20 * METERS_PER_MILE, //*** distance in meters ***//
-          distanceMultiplier: 1 / 1609.34,
-          spherical: true,
-        },
-      },
-      { $sort: { location: -1 } },
-    ]);
-  }
+  // async filterNearByRestaurant(longitude, latitude): Promise<any> {
+  //   const METERS_PER_MILE = 1609.34;
+  //   return this.restaurantModel.aggregate([
+  //     {
+  //       $geoNear: {
+  //         near: {
+  //           type: 'Point',
+  //           coordinates: [parseFloat(longitude), parseFloat(latitude)],
+  //         },
+  //         distanceField: 'distanceFromMe',
+  //         maxDistance: 20 * METERS_PER_MILE, //*** distance in meters ***//
+  //         distanceMultiplier: 1 / 1609.34,
+  //         spherical: true,
+  //       },
+  //     },
+  //     { $sort: { location: -1 } },
+  //   ]);
+  // }
 
   async filterPopularRestaurant(): Promise<any> {
     return this.voucherRedeemModel.aggregate([
@@ -134,8 +134,8 @@ export class FilterService {
         },
       },
       { $unset: ['restaurants.uniqueCode', 'restaurants.verificationCode'] },
-      { $group: { _id: '$restaurants', count: { $sum: 1 } } },
-      { $sort: { count: -1 } },
+      { $group: { _id: '$restaurants', popularity: { $sum: 1 } } },
+      { $sort: { popularity: -1 } },
     ]);
   }
 

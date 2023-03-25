@@ -20,7 +20,7 @@ import { ProfileDto } from '../../data/dtos/profile.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('login')
+  @Post('sign-in')
   @ApiCreatedResponse({
     description: 'SignIn successful',
   })
@@ -40,7 +40,7 @@ export class AuthController {
     return this.authService.login(request.body);
   }
 
-  @Get('profile')
+  @Get('person')
   @ApiBearerAuth('access_token')
   @ApiCreatedResponse({
     type: ProfileDto,
@@ -62,9 +62,8 @@ export class AuthController {
   forgotPassword(@Query('email') email: string) {
     return this.authService.forgotPassword(email);
   }
+  @UseGuards(JwtAuthGuard)
   @Post('reset-password')
-  @ApiQuery({ name: 'userId', type: String })
-  @ApiQuery({ name: 'token', type: String })
   @ApiResponse({ description: 'Password Reset Successfully' })
   @ApiBadRequestResponse({
     description: 'Could not reset password',
@@ -74,15 +73,16 @@ export class AuthController {
       type: 'object',
       properties: {
         password: { type: 'string' },
+        token: { type: 'string' },
       },
     },
   })
   resetPassword(
+    @Request() request,
     @Body('password') password,
-    @Query('userId') userId,
-    @Query('token') token,
+    @Body('token') token,
   ) {
-    return this.authService.resetPassword(userId, token, password);
+    return this.authService.resetPassword(request.user.userId, token, password);
   }
 
   // @Post('logout')

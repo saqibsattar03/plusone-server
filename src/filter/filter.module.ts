@@ -6,7 +6,7 @@ import {
   Restaurant,
   RestaurantSchema,
 } from '../data/schemas/restaurant.schema';
-import { Profile, ProfileSchema } from '../data/schemas/Profile.schema';
+import { Profile, ProfileSchema } from '../data/schemas/profile.schema';
 import {
   RedeemVoucher,
   RedeemVoucherSchema,

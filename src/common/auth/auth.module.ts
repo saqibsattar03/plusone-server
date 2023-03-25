@@ -1,15 +1,14 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { UserModule } from '../../modules/user/user.module';
+
 import { jwtConstants } from './guards/constant';
 import { JwtModule } from '@nestjs/jwt';
 
-import { UserService } from '../../modules/user/user.service';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { AuthController } from './auth.controller';
-import { ProfilesModule } from '../../modules/user/profiles/profiles.module';
+import { ProfilesModule } from '../../modules/profiles/profiles.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import {
   ForgotPassword,
@@ -18,7 +17,6 @@ import {
 
 @Module({
   imports: [
-    UserModule,
     ProfilesModule,
     PassportModule,
     JwtModule.register({

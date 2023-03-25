@@ -6,13 +6,20 @@ export class RestaurantDto {
   @ApiProperty()
   _id: string;
 
+  @ApiProperty()
+  @IsNotEmpty()
+  userId: string;
+
   @ApiProperty({ type: () => String })
+  @IsNotEmpty()
   restaurantName: string;
 
   @ApiProperty({ type: String })
+  @IsNotEmpty()
   profileImage: string;
 
   @ApiProperty({ type: () => Number })
+  @IsNotEmpty()
   phoneNumber: number;
   @ApiProperty({ type: () => [String] })
   menu: [string];

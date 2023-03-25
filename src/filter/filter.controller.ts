@@ -34,19 +34,19 @@ export class FilterController {
     return this.filterService.filterRestaurantBasedOnCaption(keyword);
   }
 
-  @Get('get-nearby-restaurant')
-  @ApiQuery({ name: 'longitude', type: Number })
-  @ApiQuery({ name: 'latitude', type: Number })
-  @ApiCreatedResponse()
-  @ApiBadRequestResponse({
-    description: 'could not fetch the list of nearby restaurant',
-  })
-  filterNearByRestaurant(
-    @Query('longitude') longitude,
-    @Query('latitude') latitude,
-  ) {
-    return this.filterService.filterNearByRestaurant(longitude, latitude);
-  }
+  // @Get('get-nearby-restaurantssss')
+  // @ApiQuery({ name: 'longitude', type: Number })
+  // @ApiQuery({ name: 'latitude', type: Number })
+  // @ApiCreatedResponse()
+  // @ApiBadRequestResponse({
+  //   description: 'could not fetch the list of nearby restaurantssss',
+  // })
+  // filterNearByRestaurant(
+  //   @Query('longitude') longitude,
+  //   @Query('latitude') latitude,
+  // ) {
+  //   return this.filterService.filterNearByRestaurant(longitude, latitude);
+  // }
   @Get('popular-restaurants')
   filterPopularRestaurant() {
     return this.filterService.filterPopularRestaurant();
