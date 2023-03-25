@@ -26,6 +26,7 @@ export class AuthService {
 
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.profileService.getUser(email);
+    // await this.profileService.getUserByEmailAndPassword(email, password);
     if (!user) {
       throw new NotAcceptableException(
         'An account with these credentials does not exist, Please create your account first.',

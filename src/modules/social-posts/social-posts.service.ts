@@ -59,6 +59,7 @@ export class SocialPostsService {
     await post.remove();
     throw new HttpException('post deleted successfully', HttpStatus.OK);
   }
+  // async removeAllUserPosts(userId):Promise
 
   async likePost(userId, postId): Promise<LikedPostDocument> {
     const res = await this.postLikedModel.findOne({ postId: postId });

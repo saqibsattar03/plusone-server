@@ -158,7 +158,6 @@ export class ProfileDto {
 export class UpdateProfileDto {
   @ApiProperty({ description: 'Bio', type: String })
   bio: { type: 'string' };
-  accountHolderType: string;
   @ApiProperty({
     description: 'Account Type',
     type: String,
@@ -194,4 +193,7 @@ export class UpdateProfileDto {
 
   @ApiProperty({ type: Boolean })
   isSkip: boolean;
+
+  @ApiProperty({ type: [String] })
+  scopes: [string];
 }

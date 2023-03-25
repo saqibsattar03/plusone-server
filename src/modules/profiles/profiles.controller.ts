@@ -39,64 +39,58 @@ export class ProfilesController {
     data.password = await bcrypt.hash(data.password, saltOrRounds);
     return this.profileService.createUser(data);
   }
-
-  @UseGuards(JwtAuthGuard)
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string' },
+        password: { type: 'string' },
+      },
+    },
+  })
   @Get('verify-account')
   verifyUser(@Request() request) {
     return this.profileService.verifyUser(request.user.confirmationCode);
   }
-
-  @Get(':id')
-  @ApiParam({ name: 'userId', type: String })
+  @Get('single/:profileId')
+  @ApiParam({ name: 'profileId', type: String })
   @ApiCreatedResponse({
     type: ProfileDto,
     description: 'user fetched successfully',
   })
   @ApiBadRequestResponse({ description: 'could not fetch the user' })
   // @UseGuards(JwtAuthGuard)
-  getSingleProfile(@Param('id') id) {
+  getSingleAdmin(@Param('profileId') id) {
     return this.profileService.getSingleProfile(id);
   }
 
-  @Patch(':id')
-  @ApiParam({ name: 'id', type: String })
+  @Patch('update/:profileId')
+  @ApiParam({ name: 'profileId', type: String })
   @ApiBody({ type: UpdateProfileDto })
   @ApiCreatedResponse({
     type: ProfileDto,
     description: 'Profile updated successfully',
   })
   @ApiBadRequestResponse({ description: 'could not update Profile' })
-  async updateProfile(@Param('id') profileId, @Body() data) {
+  async updateProfile(@Param('profileId') profileId, @Body() data) {
+    console.log(profileId);
     return this.profileService.updateProfile(data, profileId);
   }
 
   @Delete('')
   @ApiResponse({ description: 'Profile deleted successfully' })
   @ApiBadRequestResponse({ description: 'could not delete Profile' })
-  @UseGuards(JwtAuthGuard)
-  async removeProfile(@Request() request) {
-    return this.profileService.removeProfile(request.user.userId);
+  // @UseGuards(JwtAuthGuard)
+  async removeProfile(@Query('profileId') profileId) {
+    return this.profileService.removeProfile(profileId);
   }
 
-  @Get('all')
+  @Get('/all')
   @ApiQuery({ type: String, name: 'role' })
   @ApiResponse({ description: 'All Users  Fetched successfully' })
   @ApiBadRequestResponse({ description: 'could not Fetch  Users' })
-  getAllUsers() {
-    return this.profileService.getAllUsers();
-  }
-  @Get('merchants')
-  @ApiResponse({ description: 'All Merchants  Fetched successfully' })
-  @ApiBadRequestResponse({ description: 'could not Fetch  Merchant' })
-  getAllMerchants() {
-    return this.profileService.getAllMerchants();
-  }
-
-  @Get('admins')
-  @ApiResponse({ description: 'All Admins  Fetched successfully' })
-  @ApiBadRequestResponse({ description: 'could not Fetch  Admins' })
-  getAllAdmins() {
-    return this.profileService.getAllAdmins();
+  getAllUsers(@Query('role') role) {
+    return this.profileService.getAllUsers(role);
   }
   @Get('all-public')
   @ApiResponse({ description: 'All Public Profile  Fetched successfully' })

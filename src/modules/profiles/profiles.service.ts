@@ -29,11 +29,11 @@ export class ProfilesService {
   ) {}
 
   async createUser(createUserDto: ProfileDto) {
-    console.log('user = ', createUserDto);
+    if (createUserDto.role == 'ADMIN' || createUserDto.role == 'MERCHANT')
+      createUserDto.accountHolderType = null;
     const userName = await this.profileModel.findOne({
       username: createUserDto.username,
     });
-    console.log(userName);
     if (userName)
       throw new HttpException(
         'Username already taken',
@@ -84,7 +84,9 @@ export class ProfilesService {
   }
 
   async getSingleProfile(userId): Promise<ProfileDocument> {
-    return this.profileModel.findById({ _id: userId });
+    return this.profileModel
+      .findById({ _id: userId })
+      .select('-password -confirmationCode -isSkip');
   }
 
   async getUserByEmailOrUserName(user): Promise<ProfileDocument> {
@@ -106,26 +108,23 @@ export class ProfilesService {
       );
     return fetchedUser;
   }
-  async updateProfile(
-    data: UpdateProfileDto,
-    profileId,
-  ): Promise<ProfileDocument> {
-    console.log('data = ', data);
+  async updateProfile(data: UpdateProfileDto, profileId): Promise<any> {
     const profile = await this.profileModel.findById({ _id: profileId });
     if (!profile) throw new NotFoundException(' Profile does not exist');
 
-    return this.profileModel.findOneAndUpdate(profileId, data, { new: true });
+    if (profile.status == 'PENDING')
+      throw new HttpException(
+        'Account is still not verified yet',
+        HttpStatus.UNAUTHORIZED,
+      );
+
+    return this.profileModel.findByIdAndUpdate(profileId, data, {
+      returnDocument: 'after',
+    });
   }
 
-  async getAllUsers(): Promise<any> {
-    return this.profileModel.find({ role: 'USER' });
-  }
-
-  async getAllMerchants(): Promise<any> {
-    return this.profileModel.find({ role: 'MERCHANT' });
-  }
-  async getAllAdmins(): Promise<any> {
-    return this.profileModel.find({ role: 'ADMIN' });
+  async getAllUsers(role: string): Promise<any> {
+    return this.profileModel.find({ role });
   }
   async removeProfile(profileId): Promise<ProfileDocument> {
     const oid = new mongoose.Types.ObjectId(profileId);
@@ -179,10 +178,31 @@ export class ProfilesService {
   }
 
   async getUser(email: string) {
-    return this.profileModel.findOne({
-      $or: [{ email: email }, { username: email }],
-    });
+    return this.profileModel
+      .findOne({
+        $or: [{ email: email }, { username: email }],
+      })
+      .select('password');
   }
+  // async getUserByEmailAndPassword(email, password): Promise<any> {
+  //   const user = this.profileModel
+  //     .findOne({
+  //       $or: [{ email: email }, { username: email }],
+  //     })
+  //     .select('password');
+  //   const passwordValid = await bcrypt.compare(password, user.password);
+  //   if (user && passwordValid) {
+  //     const { password, ...result } = user;
+  //     return result;
+  //   }
+  //   return null;
+  // const passwordValid = await bcrypt.compare(password, user.password);
+  // if (user && passwordValid) {
+  //   const { password, ...result } = user;
+  //   return result;
+  // }
+  // return null;
+  // }
 
   async changePassword(email: string, oldPassword, newPassword): Promise<any> {
     const user = await this.profileModel.findOne({ email: email });
