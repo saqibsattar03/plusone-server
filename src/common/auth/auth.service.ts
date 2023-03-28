@@ -50,7 +50,7 @@ export class AuthService {
         HttpStatus.UNAUTHORIZED,
       );
     }
-    if (fetchedUser.status != 'ACTIVE') {
+    if (fetchedUser.role != 'ADMIN' && fetchedUser.status != 'ACTIVE') {
       throw new UnauthorizedException('Account is in pending state');
     }
     return {
@@ -88,16 +88,17 @@ export class AuthService {
     return token;
   }
 
-  async resetPassword(userId, token, password) {
-    const user = await this.profileService.getSingleProfile(userId);
+  async resetPassword(data) {
+    // const user = await this.profileService.getSingleProfile(userId);
+    const user = await this.profileService.getUser(data.email);
     if (!user) throw new HttpException('user Not Found', HttpStatus.NOT_FOUND);
     const res = await this.forgotModel.findOne({
       userId: user._id,
-      token: token,
+      token: data.token,
     });
     if (!res)
       throw new HttpException('Invalid token or expired', HttpStatus.NOT_FOUND);
-    await this.profileService.resetPassword(user, password);
+    await this.profileService.resetPassword(user, data.password);
     await res.delete();
     throw new HttpException('Password Reset Successfully ', HttpStatus.OK);
   }

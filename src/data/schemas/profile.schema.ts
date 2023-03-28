@@ -6,10 +6,10 @@ import validator from 'validator';
 export type ProfileDocument = HydratedDocument<Profile>;
 @Schema({ timestamps: true })
 export class Profile extends User {
-  @Prop({ type: String, required: true })
+  @Prop({ type: String })
   firstname: string;
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String })
   surname: string;
 
   @Prop({

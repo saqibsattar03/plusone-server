@@ -1,6 +1,8 @@
 import {
+  forwardRef,
   HttpException,
   HttpStatus,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -8,13 +10,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Profile, ProfileDocument } from '../../data/schemas/profile.schema';
 import mongoose, { Model } from 'mongoose';
 import { PaginationDto } from '../../common/auth/dto/pagination.dto';
-import { ProfileDto, UpdateProfileDto } from '../../data/dtos/profile.dto';
+import { UpdateProfileDto } from '../../data/dtos/profile.dto';
 import { FollowingService } from '../following/following.service';
 import { FollowerService } from '../follower/follower.service';
 import { SocialPostsService } from '../social-posts/social-posts.service';
 import { RestaurantReviewService } from '../restaurant-review/restaurant-review.service';
 import { RestaurantService } from '../restaurant/restaurant.service';
 import * as bcrypt from 'bcrypt';
+import { Constants } from '../../common/constants';
 
 @Injectable()
 export class ProfilesService {
@@ -28,11 +31,13 @@ export class ProfilesService {
     private readonly restaurantService: RestaurantService,
   ) {}
 
-  async createUser(createUserDto: ProfileDto) {
-    if (createUserDto.role == 'ADMIN' || createUserDto.role == 'MERCHANT')
-      createUserDto.accountHolderType = null;
+  async createUser(userDto: any) {
+    const saltOrRounds = 10;
+    userDto.password = await bcrypt.hash(userDto.password, saltOrRounds);
+    if (userDto.role == Constants.ADMIN || userDto.role == Constants.MERCHANT)
+      userDto.accountHolderType = null;
     const userName = await this.profileModel.findOne({
-      username: createUserDto.username,
+      username: userDto.username,
     });
     if (userName)
       throw new HttpException(
@@ -40,7 +45,7 @@ export class ProfilesService {
         HttpStatus.UNAUTHORIZED,
       );
     const user = await this.profileModel.findOne({
-      email: createUserDto.email,
+      email: userDto.email,
     });
     if (user)
       throw new HttpException('Email already exist', HttpStatus.UNAUTHORIZED);
@@ -51,16 +56,19 @@ export class ProfilesService {
       token += characters[Math.floor(Math.random() * characters.length)];
     }
     const newUser = new this.profileModel({
-      firstname: createUserDto.firstname,
-      surname: createUserDto.surname,
-      username: createUserDto.username,
-      email: createUserDto.email,
-      password: createUserDto.password,
-      accountHolderType: createUserDto.accountHolderType,
-      role: createUserDto.role,
+      firstname: userDto.firstname,
+      surname: userDto.surname,
+      username: userDto.username,
+      email: userDto.email,
+      password: userDto.password,
+      accountHolderType: userDto.accountHolderType,
+      role: userDto.role,
+      scopes: userDto.scopes,
+      status: userDto.status,
       confirmationCode: token,
     });
     await newUser.save();
+    if (newUser.role == Constants.MERCHANT) return newUser;
     // sendConfirmationEmail(newUser.email, newUser.confirmationCode);
     throw new HttpException(
       'Account Created Successfully. Please Confirm Your Email to Active Your Account. Check Your Email for Confirmation',
@@ -73,7 +81,7 @@ export class ProfilesService {
       confirmationCode: confirmationCode,
     });
     if (verified) {
-      await verified.updateOne({ status: 'ACTIVE' });
+      await verified.updateOne({ status: Constants.ACTIVE });
       await verified.updateOne({ confirmationCode: null });
       throw new HttpException('Account Activated Successfully', HttpStatus.OK);
     } else
@@ -95,10 +103,10 @@ export class ProfilesService {
     });
   }
 
-  async fetchProfileUsingToken(email): Promise<any> {
+  async fetchProfileUsingToken(user): Promise<any> {
     const fetchedUser = await this.profileModel
       .findOne({
-        $or: [{ email: email }, { username: email }],
+        $or: [{ email: user }, { username: user }],
       })
       .select(['-password', '-confirmationCode', '-createdAt', '-updatedAt']);
     if (!fetchedUser)
@@ -112,7 +120,7 @@ export class ProfilesService {
     const profile = await this.profileModel.findById({ _id: profileId });
     if (!profile) throw new NotFoundException(' Profile does not exist');
 
-    if (profile.status == 'PENDING')
+    if (profile.role == Constants.USER && profile.status == Constants.PENDING)
       throw new HttpException(
         'Account is still not verified yet',
         HttpStatus.UNAUTHORIZED,
@@ -124,7 +132,22 @@ export class ProfilesService {
   }
 
   async getAllUsers(role: string): Promise<any> {
-    return this.profileModel.find({ role });
+    return this.profileModel.aggregate([
+      {
+        $match: { role: role },
+      },
+      {
+        $lookup: {
+          from: 'restaurants',
+          localField: '_id',
+          foreignField: 'userId',
+          as: 'restaurantData',
+        },
+      },
+      {
+        $unset: ['password', 'confirmationCode'],
+      },
+    ]);
   }
   async removeProfile(profileId): Promise<ProfileDocument> {
     const oid = new mongoose.Types.ObjectId(profileId);
@@ -153,20 +176,8 @@ export class ProfilesService {
       ]);
   }
 
-  async restaurantFilters(
-    cuisine,
-    tags,
-    nearest,
-    longitude,
-    latitude,
-  ): Promise<any> {
-    return this.restaurantService.restaurantFilters(
-      cuisine,
-      tags,
-      nearest,
-      longitude,
-      latitude,
-    );
+  async restaurantFilters(data, paginationQuery): Promise<any> {
+    return this.restaurantService.restaurantFilters(data, paginationQuery);
   }
 
   async resetPassword(user, password) {
@@ -178,11 +189,12 @@ export class ProfilesService {
   }
 
   async getUser(email: string) {
+    console.log('getUser = ', email);
     return this.profileModel
       .findOne({
         $or: [{ email: email }, { username: email }],
       })
-      .select('password');
+      .select('email password');
   }
   // async getUserByEmailAndPassword(email, password): Promise<any> {
   //   const user = this.profileModel
@@ -215,6 +227,7 @@ export class ProfilesService {
       );
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     const differentPassword = await bcrypt.compare(oldPassword, hashedPassword);
+    console.log(differentPassword);
     if (!differentPassword) {
       user.password = hashedPassword;
       return user.save();

@@ -62,7 +62,7 @@ export class AuthController {
   forgotPassword(@Query('email') email: string) {
     return this.authService.forgotPassword(email);
   }
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Post('reset-password')
   @ApiResponse({ description: 'Password Reset Successfully' })
   @ApiBadRequestResponse({
@@ -72,17 +72,14 @@ export class AuthController {
     schema: {
       type: 'object',
       properties: {
+        email: { type: 'string' },
         password: { type: 'string' },
         token: { type: 'string' },
       },
     },
   })
-  resetPassword(
-    @Request() request,
-    @Body('password') password,
-    @Body('token') token,
-  ) {
-    return this.authService.resetPassword(request.user.userId, token, password);
+  resetPassword(@Body() data) {
+    return this.authService.resetPassword(data);
   }
 
   // @Post('logout')

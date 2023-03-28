@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ProfilesController } from './profiles.controller';
 import { ProfilesService } from './profiles.service';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -29,7 +29,7 @@ import {
     FollowingModule,
     SocialPostsModule,
     RestaurantReviewModule,
-    RestaurantModule,
+    forwardRef(() => RestaurantModule),
   ],
   controllers: [ProfilesController],
   providers: [ProfilesService],

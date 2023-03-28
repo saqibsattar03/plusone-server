@@ -197,3 +197,19 @@ export class UpdateProfileDto {
   @ApiProperty({ type: [String] })
   scopes: [string];
 }
+
+export class RestaurantFilter {
+  @ApiProperty({ type: [String] })
+  cuisine: [string];
+  @ApiProperty({ type: [String] })
+  tags: [string];
+
+  @ApiProperty({ type: [String] })
+  dietary: [string];
+
+  @ApiProperty({ type: Number })
+  longitude: number;
+
+  @ApiProperty({ type: Number })
+  latitude: number;
+}

@@ -9,6 +9,10 @@ export class Voucher {
   restaurantId: Restaurant;
   @Prop()
   voucherObject: [VoucherStructure];
+  @Prop({ type: () => Number, default: 0 })
+  studentVoucherCount: number;
+  @Prop({ type: () => Number, default: 0 })
+  nonStudentVoucherCount: number;
 }
 @Schema()
 export class VoucherStructure {
@@ -31,7 +35,11 @@ export class VoucherStructure {
   @Prop({ type: () => String, default: 'BOGO', enum: ['BOGO', 'DISCOUNTED'] })
   voucherType: string;
 
-  @Prop({ type: () => Number, required: true, unique: true })
+  @Prop({
+    type: Number,
+    required: true,
+    index: { unique: true },
+  })
   voucherCode: number;
   @Prop({
     type: () => String,
@@ -45,5 +53,4 @@ export class VoucherStructure {
   @Prop({ type: () => String })
   voucherImage: string;
 }
-
 export const VoucherSchema = SchemaFactory.createForClass(Voucher);

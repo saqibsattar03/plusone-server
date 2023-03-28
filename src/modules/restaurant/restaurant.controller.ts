@@ -31,9 +31,9 @@ export class RestaurantController {
     description: 'Created Restaurant object as response',
   })
   @ApiBadRequestResponse({ description: 'can not create Restaurant' })
-  @UseGuards(JwtAuthGuard)
-  createRestaurant(@Body() data, @Request() request) {
-    data.userId = request.user.userId;
+  // @UseGuards(JwtAuthGuard)
+  createRestaurant(@Body() data) {
+    // data.userId = request.user.userId;
     return this.restaurantService.createRestaurant(data);
   }
 
@@ -60,21 +60,33 @@ export class RestaurantController {
     return this.restaurantService.getSingleRestaurantDetails(restaurantId);
   }
 
-  @Patch('update-status')
+  @Get('profile')
   @ApiCreatedResponse({
-    description: 'Restaurant Status updated',
+    type: SingleRestaurantResponseDto,
+    description: 'Single Restaurant in response',
   })
-  @ApiQuery({ name: 'restaurantId', type: 'string' })
-  @ApiQuery({ name: 'status', type: 'string' })
-  @ApiBadRequestResponse({
-    description: 'could not update restaurantssss status',
-  })
-  changeRestaurantStatus(
-    @Query('restaurantId') restaurantId,
-    @Query('status') status,
-  ) {
-    return this.restaurantService.changeRestaurantStatus(restaurantId, status);
+  @ApiQuery({ name: 'userId', type: 'string' })
+  @ApiBadRequestResponse({ description: 'can not get Restaurant' })
+  @UseGuards(JwtAuthGuard)
+  getRestaurantProfile(@Request() request) {
+    return this.restaurantService.getRestaurantProfile(request.user.userId);
   }
+  // @Patch('update-status')
+  // @ApiCreatedResponse({
+  //   description: 'Restaurant Status updated',
+  // })
+  // @ApiQuery({ name: 'restaurantId', type: 'string' })
+  // @ApiQuery({ name: 'status', type: 'string' })
+  // @ApiBadRequestResponse({
+  //   description: 'could not update restaurant status',
+  // })
+  // @UseGuards(JwtAuthGuard)
+  // changeRestaurantStatus(@Request() request, @Body('status') status) {
+  //   return this.restaurantService.changeRestaurantStatus(
+  //     request.user.userId,
+  //     status,
+  //   );
+  // }
 
   @Patch('')
   @ApiBody({ type: UpdateRestaurantDto })
@@ -84,7 +96,7 @@ export class RestaurantController {
   })
   @ApiQuery({ name: 'restaurantId', type: 'string' })
   @ApiBadRequestResponse({
-    description: 'can not edit the restaurantssss',
+    description: 'can not edit the restaurant',
   })
   editRestaurant(@Query('restaurantId') restaurantId, @Body() data) {
     return this.restaurantService.editRestaurant(restaurantId, data);

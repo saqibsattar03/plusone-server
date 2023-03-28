@@ -6,6 +6,7 @@ import {
   Post,
   Query,
   UploadedFile,
+  UseGuards,
 } from '@nestjs/common';
 import {
   Get,
@@ -26,6 +27,7 @@ import {
 } from '@nestjs/swagger';
 import * as fs from 'fs';
 import * as path from 'path';
+import { JwtAuthGuard } from './common/auth/guards/jwt-auth.guard';
 
 @ApiTags('Main')
 @Controller()
@@ -51,6 +53,7 @@ export class AppController {
   @ApiCreatedResponse({ type: String, description: 'uploaded file name' })
   @ApiBadRequestResponse({ description: 'could not upload file' })
   @UseInterceptors(FileInterceptor('media', imageValidation))
+  @UseGuards(JwtAuthGuard)
   async uploadProfileImage(
     @UploadedFile() media: Express.Multer.File,
   ): Promise<any> {
@@ -79,6 +82,7 @@ export class AppController {
   @ApiCreatedResponse({ type: String, description: 'uploaded file names' })
   @ApiBadRequestResponse({ description: 'could not upload files' })
   @UseInterceptors(FilesInterceptor('media', 5, imageValidation))
+  @UseGuards(JwtAuthGuard)
   async uploadMultipleProfileImage(
     @UploadedFiles() media: Array<Express.Multer.File>,
   ): Promise<any> {
@@ -101,10 +105,12 @@ export class AppController {
     },
     status: HttpStatus.OK,
   })
+  @UseGuards(JwtAuthGuard)
   @ApiBadRequestResponse({ description: 'could not upload files' })
   async getFile(@Query('file') file: string): Promise<any> {
     return 'http://192.168.18.56:3000/uploads/' + file;
   }
+  @UseGuards(JwtAuthGuard)
   @Delete('remove-file')
   async removeProfileImage(@Query('media') media, @Res() res): Promise<any> {
     if (media) {

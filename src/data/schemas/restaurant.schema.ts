@@ -12,8 +12,8 @@ export class Restaurant {
   @Prop({ type: String, required: true })
   restaurantName: string;
 
-  @Prop({ type: Number, required: true })
-  phoneNumber: number;
+  @Prop({ type: String, required: true })
+  phoneNumber: string;
   @Prop()
   menu: [string];
   @Prop({ type: String, required: true })

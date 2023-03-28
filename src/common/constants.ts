@@ -1,0 +1,10 @@
+export enum Constants {
+  ACTIVE = 'ACTIVE',
+  PENDING = 'PENDING',
+  STUDENT = 'STUDENT',
+  NONSTUDENT = 'NON-STUDENT',
+  ADMIN = 'ADMIN',
+  MERCHANT = 'MERCHANT',
+  USER = 'USER',
+  BOTH = 'BOTH',
+}

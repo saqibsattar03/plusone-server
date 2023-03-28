@@ -19,6 +19,7 @@ import {
 } from '@nestjs/swagger';
 import { UpdateVoucherDto, VoucherDto } from '../../data/dtos/voucher.dto';
 import { ProfileDto } from '../../data/dtos/profile.dto';
+import { Constants } from '../../common/constants';
 
 @ApiTags('Voucher')
 @Controller('voucher')
@@ -35,10 +36,9 @@ export class VoucherController {
     description: 'Created Voucher object as response',
   })
   @ApiBadRequestResponse({ description: 'can not create voucher' })
-  createStudentVoucher(@Body() data, @Query('type') type) {
-    console.log(type);
-    if (type == 'STUDENT') {
-      data.voucherObject.voucherType = type;
+  createStudentVoucher(@Body() data, @Query('preference') preference) {
+    if (preference == Constants.STUDENT) {
+      data.voucherObject.voucherPreference = preference;
       if (data.voucherObject.voucherImage) {
         return this.voucherService.createStudentVoucher(data);
       } else
@@ -46,18 +46,18 @@ export class VoucherController {
           'Picture must be provided to create voucher',
           HttpStatus.NOT_ACCEPTABLE,
         );
-    } else if (type == 'NON-STUDENT') {
-      data.voucherObject.voucherType = type;
+    } else if (preference == Constants.NONSTUDENT) {
+      console.log('in else if preference non student');
+      data.voucherObject.voucherPreference = preference;
       if (data.voucherObject.voucherImage) {
-        return this.voucherService.createStudentVoucher(data);
+        return this.voucherService.createNonStudentVoucher(data);
+      } else return 'Picture must be provided to create voucher';
+    } else if (preference == Constants.BOTH) {
+      data.voucherObject.voucherPreference = preference;
+      if (data.voucherObject.voucherImage) {
+        return this.voucherService.createVoucherForBoth(data);
       } else return 'Picture must be provided to create voucher';
     }
-    // } else if (type == 'BOTH') {
-    //   data.voucherObject.voucherType = type;
-    //   if (data.voucherObject.voucherImage) {
-    //     return this.voucherService.createStudentVoucher(data);
-    //   } else return 'Picture must be provided to create voucher';
-    // }
   }
   @Post('create-for-non-student')
   @ApiBody({
@@ -79,7 +79,7 @@ export class VoucherController {
     );
   }
 
-  @Get('get-all-vouchers-by-restaurantssss')
+  @Get('get-all-vouchers-by-restaurant')
   @ApiQuery({ type: 'string', name: 'restaurantId' })
   @ApiQuery({ type: 'string', name: 'voucherType' })
   @ApiCreatedResponse({ type: VoucherDto })
@@ -108,25 +108,25 @@ export class VoucherController {
   @Delete('remove-all')
   @ApiQuery({ type: 'string', name: 'restaurantId' })
   @ApiCreatedResponse({
-    description: 'all vouchers of restaurantssss deleted successfully',
+    description: 'all vouchers of restaurant deleted successfully',
   })
   @ApiBadRequestResponse({ description: 'can not delete voucher' })
   deleteAllVoucher(@Query('restaurantId') restaurantId) {
     return this.voucherService.deleteAllVoucher(restaurantId);
   }
 
-  @Get('ask-for-restaurantssss-code')
+  @Get('ask-for-restaurant-code')
   @ApiQuery({ type: 'string', name: 'restaurantId' })
   @ApiCreatedResponse({ type: 'object' })
   @ApiBadRequestResponse({ description: 'can not retrieve code' })
   askForRestaurantCode(@Query('restaurantId') restaurantId) {
     return this.voucherService.askForRestaurantCode(restaurantId);
   }
-  @Post('verify-restaurantssss-code')
+  @Post('verify-restaurant-code')
   @ApiQuery({ type: 'string', name: 'restaurantId' })
   @ApiQuery({ type: 'string', name: 'restaurantCode' })
   @ApiCreatedResponse({ type: Number })
-  @ApiBadRequestResponse({ description: 'can not verify restaurantssss code' })
+  @ApiBadRequestResponse({ description: 'can not verify restaurant code' })
   verifyRestaurantCode(
     @Query('restaurantId') restaurantId,
     @Query('restaurantCode') restaurantCode,

@@ -1,14 +1,23 @@
 import { LocationDto } from './location.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
+import mongoose from 'mongoose';
 
 export class RestaurantDto {
   @ApiProperty()
   _id: string;
 
   @ApiProperty()
-  @IsNotEmpty()
-  userId: string;
+  username: string;
+  @ApiProperty()
+  email: string;
+  @ApiProperty()
+  password: string;
+  @ApiProperty()
+  role: string;
+
+  @ApiProperty()
+  userId: mongoose.Types.ObjectId;
 
   @ApiProperty({ type: () => String })
   @IsNotEmpty()
@@ -18,9 +27,9 @@ export class RestaurantDto {
   @IsNotEmpty()
   profileImage: string;
 
-  @ApiProperty({ type: () => Number })
+  @ApiProperty({ type: () => String })
   @IsNotEmpty()
-  phoneNumber: number;
+  phoneNumber: string;
   @ApiProperty({ type: () => [String] })
   menu: [string];
   @ApiProperty({ type: () => String })
@@ -45,6 +54,9 @@ export class RestaurantDto {
     default: null;
   };
 
+  @ApiProperty({ type: () => String })
+  status: string;
+
   @ApiProperty({ type: () => [String] })
   culinaryOptions: [string];
 
@@ -62,6 +74,9 @@ export class RestaurantDto {
 
   @ApiProperty({ type: Number })
   totalVoucherCreated: number;
+
+  @ApiProperty({ type: Number })
+  distanceFromMe: number;
 
   @ApiProperty({ type: () => Date })
   createdAt: Date;
@@ -150,6 +165,8 @@ export class SingleRestaurantResponseDto {
 }
 
 export class UpdateRestaurantDto {
+  @ApiProperty({ type: () => String })
+  restaurantName: string;
   @ApiProperty({ type: () => Number })
   phoneNumber: number;
   @ApiProperty({ type: () => [String] })

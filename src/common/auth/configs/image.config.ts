@@ -18,13 +18,13 @@ export const imageValidation = {
   // Enable file size limits
   limits: {
     // fileSize: +process.env.MAX_FILE_SIZE,
-    fileSize: 1048576, // 10 Mb,
+    fileSize: 10000000, // 5 Mb,
   },
   // Check the mimetypes to allow for upload
   fileFilter: (req: any, file: any, cb: any) => {
     const fileSize = parseInt(req.headers['content-length']);
     if (file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
-      if (fileSize > 1 * 1000 * 1000) {
+      if (fileSize > 10000000) {
         cb(
           new HttpException(
             'Image size is too large',
@@ -35,7 +35,7 @@ export const imageValidation = {
       // Allow storage of file
       cb(null, true);
     } else if (file.mimetype.match(/\/(mp4)$/)) {
-      if (fileSize > 1048576) {
+      if (fileSize > 2000000) {
         cb(
           new HttpException(
             'video size is too large',

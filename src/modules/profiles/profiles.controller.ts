@@ -18,10 +18,15 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { ProfileDto, UpdateProfileDto } from '../../data/dtos/profile.dto';
+import {
+  ProfileDto,
+  RestaurantFilter,
+  UpdateProfileDto,
+} from '../../data/dtos/profile.dto';
 import { PaginationDto } from '../../common/auth/dto/pagination.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtAuthGuard } from '../../common/auth/guards/jwt-auth.guard';
+import { RestaurantDto } from '../../data/dtos/restaurant.dto';
 
 @ApiTags('Person')
 @Controller('persons')
@@ -35,8 +40,6 @@ export class ProfilesController {
   })
   @ApiBadRequestResponse({ description: 'can not create user' })
   async createUser(@Body() data) {
-    const saltOrRounds = 10;
-    data.password = await bcrypt.hash(data.password, saltOrRounds);
     return this.profileService.createUser(data);
   }
   @ApiBody({
@@ -93,35 +96,33 @@ export class ProfilesController {
     return this.profileService.getAllUsers(role);
   }
   @Get('all-public')
+  @ApiQuery({ type: PaginationDto })
   @ApiResponse({ description: 'All Public Profile  Fetched successfully' })
   @ApiBadRequestResponse({ description: 'could not Fetch Public Profile' })
   getAllPublicProfile(@Query() paginationQuery: PaginationDto) {
     return this.profileService.getAllPublicProfile(paginationQuery);
   }
 
-  @Get('near-by-restaurants')
-  getNearByRestaurants(
-    @Query('cuisines') cuisine: [],
-    @Query('tags') tags: [],
-    @Query('nearest') nearest,
-    @Query('longitude') longitude,
-    @Query('latitude') latitude,
-  ) {
-    return this.profileService.restaurantFilters(
-      cuisine,
-      tags,
-      nearest,
-      longitude,
-      latitude,
-    );
+  @ApiBody({ type: RestaurantFilter })
+  // @ApiQuery({ type: PaginationDto })
+  @ApiCreatedResponse({ type: RestaurantDto })
+  @Post('near-by-restaurants')
+  getNearByRestaurants(@Body() data, @Query() paginationQuery: PaginationDto) {
+    return this.profileService.restaurantFilters(data, paginationQuery);
   }
 
+  @ApiQuery({ type: String, name: 'email' })
+  @ApiQuery({ type: String, name: 'oldPassword' })
+  @ApiQuery({ type: String, name: 'newPassword' })
+  @ApiResponse({ description: 'password updated successfully' })
+  @ApiBadRequestResponse({ description: 'could not update  password' })
   @Patch('update-password')
   changePassword(
     @Query('email') email,
     @Query('oldPassword') oldPassword,
     @Query('newPassword') newPassword,
   ) {
+    console.log('password update');
     return this.profileService.changePassword(email, oldPassword, newPassword);
   }
 }
