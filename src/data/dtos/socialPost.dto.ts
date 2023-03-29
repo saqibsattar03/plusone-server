@@ -26,6 +26,8 @@ export class SocialPostDto {
 }
 
 export class UpdateSocialPost {
+  @ApiProperty()
+  postId: string;
   @ApiProperty({ description: 'location' })
   location: LocationDto;
 

@@ -120,6 +120,7 @@ export class SingleRestaurantResponseDto {
         {
           _id: '641aa419547b0700bac512e7',
           userId: '64082e63a264b35fa2a3e9d3',
+          voucherId: '64082e63a264b35fa2a3e9d3',
           reviewText: 'this is lol review text',
           rating: 2,
         },
@@ -200,6 +201,7 @@ export class RestaurantReviewDto {
   reviewObject: {
     _id: any;
     userId: any;
+    voucherId: any;
     reviewText: string;
     rating: number;
   };

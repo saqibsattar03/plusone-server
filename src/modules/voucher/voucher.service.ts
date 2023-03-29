@@ -30,7 +30,7 @@ export class VoucherService {
 
   async createStudentVoucher(voucherDto: VoucherDto): Promise<any> {
     const oid = new mongoose.Types.ObjectId(voucherDto.voucherObject._id);
-    let voucherCode = Math.floor(Math.random() * 5596 + 1249);
+    // let voucherCode = Math.floor(Math.random() * 5596 + 1249);
     const res = await this.voucherModel.findOne({
       restaurantId: voucherDto.restaurantId,
     });
@@ -42,8 +42,9 @@ export class VoucherService {
         $push: {
           voucherObject: {
             _id: oid,
+            title: voucherDto.voucherObject.title,
             voucherType: voucherDto.voucherObject.voucherType,
-            voucherCode: voucherCode,
+            // voucherCode: voucherCode,
             voucherPreference: voucherDto.voucherObject.voucherPreference,
             discount: voucherDto.voucherObject.discount,
             description: voucherDto.voucherObject.description,
@@ -58,22 +59,21 @@ export class VoucherService {
           restaurantId: voucherDto.restaurantId,
         })
         .select('studentVoucherCount -_id');
-      console.log(c);
       await this.voucherModel.findOneAndUpdate(
         { restaurantId: voucherDto.restaurantId },
         { studentVoucherCount: c.studentVoucherCount + 1 },
       );
     } else if (res) {
       let c;
-      const code = await this.voucherModel.aggregate([
-        { $unwind: '$voucherObject' },
-        {
-          $match: {
-            'voucherObject.voucherCode': voucherDto.voucherObject.voucherCode,
-          },
-        },
-      ]);
-      if (code.length) voucherCode = Math.floor(Math.random() * 5596 + 1249);
+      // const code = await this.voucherModel.aggregate([
+      //   { $unwind: '$voucherObject' },
+      //   {
+      //     $match: {
+      //       'voucherObject.voucherCode': voucherDto.voucherObject.voucherCode,
+      //     },
+      //   },
+      // ]);
+      // if (code.length) voucherCode = Math.floor(Math.random() * 5596 + 1249);
 
       await this.voucherModel.aggregate([
         { $unwind: '$voucherObject' },
@@ -85,14 +85,14 @@ export class VoucherService {
           restaurantId: voucherDto.restaurantId,
         })
         .select('studentVoucherCount -_id');
-      console.log(c);
       if (c.studentVoucherCount < 3) {
         await res.updateOne({
           $push: {
             voucherObject: {
               _id: oid,
+              title: voucherDto.voucherObject.title,
               voucherType: voucherDto.voucherObject.voucherType,
-              voucherCode: voucherCode,
+              // voucherCode: voucherCode,
               voucherPreference: voucherDto.voucherObject.voucherPreference,
               discount: voucherDto.voucherObject.discount,
               description: voucherDto.voucherObject.description,
@@ -116,7 +116,7 @@ export class VoucherService {
   }
   async createNonStudentVoucher(voucherDto: VoucherDto): Promise<any> {
     const oid = new mongoose.Types.ObjectId(voucherDto.voucherObject._id);
-    let voucherCode = Math.floor(Math.random() * 5596 + 1249);
+    // let voucherCode = Math.floor(Math.random() * 5596 + 1249);
     const res = await this.voucherModel.findOne({
       restaurantId: voucherDto.restaurantId,
     });
@@ -128,8 +128,9 @@ export class VoucherService {
         $push: {
           voucherObject: {
             _id: oid,
+            title: voucherDto.voucherObject.title,
             voucherType: voucherDto.voucherObject.voucherType,
-            voucherCode: voucherCode,
+            // voucherCode: voucherCode,
             voucherPreference: voucherDto.voucherObject.voucherPreference,
             discount: voucherDto.voucherObject.discount,
             description: voucherDto.voucherObject.description,
@@ -144,22 +145,21 @@ export class VoucherService {
           restaurantId: voucherDto.restaurantId,
         })
         .select('nonStudentVoucherCount -_id');
-      console.log(c);
       await this.voucherModel.findOneAndUpdate(
         { restaurantId: voucherDto.restaurantId },
         { nonStudentVoucherCount: c.nonStudentVoucherCount + 1 },
       );
     } else if (res) {
       let c;
-      const code = await this.voucherModel.aggregate([
-        { $unwind: '$voucherObject' },
-        {
-          $match: {
-            'voucherObject.voucherCode': voucherDto.voucherObject.voucherCode,
-          },
-        },
-      ]);
-      if (code.length) voucherCode = Math.floor(Math.random() * 5596 + 1249);
+      // const code = await this.voucherModel.aggregate([
+      //   { $unwind: '$voucherObject' },
+      //   {
+      //     $match: {
+      //       'voucherObject.voucherCode': voucherDto.voucherObject.voucherCode,
+      //     },
+      //   },
+      // ]);
+      // if (code.length) voucherCode = Math.floor(Math.random() * 5596 + 1249);
 
       await this.voucherModel.aggregate([
         { $unwind: '$voucherObject' },
@@ -177,8 +177,9 @@ export class VoucherService {
           $push: {
             voucherObject: {
               _id: oid,
+              title: voucherDto.voucherObject.title,
               voucherType: voucherDto.voucherObject.voucherType,
-              voucherCode: voucherCode,
+              // voucherCode: voucherCode,
               voucherPreference: voucherDto.voucherObject.voucherPreference,
               discount: voucherDto.voucherObject.discount,
               description: voucherDto.voucherObject.description,
@@ -194,7 +195,7 @@ export class VoucherService {
         );
       } else
         throw new HttpException(
-          'Not Allowed to create more than 3 vouchers for student',
+          'Not Allowed to create more than 3 vouchers for non student',
           HttpStatus.UNAUTHORIZED,
         );
     }
@@ -203,9 +204,8 @@ export class VoucherService {
 
   async createVoucherForBoth(voucherDto: VoucherDto): Promise<any> {
     const oid = new mongoose.Types.ObjectId(voucherDto.voucherObject._id);
-    let voucherCode = Math.floor(Math.random() * 5596 + 1249);
+    // let voucherCode = Math.floor(Math.random() * 5596 + 1249);
     let sCount;
-    let nSCount;
     const res = await this.voucherModel.findOne({
       restaurantId: voucherDto.restaurantId,
     });
@@ -217,8 +217,9 @@ export class VoucherService {
         $push: {
           voucherObject: {
             _id: oid,
+            title: voucherDto.voucherObject.title,
             voucherType: voucherDto.voucherObject.voucherType,
-            voucherCode: voucherCode,
+            // voucherCode: voucherCode,
             voucherPreference: voucherDto.voucherObject.voucherPreference,
             discount: voucherDto.voucherObject.discount,
             description: voucherDto.voucherObject.description,
@@ -242,15 +243,15 @@ export class VoucherService {
         },
       );
     } else if (res) {
-      const code = await this.voucherModel.aggregate([
-        { $unwind: '$voucherObject' },
-        {
-          $match: {
-            'voucherObject.voucherCode': voucherDto.voucherObject.voucherCode,
-          },
-        },
-      ]);
-      if (code.length) voucherCode = Math.floor(Math.random() * 5596 + 1249);
+      // const code = await this.voucherModel.aggregate([
+      //   { $unwind: '$voucherObject' },
+      //   {
+      //     $match: {
+      //       'voucherObject.voucherCode': voucherDto.voucherObject.voucherCode,
+      //     },
+      //   },
+      // ]);
+      // if (code.length) voucherCode = Math.floor(Math.random() * 5596 + 1249);
 
       await this.voucherModel.aggregate([
         { $unwind: '$voucherObject' },
@@ -267,8 +268,9 @@ export class VoucherService {
           $push: {
             voucherObject: {
               _id: oid,
+              title: voucherDto.voucherObject.title,
               voucherType: voucherDto.voucherObject.voucherType,
-              voucherCode: voucherCode,
+              // voucherCode: voucherCode,
               voucherPreference: voucherDto.voucherObject.voucherPreference,
               discount: voucherDto.voucherObject.discount,
               description: voucherDto.voucherObject.description,
@@ -316,6 +318,7 @@ export class VoucherService {
     return res;
   }
 
+  //delete voucher route To be defined yet
   async deleteSingleVoucher(voucherObjectId): Promise<VoucherDocument> {
     const oid = new mongoose.Types.ObjectId(voucherObjectId);
     const result = await this.voucherModel.aggregate([
@@ -342,26 +345,33 @@ export class VoucherService {
     });
   }
 
-  async askForRestaurantCode(restaurantId): Promise<any> {
-    return this.restaurantService.getRestaurantUniqueCode(restaurantId);
-  }
+  // async askForRestaurantCode(restaurantId, restaurantCode): Promise<any> {
+  //   return this.restaurantService.getRestaurantUniqueCode(restaurantId);
+  // }
 
-  async verifyRestaurantCode(restaurantId, restaurantCode): Promise<any> {
-    const oid = new mongoose.Types.ObjectId(restaurantId);
+  async verifyRestaurantCode(data): Promise<any> {
+    const oid = new mongoose.Types.ObjectId(data.restaurantId);
     let isVerified: boolean;
     const res = await this.restaurantService.getRestaurantVerificationCode(
-      restaurantId,
+      data.restaurantId,
+      data.restaurantCode,
     );
     // eslint-disable-next-line prefer-const
-    isVerified = res.uniqueCode == restaurantCode;
+    isVerified = res.uniqueCode == data.restaurantCode;
     if (isVerified) {
-      // await this.restaurantModel.findOneAndUpdate(
-      //   { _id: restaurantId },
-      //   {
-      //     verificationCode: verificationCode,
-      //   },
-      // );
-      return await this.fourDigitCode();
+      const verificationCode = await this.fourDigitCode(4);
+      const res = await this.redeemVoucherModel.create({
+        userId: data.userId,
+        voucherId: data.voucherId,
+        restaurantId: data.restaurantId,
+        verificationCode: verificationCode,
+      });
+      const rPoints = await this.profileService.getSingleProfile(data.userId);
+      await this.profileService.updateRewardPoints(
+        data.userId,
+        rPoints.rewardPoints + 1,
+      );
+      return res;
     } else
       throw new HttpException(
         'Please Enter Correct Restaurant Code',
@@ -369,122 +379,120 @@ export class VoucherService {
       );
   }
 
-  async redeemVoucher(
-    userId,
-    voucherId,
-    restaurantId,
-    verificationCode,
-  ): Promise<any> {
-    const oid = new mongoose.Types.ObjectId(restaurantId);
-    const restaurant = await this.restaurantService.getSingleRestaurantDetails(
-      oid,
-    );
-    console.log('restaurant  = ', restaurant);
-    console.log(verificationCode);
-    return;
-    const user = await this.profileService.getSingleProfile(userId);
-    // checking if user already bought subscription //
-
-    if (user.isPremium) {
-      //checking if user is at the right restaurant through restaurant's verification code //
-      if (restaurant.verificationCode == verificationCode) {
-        const oid = new mongoose.Types.ObjectId(voucherId);
-
-        // fetching restaurant voucher //
-
-        const voucher = await this.voucherModel.findOne(
-          {
-            restaurantId: restaurantId,
-          },
-          { voucherObject: { $elemMatch: { _id: oid } } },
-        );
-
-        const voucherDetails = await this.redeemVoucherModel.findOne({
-          userId: userId,
-          voucherId: voucherId,
-        });
-
-        // checking if exactly 1 year past //
-        if (voucherDetails) {
-          const year = moment().diff(voucherDetails.updatedAt, 'year');
-          if (year >= 1) {
-            if (
-              voucher.voucherObject[0].voucherPreference[0] ==
-              user.accountHolderType
-            ) {
-              await this.redeemVoucherModel.findOneAndUpdate({
-                userId: userId,
-                voucherId: voucherId,
-              });
-              // await this.restaurantModel.findOneAndDelete(
-              //   {
-              //     restaurantId: restaurantId,
-              //   },
-              //   { verificationCode: verificationCode },
-              // );
-            }
-            throw new HttpException(
-              'Voucher Redeemed Again. Come Back Next Year!!',
-              HttpStatus.ACCEPTED,
-            );
-          }
-        }
-        // checking if the voucher and customer type matches //
-        if (voucher.voucherObject[0].voucherPreference[0] == 'NON-STUDENT') {
-          const res = await this.redeemVoucherModel.findOne({
-            userId: userId,
-            voucherId: voucherId,
-          });
-
-          // saving user details about voucher redemption in database if not already in database //
-
-          if (!res) {
-            await this.redeemVoucherModel.create({
-              userId: userId,
-              voucherId: voucherId,
-              restaurantId: restaurantId, //*** storing restaurantId to get popular restaurants ***//
-            });
-            // this.rewardPoints++;
-            // await this.reward(userId, this.rewardPoints, this.profileModel);
-            // if (this.rewardPoints == 10) {
-            //   await this.profileModel.findOneAndUpdate(
-            //     { _id: userId },
-            //     { rewardPoints: 0 },
-            //   );
-            //   throw new HttpException('you get a free voucher', HttpStatus.OK);
-            // }
-            // else {
-            //   await this.profileModel
-            //     .findById({ _id: userId })
-            //     .updateOne({ rewardPoints: this.rewardPoints });
-            //   throw new HttpException(
-            //     'voucher Redeemed Successfully',
-            //     HttpStatus.OK,
-            //   );
-            // }
-          }
-          // if voucher already redeemed //
-          else
-            throw new HttpException(
-              'already redeemed',
-              HttpStatus.NOT_ACCEPTABLE,
-            );
-        } else
-          throw new HttpException(
-            'voucher type does not match',
-            HttpStatus.NOT_ACCEPTABLE,
-          );
-      } else
-        throw new HttpException(
-          'verification code does not match',
-          HttpStatus.FORBIDDEN,
-        );
-    } else
-      throw new HttpException(
-        'You must buy subscription to redeem the voucher',
-        HttpStatus.FORBIDDEN,
-      );
-  }
+  // async redeemVoucher(
+  //   userId,
+  //   voucherId,
+  //   restaurantId,
+  //   verificationCode,
+  // ): Promise<any> {
+  //   const oid = new mongoose.Types.ObjectId(restaurantId);
+  //   const restaurant = await this.restaurantService.getSingleRestaurantDetails(
+  //     oid,
+  //   );
+  //   return;
+  //   const user = await this.profileService.getSingleProfile(userId);
+  //   // checking if user already bought subscription //
+  //
+  //   if (user.isPremium) {
+  //     //checking if user is at the right restaurant through restaurant's verification code //
+  //     if (restaurant.verificationCode == verificationCode) {
+  //       const oid = new mongoose.Types.ObjectId(voucherId);
+  //
+  //       // fetching restaurant voucher //
+  //
+  //       const voucher = await this.voucherModel.findOne(
+  //         {
+  //           restaurantId: restaurantId,
+  //         },
+  //         { voucherObject: { $elemMatch: { _id: oid } } },
+  //       );
+  //
+  //       const voucherDetails = await this.redeemVoucherModel.findOne({
+  //         userId: userId,
+  //         voucherId: voucherId,
+  //       });
+  //
+  //       // checking if exactly 1 year past //
+  //       if (voucherDetails) {
+  //         const year = moment().diff(voucherDetails.updatedAt, 'year');
+  //         if (year >= 1) {
+  //           if (
+  //             voucher.voucherObject[0].voucherPreference[0] ==
+  //             user.accountHolderType
+  //           ) {
+  //             await this.redeemVoucherModel.findOneAndUpdate({
+  //               userId: userId,
+  //               voucherId: voucherId,
+  //             });
+  //             // await this.restaurantModel.findOneAndDelete(
+  //             //   {
+  //             //     restaurantId: restaurantId,
+  //             //   },
+  //             //   { verificationCode: verificationCode },
+  //             // );
+  //           }
+  //           throw new HttpException(
+  //             'Voucher Redeemed Again. Come Back Next Year!!',
+  //             HttpStatus.ACCEPTED,
+  //           );
+  //         }
+  //       }
+  //       // checking if the voucher and customer type matches //
+  //       if (voucher.voucherObject[0].voucherPreference[0] == 'NON-STUDENT') {
+  //         const res = await this.redeemVoucherModel.findOne({
+  //           userId: userId,
+  //           voucherId: voucherId,
+  //         });
+  //
+  //         // saving user details about voucher redemption in database if not already in database //
+  //
+  //         if (!res) {
+  //           await this.redeemVoucherModel.create({
+  //             userId: userId,
+  //             voucherId: voucherId,
+  //             restaurantId: restaurantId, //*** storing restaurantId to get popular restaurants ***//
+  //           });
+  //           // this.rewardPoints++;
+  //           // await this.reward(userId, this.rewardPoints, this.profileModel);
+  //           // if (this.rewardPoints == 10) {
+  //           //   await this.profileModel.findOneAndUpdate(
+  //           //     { _id: userId },
+  //           //     { rewardPoints: 0 },
+  //           //   );
+  //           //   throw new HttpException('you get a free voucher', HttpStatus.OK);
+  //           // }
+  //           // else {
+  //           //   await this.profileModel
+  //           //     .findById({ _id: userId })
+  //           //     .updateOne({ rewardPoints: this.rewardPoints });
+  //           //   throw new HttpException(
+  //           //     'voucher Redeemed Successfully',
+  //           //     HttpStatus.OK,
+  //           //   );
+  //           // }
+  //         }
+  //         // if voucher already redeemed //
+  //         else
+  //           throw new HttpException(
+  //             'already redeemed',
+  //             HttpStatus.NOT_ACCEPTABLE,
+  //           );
+  //       } else
+  //         throw new HttpException(
+  //           'voucher type does not match',
+  //           HttpStatus.NOT_ACCEPTABLE,
+  //         );
+  //     } else
+  //       throw new HttpException(
+  //         'verification code does not match',
+  //         HttpStatus.FORBIDDEN,
+  //       );
+  //   } else
+  //     throw new HttpException(
+  //       'You must buy subscription to redeem the voucher',
+  //       HttpStatus.FORBIDDEN,
+  //     );
+  // }
 
   async reward(userId, points, profileModel): Promise<any> {
     console.log(userId);
@@ -566,7 +574,15 @@ export class VoucherService {
     return this.redeemVoucherModel.find({ voucherId: oid });
   }
 
-  async fourDigitCode() {
-    return Math.floor(Math.random() * 7291 + 1000);
+  async fourDigitCode(length) {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+    let result = ' ';
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+
+    return result;
   }
 }

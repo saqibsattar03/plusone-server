@@ -14,6 +14,9 @@ export class RedeemVoucher {
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Voucher' })
   voucherId: Voucher;
+
+  @Prop({ type: String })
+  verificationCode: string;
   @Prop({ type: Date, description: 'Created At' })
   createdAt?: Date;
 

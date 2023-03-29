@@ -39,9 +39,6 @@ export class Restaurant {
   @Prop({
     type: Number,
     required: true,
-    default: function () {
-      return Math.floor(Math.random() * 1834 + 1573);
-    },
     index: { unique: true },
   })
   uniqueCode: number;
@@ -49,7 +46,11 @@ export class Restaurant {
   @Prop({ type: Number, default: null })
   verificationCode: number;
 
-  @Prop({ type: String, default: 'ACTIVE', enum: ['ACTIVE', 'DISABLED'] })
+  @Prop({
+    type: String,
+    default: 'ACTIVE',
+    enum: ['ACTIVE', 'DISABLED', 'PENDING'],
+  })
   status: string;
 
   @Prop({ type: Boolean, default: false })
@@ -63,4 +64,3 @@ export class Restaurant {
 
 export const RestaurantSchema = SchemaFactory.createForClass(Restaurant);
 RestaurantSchema.index({ location: '2dsphere' });
-RestaurantSchema.index({ description: 'text' });

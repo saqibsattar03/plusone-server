@@ -19,8 +19,18 @@ export class RestaurantService {
   ) {}
 
   async createRestaurant(restaurantDto: RestaurantDto): Promise<any> {
+    console.log('restaurant data ::', restaurantDto);
+    let uniqueCode = Math.floor(Math.random() * 5596 + 1249);
+    const codeCheck = await this.restaurantModel.findOne({
+      uniqueCode: uniqueCode,
+    });
+    console.log(uniqueCode);
+    if (codeCheck) {
+      uniqueCode = Math.floor(Math.random() * 5596 + 1249);
+    }
     const user = await this.profileService.createUser(restaurantDto);
     restaurantDto.userId = user._id;
+    restaurantDto.uniqueCode = uniqueCode;
     return this.restaurantModel.create(restaurantDto);
   }
 
@@ -84,17 +94,9 @@ export class RestaurantService {
     ]);
   }
 
-  async getSingleRestaurant(restaurantId): Promise<any> {
-    console.log('here', restaurantId);
-    await this.restaurantModel.findOne({
-      restaurantId,
-    });
-  }
-  async getRestaurantProfile(userId): Promise<any> {
-    const oid = new mongoose.Types.ObjectId(userId);
-    return this.restaurantModel.findOne({
-      userId: oid,
-    });
+  async getRestaurantProfile(restaurantId): Promise<any> {
+    const oid = new mongoose.Types.ObjectId(restaurantId);
+    return this.restaurantModel.findById(oid);
   }
   async editRestaurant(restaurantId, data): Promise<RestaurantDocument> {
     // const res = await this.restaurantModel.findById({ _id: restaurantId });
@@ -148,10 +150,14 @@ export class RestaurantService {
     );
   }
 
-  async getRestaurantVerificationCode(restaurantId): Promise<any> {
+  async getRestaurantVerificationCode(
+    restaurantId,
+    restaurantCode,
+  ): Promise<any> {
     return this.restaurantModel
       .findOne({
         _id: restaurantId,
+        uniqueCode: restaurantCode,
       })
       .select('uniqueCode -_id');
   }
@@ -164,11 +170,12 @@ export class RestaurantService {
     let sort;
     let pipeline;
 
-    if (data.cuisines) {
-      const culinaryOptions = {
-        culinaryOptions: { $in: data.cuisines },
+    if (data.cuisine) {
+      console.log('inside', data.cuisine);
+      const cuisine = {
+        culinaryOptions: { $in: data.cuisine },
       };
-      query.push(culinaryOptions);
+      query.push(cuisine);
     }
     if (data.tags) {
       const tag = {
@@ -188,7 +195,7 @@ export class RestaurantService {
       sort = -1;
     }
     if (
-      !data.cuisines &&
+      !data.cuisine &&
       !data.tags &&
       !data.nearest &&
       !data.longitude &&
@@ -250,11 +257,6 @@ export class RestaurantService {
       return this.restaurantModel.aggregate(pipeline);
     }
   }
-
-  async filterRestaurantBasedOnCaption(keyword: string): Promise<any> {
-    return this.restaurantModel.find({ $text: { $search: keyword } });
-  }
-
   async dietFilter(dietaryRestrictions: [string]): Promise<any> {
     return this.restaurantModel.aggregate([
       {

@@ -36,27 +36,32 @@ export class VoucherController {
     description: 'Created Voucher object as response',
   })
   @ApiBadRequestResponse({ description: 'can not create voucher' })
-  createStudentVoucher(@Body() data, @Query('preference') preference) {
-    if (preference == Constants.STUDENT) {
-      data.voucherObject.voucherPreference = preference;
-      if (data.voucherObject.voucherImage) {
-        return this.voucherService.createStudentVoucher(data);
-      } else
-        throw new HttpException(
-          'Picture must be provided to create voucher',
-          HttpStatus.NOT_ACCEPTABLE,
-        );
-    } else if (preference == Constants.NONSTUDENT) {
-      console.log('in else if preference non student');
-      data.voucherObject.voucherPreference = preference;
-      if (data.voucherObject.voucherImage) {
-        return this.voucherService.createNonStudentVoucher(data);
-      } else return 'Picture must be provided to create voucher';
-    } else if (preference == Constants.BOTH) {
-      data.voucherObject.voucherPreference = preference;
-      if (data.voucherObject.voucherImage) {
-        return this.voucherService.createVoucherForBoth(data);
-      } else return 'Picture must be provided to create voucher';
+  createStudentVoucher(@Body() data) {
+    switch (data.voucherObject.voucherPreference) {
+      case Constants.STUDENT:
+        if (data.voucherObject.voucherImage) {
+          return this.voucherService.createStudentVoucher(data);
+        } else
+          throw new HttpException(
+            'Picture must be provided to create voucher',
+            HttpStatus.NOT_ACCEPTABLE,
+          );
+      case Constants.NONSTUDENT:
+        if (data.voucherObject.voucherImage) {
+          return this.voucherService.createNonStudentVoucher(data);
+        } else
+          throw new HttpException(
+            'Picture must be provided to create voucher',
+            HttpStatus.NOT_ACCEPTABLE,
+          );
+      case Constants.BOTH:
+        if (data.voucherObject.voucherImage) {
+          return this.voucherService.createVoucherForBoth(data);
+        } else
+          throw new HttpException(
+            'Picture must be provided to create voucher',
+            HttpStatus.NOT_ACCEPTABLE,
+          );
     }
   }
   @Post('create-for-non-student')
@@ -115,46 +120,45 @@ export class VoucherController {
     return this.voucherService.deleteAllVoucher(restaurantId);
   }
 
-  @Get('ask-for-restaurant-code')
-  @ApiQuery({ type: 'string', name: 'restaurantId' })
-  @ApiCreatedResponse({ type: 'object' })
-  @ApiBadRequestResponse({ description: 'can not retrieve code' })
-  askForRestaurantCode(@Query('restaurantId') restaurantId) {
-    return this.voucherService.askForRestaurantCode(restaurantId);
-  }
+  // @Get('ask-for-restaurant-code')
+  // @ApiQuery({ type: 'string', name: 'restaurantId' })
+  // @ApiQuery({ type: 'string', name: 'restaurantCode' })
+  // @ApiCreatedResponse({ type: 'object' })
+  // @ApiBadRequestResponse({ description: 'can not retrieve code' })
+  // askForRestaurantCode(
+  //   @Query('restaurantId') restaurantId,
+  //   @Query('restaurantCode') restaurantCode,
+  // ) {
+  //   return this.voucherService.askForRestaurantCode(
+  //     restaurantId,
+  //     restaurantCode,
+  //   );
+  // }
   @Post('verify-restaurant-code')
-  @ApiQuery({ type: 'string', name: 'restaurantId' })
-  @ApiQuery({ type: 'string', name: 'restaurantCode' })
   @ApiCreatedResponse({ type: Number })
   @ApiBadRequestResponse({ description: 'can not verify restaurant code' })
-  verifyRestaurantCode(
-    @Query('restaurantId') restaurantId,
-    @Query('restaurantCode') restaurantCode,
-  ) {
-    return this.voucherService.verifyRestaurantCode(
-      restaurantId,
-      restaurantCode,
-    );
+  verifyRestaurantCode(@Body() data) {
+    return this.voucherService.verifyRestaurantCode(data);
   }
 
-  @Post('redeem')
-  @ApiQuery({ type: 'string', name: 'userId' })
-  @ApiQuery({ type: 'string', name: 'voucherId' })
-  @ApiQuery({ type: 'string', name: 'restaurantId' })
-  @ApiQuery({ type: 'string', name: 'verificationCode' })
-  redeemVoucher(
-    @Query('userId') userId,
-    @Query('voucherId') voucherId,
-    @Query('restaurantId') restaurantId,
-    @Query('verificationCode') verificationCode,
-  ) {
-    return this.voucherService.redeemVoucher(
-      userId,
-      voucherId,
-      restaurantId,
-      verificationCode,
-    );
-  }
+  // @Post('redeem')
+  // @ApiQuery({ type: 'string', name: 'userId' })
+  // @ApiQuery({ type: 'string', name: 'voucherId' })
+  // @ApiQuery({ type: 'string', name: 'restaurantId' })
+  // @ApiQuery({ type: 'string', name: 'verificationCode' })
+  // redeemVoucher(
+  //   @Query('userId') userId,
+  //   @Query('voucherId') voucherId,
+  //   @Query('restaurantId') restaurantId,
+  //   @Query('verificationCode') verificationCode,
+  // ) {
+  //   return this.voucherService.redeemVoucher(
+  //     userId,
+  //     voucherId,
+  //     restaurantId,
+  //     verificationCode,
+  //   );
+  // }
 
   @Get('all-redeemed-by-user')
   getAllVoucherRedeemedByUser(@Query('userId') userId) {

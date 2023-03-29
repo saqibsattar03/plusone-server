@@ -3,6 +3,7 @@ import mongoose, { HydratedDocument } from 'mongoose';
 import { Profile } from './profile.schema';
 import any = jasmine.any;
 import { Restaurant } from './restaurant.schema';
+import { Voucher } from './voucher.schema';
 
 export type RestaurantReviewDocument = HydratedDocument<RestaurantReview>;
 @Schema({ versionKey: false })
@@ -21,6 +22,9 @@ export class ReviewStructure {
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Profile' })
   userId: Profile;
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Voucher' })
+  voucherId: Voucher;
 
   @Prop({ type: String })
   reviewText: string;

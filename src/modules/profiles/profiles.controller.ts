@@ -52,8 +52,8 @@ export class ProfilesController {
     },
   })
   @Get('verify-account')
-  verifyUser(@Request() request) {
-    return this.profileService.verifyUser(request.user.confirmationCode);
+  verifyUser(@Query('confirmationCode') confirmationCode) {
+    return this.profileService.verifyUser(confirmationCode);
   }
   @Get('single/:profileId')
   @ApiParam({ name: 'profileId', type: String })
@@ -108,21 +108,25 @@ export class ProfilesController {
   @ApiCreatedResponse({ type: RestaurantDto })
   @Post('near-by-restaurants')
   getNearByRestaurants(@Body() data, @Query() paginationQuery: PaginationDto) {
+    console.log(data);
     return this.profileService.restaurantFilters(data, paginationQuery);
   }
 
-  @ApiQuery({ type: String, name: 'email' })
-  @ApiQuery({ type: String, name: 'oldPassword' })
-  @ApiQuery({ type: String, name: 'newPassword' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string' },
+        oldPassword: { type: 'string' },
+        newPassword: { type: 'string' },
+      },
+    },
+  })
   @ApiResponse({ description: 'password updated successfully' })
   @ApiBadRequestResponse({ description: 'could not update  password' })
   @Patch('update-password')
-  changePassword(
-    @Query('email') email,
-    @Query('oldPassword') oldPassword,
-    @Query('newPassword') newPassword,
-  ) {
+  changePassword(data) {
     console.log('password update');
-    return this.profileService.changePassword(email, oldPassword, newPassword);
+    return this.profileService.changePassword(data);
   }
 }

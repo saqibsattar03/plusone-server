@@ -33,6 +33,7 @@ export class RestaurantController {
   @ApiBadRequestResponse({ description: 'can not create Restaurant' })
   // @UseGuards(JwtAuthGuard)
   createRestaurant(@Body() data) {
+    console.log(data);
     // data.userId = request.user.userId;
     return this.restaurantService.createRestaurant(data);
   }
@@ -65,11 +66,10 @@ export class RestaurantController {
     type: SingleRestaurantResponseDto,
     description: 'Single Restaurant in response',
   })
-  @ApiQuery({ name: 'userId', type: 'string' })
+  @ApiQuery({ name: 'restaurantId', type: 'string' })
   @ApiBadRequestResponse({ description: 'can not get Restaurant' })
-  @UseGuards(JwtAuthGuard)
-  getRestaurantProfile(@Request() request) {
-    return this.restaurantService.getRestaurantProfile(request.user.userId);
+  getRestaurantProfile(@Query('restaurantId') restaurantId) {
+    return this.restaurantService.getRestaurantProfile(restaurantId);
   }
   // @Patch('update-status')
   // @ApiCreatedResponse({
@@ -101,12 +101,6 @@ export class RestaurantController {
   editRestaurant(@Query('restaurantId') restaurantId, @Body() data) {
     return this.restaurantService.editRestaurant(restaurantId, data);
   }
-
-  @Get('caption')
-  filterRestaurantBasedOnCaption(@Query('keyword') keyword) {
-    return this.restaurantService.filterRestaurantBasedOnCaption(keyword);
-  }
-
   @Get('dietary-Restrictions')
   dietFilter(@Query('dietaryRestrictions') dietaryRestrictions: [string]) {
     return this.restaurantService.dietFilter(dietaryRestrictions);

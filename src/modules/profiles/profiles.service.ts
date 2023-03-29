@@ -131,6 +131,13 @@ export class ProfilesService {
     });
   }
 
+  async updateRewardPoints(userId, rewardPoints): Promise<any> {
+    await this.profileModel.findOneAndUpdate(
+      { _id: userId },
+      { rewardPoints: rewardPoints },
+    );
+  }
+
   async getAllUsers(role: string): Promise<any> {
     return this.profileModel.aggregate([
       {
@@ -153,7 +160,7 @@ export class ProfilesService {
     const oid = new mongoose.Types.ObjectId(profileId);
     const profile = await this.profileModel.findById(profileId);
     if (!profile) throw new NotFoundException(' Profile does not exist');
-    await this.socialPostService.removePost(oid);
+    // await this.socialPostService.removePost(oid);
     await this.resReviewService.deleteAllReviewsOfUser(oid);
     await this.socialPostService.removeUserLikes(oid);
     await this.followeeService.deleteAllFollwees(oid);
@@ -216,17 +223,23 @@ export class ProfilesService {
   // return null;
   // }
 
-  async changePassword(email: string, oldPassword, newPassword): Promise<any> {
-    const user = await this.profileModel.findOne({ email: email });
+  async changePassword(data): Promise<any> {
+    const user = await this.profileModel.findOne({ email: data.email });
     if (!user) throw new HttpException('use not found', HttpStatus.NOT_FOUND);
-    const isValidPassword = await bcrypt.compare(oldPassword, user.password);
+    const isValidPassword = await bcrypt.compare(
+      data.oldPassword,
+      user.password,
+    );
     if (!isValidPassword)
       throw new HttpException(
         'Old Password is incorrect',
         HttpStatus.FORBIDDEN,
       );
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    const differentPassword = await bcrypt.compare(oldPassword, hashedPassword);
+    const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+    const differentPassword = await bcrypt.compare(
+      data.oldPassword,
+      hashedPassword,
+    );
     console.log(differentPassword);
     if (!differentPassword) {
       user.password = hashedPassword;

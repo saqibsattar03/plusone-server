@@ -19,6 +19,9 @@ export class VoucherStructure {
   @Prop()
   _id: mongoose.Schema.Types.ObjectId;
 
+  @Prop()
+  title: string;
+
   @Prop({ type: () => Number, default: 0 })
   discount: number;
 
@@ -35,12 +38,6 @@ export class VoucherStructure {
   @Prop({ type: () => String, default: 'BOGO', enum: ['BOGO', 'DISCOUNTED'] })
   voucherType: string;
 
-  @Prop({
-    type: Number,
-    required: true,
-    index: { unique: true },
-  })
-  voucherCode: number;
   @Prop({
     type: () => String,
   })

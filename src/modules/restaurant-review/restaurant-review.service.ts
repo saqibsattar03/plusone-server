@@ -20,6 +20,12 @@ export class RestaurantReviewService {
     restaurantReviewDto.reviewObject._id = new mongoose.Types.ObjectId(
       restaurantReviewDto.reviewObject._id,
     );
+    restaurantReviewDto.reviewObject.userId = new mongoose.Types.ObjectId(
+      restaurantReviewDto.reviewObject.userId,
+    );
+    restaurantReviewDto.reviewObject.voucherId = new mongoose.Types.ObjectId(
+      restaurantReviewDto.reviewObject.voucherId,
+    );
     const res = await this.restaurantReviewModel.findOne({
       restaurantId: restaurantReviewDto.restaurantId,
     });
@@ -32,6 +38,7 @@ export class RestaurantReviewService {
           reviewObject: {
             _id: restaurantReviewDto.reviewObject._id,
             userId: restaurantReviewDto.reviewObject.userId,
+            voucherId: restaurantReviewDto.reviewObject.voucherId,
             reviewText: restaurantReviewDto.reviewObject.reviewText,
             rating: restaurantReviewDto.reviewObject.rating,
           },
@@ -51,6 +58,7 @@ export class RestaurantReviewService {
           reviewObject: {
             _id: restaurantReviewDto.reviewObject._id,
             userId: restaurantReviewDto.reviewObject.userId,
+            voucherId: restaurantReviewDto.reviewObject.voucherId,
             reviewText: restaurantReviewDto.reviewObject.reviewText,
             rating: restaurantReviewDto.reviewObject.rating,
           },

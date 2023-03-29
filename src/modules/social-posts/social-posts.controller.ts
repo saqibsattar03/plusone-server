@@ -4,6 +4,7 @@ import {
   HttpStatus,
   NotFoundException,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
   Body,
@@ -12,9 +13,11 @@ import {
   Param,
   Patch,
   Post,
+  Request,
 } from '@nestjs/common/decorators';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiConsumes,
   ApiCreatedResponse,
@@ -27,6 +30,7 @@ import {
   UpdateSocialPost,
 } from '../../data/dtos/socialPost.dto';
 import { SocialPostsService } from './social-posts.service';
+import { JwtAuthGuard } from '../../common/auth/guards/jwt-auth.guard';
 
 @ApiTags('Social Post')
 @Controller('post')
@@ -36,6 +40,7 @@ export class SocialPostsController {
   //Create Post Route
 
   @Post('')
+  @ApiBearerAuth('access_token')
   @ApiBody({
     type: SocialPostDto,
     description: 'Request body to create a post',
@@ -45,7 +50,9 @@ export class SocialPostsController {
     description: 'Created post object as response',
   })
   @ApiBadRequestResponse({ description: 'can not create post' })
-  createPost(@Body() data) {
+  @UseGuards(JwtAuthGuard)
+  createPost(@Request() request, @Body() data) {
+    data.userId = request.user.userId;
     if (data.media.length > 0) return this.socialPostService.createPost(data);
     else
       throw new HttpException(
@@ -77,8 +84,8 @@ export class SocialPostsController {
   //Post Update Route
 
   @Patch('')
+  @ApiBearerAuth('access_token')
   @ApiQuery({ name: 'postId', type: String })
-  @ApiQuery({ name: 'userId', type: String })
   @ApiBody({
     type: UpdateSocialPost,
     description: 'Request body to update post',
@@ -88,45 +95,42 @@ export class SocialPostsController {
     description: 'post updated successfully',
   })
   @ApiBadRequestResponse({ description: 'could not update post' })
-  async updatePost(@Query('postId') postId, @Body() data) {
-    const post = await this.socialPostService.updatePost(postId, data);
+  @UseGuards(JwtAuthGuard)
+  async updatePost(@Request() request, @Body() data) {
+    console.log('request = ', request.user);
+    const post = await this.socialPostService.updatePost(
+      request.user.userId,
+      data,
+    );
     if (!post) throw new NotFoundException(' Post does not exist');
     return post;
-  }
-
-  @Patch('update-post-audience-preference')
-  updatePostPreference(
-    @Query('postId') postId,
-    @Query('preference') preference,
-  ) {
-    return this.socialPostService.updatePostPreference(postId, preference);
   }
   //Delete Post Route
 
   @Delete(':postId')
+  @ApiBearerAuth('access_token')
   @ApiParam({ name: 'postId', type: 'string' })
   @ApiCreatedResponse({ description: 'post deleted successfully' })
   @ApiBadRequestResponse({ description: 'could not delete post' })
-  removePost(@Param('postId') postId) {
-    return this.socialPostService.removePost(postId);
+  @UseGuards(JwtAuthGuard)
+  removePost(@Request() request, @Param('postId') postId) {
+    return this.socialPostService.removePost(request.user.userId, postId);
   }
 
   //Like Post  Route
 
   @Post('like')
-  @ApiQuery({
-    name: 'userId',
-    description: 'user id is required in Query parameter',
-  })
+  @ApiBearerAuth('access_token')
   @ApiCreatedResponse({ description: 'post liked successfully' })
   @ApiQuery({
     name: 'postId',
     description: 'post id is required in Query parameter',
   })
   @ApiBadRequestResponse({ description: 'could not like post' })
-  postLiked(@Query('userId') userId, @Query('postId') postId) {
+  @UseGuards(JwtAuthGuard)
+  postLiked(@Request() request, @Query('postId') postId) {
     if (postId) {
-      return this.socialPostService.likePost(userId, postId);
+      return this.socialPostService.likePost(request.user.userId, postId);
     } else {
       throw new HttpException(
         'No Post Id was Provided',
@@ -138,21 +142,23 @@ export class SocialPostsController {
   //Remove Like Route
 
   @Patch('remove-like')
-  @ApiQuery({
-    name: 'userId',
-    description: 'user id is required in Query Parameter to remove like ',
-  })
+  @ApiBearerAuth('access_token')
   @ApiCreatedResponse({ description: 'post unliked successfully' })
-  @ApiQuery({ description: 'post id is required in Query Parameter' })
   @ApiBadRequestResponse({ description: 'could not unlike post' })
-  removeLike(@Query('userId') userId, @Query('postId') postId) {
+  @UseGuards(JwtAuthGuard)
+  removeLike(@Request() request, @Query('postId') postId) {
     if (postId) {
-      return this.socialPostService.removeLike(userId, postId);
+      return this.socialPostService.removeLike(request.user.userId, postId);
     } else {
       throw new HttpException(
         'No Post Id was Provided',
         HttpStatus.BAD_REQUEST,
       );
     }
+  }
+
+  @Get('caption')
+  filterRestaurantBasedOnCaption(@Query('keyword') keyword) {
+    return this.socialPostService.filterPostBasedOnCaption(keyword);
   }
 }

@@ -31,36 +31,38 @@ export class SocialPostsService {
   }
 
   async updatePost(
-    postId,
+    userId,
     updatePostDto: UpdateSocialPost,
   ): Promise<PostDocument> {
-    // const user = await this.socialPostModel.findOne({
-    //   _id: postId,
-    //   userId: userId,
-    // });
-    // if (!user)
-    //   throw new HttpException(
-    //     'not allow to edit post',
-    //     HttpStatus.UNAUTHORIZED,
-    //   );
-    return this.socialPostModel.findByIdAndUpdate(postId, updatePostDto);
-  }
-
-  async updatePostPreference(postId, preference): Promise<any> {
-    return this.socialPostModel.findOneAndUpdate(
-      { _id: postId },
-      { postAudiencePreference: preference },
+    const user = await this.socialPostModel.findOne({
+      _id: updatePostDto.postId,
+      userId: userId,
+    });
+    if (!user)
+      throw new HttpException(
+        'not allow to edit post',
+        HttpStatus.UNAUTHORIZED,
+      );
+    return this.socialPostModel.findByIdAndUpdate(
+      updatePostDto.postId,
+      updatePostDto,
+      { returnDocument: 'after' },
     );
   }
-
-  async removePost(postId): Promise<PostDocument> {
-    const post = await this.socialPostModel.findById(postId);
+  async removePost(userId, postId): Promise<PostDocument> {
+    const post = await this.socialPostModel.findOne({
+      _id: postId,
+      userId: userId,
+    });
+    if (!post)
+      throw new HttpException(
+        'unAuthorize to delete this post',
+        HttpStatus.UNAUTHORIZED,
+      );
     await this.postLikedModel.findOneAndDelete({ postId: postId });
-    await post.remove();
+    await post.deleteOne();
     throw new HttpException('post deleted successfully', HttpStatus.OK);
   }
-  // async removeAllUserPosts(userId):Promise
-
   async likePost(userId, postId): Promise<LikedPostDocument> {
     const res = await this.postLikedModel.findOne({ postId: postId });
     if (!res) {
@@ -123,5 +125,8 @@ export class SocialPostsService {
       { _id: postId },
       { commentCount: count },
     );
+  }
+  async filterPostBasedOnCaption(keyword: string): Promise<any> {
+    return this.socialPostModel.find({ $text: { $search: keyword } });
   }
 }
