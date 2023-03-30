@@ -3,8 +3,10 @@ export enum Constants {
   PENDING = 'PENDING',
   STUDENT = 'STUDENT',
   NONSTUDENT = 'NON-STUDENT',
+  BOTH = 'BOTH',
+  BOGO = 'BOGO',
+  DISCOUNTED = 'DISCOUNTED',
   ADMIN = 'ADMIN',
   MERCHANT = 'MERCHANT',
   USER = 'USER',
-  BOTH = 'BOTH',
 }

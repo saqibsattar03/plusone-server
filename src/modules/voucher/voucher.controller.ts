@@ -135,30 +135,22 @@ export class VoucherController {
   //   );
   // }
   @Post('verify-restaurant-code')
-  @ApiCreatedResponse({ type: Number })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        restaurantId: { type: 'string' },
+        userId: { type: 'string' },
+        restaurantCode: { type: 'number' },
+        voucherId: { type: 'string' },
+      },
+    },
+  })
+  @ApiCreatedResponse({ type: Number, description: 'return 4 digit code ' })
   @ApiBadRequestResponse({ description: 'can not verify restaurant code' })
   verifyRestaurantCode(@Body() data) {
     return this.voucherService.verifyRestaurantCode(data);
   }
-
-  // @Post('redeem')
-  // @ApiQuery({ type: 'string', name: 'userId' })
-  // @ApiQuery({ type: 'string', name: 'voucherId' })
-  // @ApiQuery({ type: 'string', name: 'restaurantId' })
-  // @ApiQuery({ type: 'string', name: 'verificationCode' })
-  // redeemVoucher(
-  //   @Query('userId') userId,
-  //   @Query('voucherId') voucherId,
-  //   @Query('restaurantId') restaurantId,
-  //   @Query('verificationCode') verificationCode,
-  // ) {
-  //   return this.voucherService.redeemVoucher(
-  //     userId,
-  //     voucherId,
-  //     restaurantId,
-  //     verificationCode,
-  //   );
-  // }
 
   @Get('all-redeemed-by-user')
   getAllVoucherRedeemedByUser(@Query('userId') userId) {

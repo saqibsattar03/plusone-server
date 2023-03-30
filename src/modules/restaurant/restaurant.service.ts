@@ -130,12 +130,6 @@ export class RestaurantService {
   //   );
   // }
 
-  async getRestaurantUniqueCode(restaurantId): Promise<any> {
-    return this.restaurantModel
-      .findOne({ _id: restaurantId })
-      .select('uniqueCode -_id');
-  }
-
   async getRestaurantReviewCount(restaurantId): Promise<any> {
     return this.restaurantModel
       .findOne({ _id: restaurantId })
@@ -171,7 +165,6 @@ export class RestaurantService {
     let pipeline;
 
     if (data.cuisine) {
-      console.log('inside', data.cuisine);
       const cuisine = {
         culinaryOptions: { $in: data.cuisine },
       };

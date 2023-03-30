@@ -14,7 +14,6 @@ import { VoucherModule } from './modules/voucher/voucher.module';
 import { QuoteModule } from './modules/quote/quote.module';
 import { CustomerServiceModule } from './modules/customer-service/customer-service.module';
 import { AuthModule } from './common/auth/auth.module';
-import { FilterModule } from './filter/filter.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { DepositMoneyModule } from './modules/deposit-money/deposit-money.module';
 import { DbModule } from './common/db/db.module';
@@ -40,7 +39,6 @@ import { ConfigModule } from '@nestjs/config';
     QuoteModule,
     CustomerServiceModule,
     AuthModule,
-    FilterModule,
     MulterModule.register({
       dest: '../uploads',
     }),
