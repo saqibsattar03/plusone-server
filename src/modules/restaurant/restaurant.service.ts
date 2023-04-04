@@ -1,4 +1,10 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   Restaurant,
@@ -19,7 +25,6 @@ export class RestaurantService {
   ) {}
 
   async createRestaurant(restaurantDto: RestaurantDto): Promise<any> {
-    console.log('restaurant data ::', restaurantDto);
     let uniqueCode = Math.floor(Math.random() * 5596 + 1249);
     const codeCheck = await this.restaurantModel.findOne({
       uniqueCode: uniqueCode,
@@ -36,7 +41,33 @@ export class RestaurantService {
 
   async getAllRestaurants(paginationDto: PaginationDto): Promise<any> {
     const { limit, offset } = paginationDto;
-    return this.restaurantModel.find().limit(limit).skip(offset);
+    return this.restaurantModel
+      .aggregate([
+        {
+          $lookup: {
+            from: 'restaurantreviews',
+            localField: '_id',
+            foreignField: 'restaurantId',
+            as: 'restaurantReviews',
+          },
+        },
+        {
+          $project: {
+            _id: '$_id',
+            restaurantName: '$restaurantName',
+            profileImage: '$profileImage',
+            description: '$description',
+            phoneNumber: '$phoneNumber',
+            media: '$media',
+            isSponsored: '$isSponsored',
+            totalVoucherCount: '$totalVoucherCount',
+            reviewCount: '$reviewCount',
+            reviewObject: '$restaurantReviews.reviewObject.rating',
+          },
+        },
+      ])
+      .skip(offset)
+      .limit(limit);
   }
   async getSingleRestaurantDetails(restaurantId): Promise<any> {
     const oid = new mongoose.Types.ObjectId(restaurantId);
@@ -120,16 +151,6 @@ export class RestaurantService {
       { returnDocument: 'after' },
     );
   }
-
-  // async changeRestaurantStatus(restaurantId, status): Promise<any> {
-  //   const oid = new mongoose.Types.ObjectId(restaurantId);
-  //   return this.restaurantModel.findOneAndUpdate(
-  //     { userId: oid },
-  //     { status: status.toUpperCase() },
-  //     { returnDocument: 'after' },
-  //   );
-  // }
-
   async getRestaurantReviewCount(restaurantId): Promise<any> {
     return this.restaurantModel
       .findOne({ _id: restaurantId })
@@ -157,6 +178,8 @@ export class RestaurantService {
   }
 
   async restaurantFilters(data, paginationQuery): Promise<any> {
+    const fieldName = 'reviewObject';
+    const lookupAndProjectStage = this.generateLookupAndProjectStage(fieldName);
     const { limit, offset } = paginationQuery;
     const METERS_PER_MILE = 1609.34;
     const query = [];
@@ -182,9 +205,8 @@ export class RestaurantService {
       };
       query.push(diet);
     }
-    console.log(query);
     if (data.nearest) {
-      maxDistance = 1609.34 * 2;
+      maxDistance = 1609.34 * 5;
       sort = -1;
     }
     if (
@@ -213,9 +235,33 @@ export class RestaurantService {
                 ],
               },
               distanceField: 'distanceFromMe',
-              maxDistance: maxDistance ?? 100 * METERS_PER_MILE, //!*** distance in meters ***!//
-              distanceMultiplier: 1 / 1609.34,
+              maxDistance: maxDistance ?? 500 * METERS_PER_MILE, //!*** distance in meters ***!//
+              distanceMultiplier: 0.000621371,
               spherical: true,
+            },
+          },
+          {
+            $lookup: {
+              from: 'restaurantreviews',
+              localField: '_id',
+              foreignField: 'restaurantId',
+              as: 'restaurantReviews',
+            },
+          },
+          {
+            $project: {
+              _id: '$_id',
+              restaurantName: '$restaurantName',
+              profileImage: '$profileImage',
+              description: '$description',
+              phoneNumber: '$phoneNumber',
+              media: '$media',
+              isSponsored: '$isSponsored',
+              totalVoucherCount: '$totalVoucherCount',
+              reviewCount: '$reviewCount',
+              location: '$location',
+              distanceFromMe: '$distanceFromMe',
+              reviewObject: '$restaurantReviews.reviewObject.rating',
             },
           },
         ];
@@ -229,6 +275,7 @@ export class RestaurantService {
                 $or: query,
               },
             },
+            ...lookupAndProjectStage,
           ];
         } else {
           pipeline = [
@@ -237,6 +284,7 @@ export class RestaurantService {
                 $or: query,
               },
             },
+            ...lookupAndProjectStage,
           ];
         }
       }
@@ -264,7 +312,6 @@ export class RestaurantService {
       },
     ]);
   }
-
   async filterPopularRestaurant(): Promise<any> {
     return this.restaurantModel.aggregate([
       {
@@ -289,5 +336,73 @@ export class RestaurantService {
       },
       { $sort: { popularity: -1 } },
     ]);
+  }
+  async depositMoney(restaurantId, amount): Promise<any> {
+    const res = await this.restaurantModel.findById({ _id: restaurantId });
+    if (!res)
+      throw new HttpException(
+        'No Such Restaurant Found',
+        HttpStatus.BAD_REQUEST,
+      );
+    const totalDeposit = res.totalDeposit + amount;
+    const availableDeposit = res.availableDeposit + amount;
+    await res.update({
+      $set: {
+        totalDeposit: totalDeposit,
+        availableDeposit: availableDeposit,
+      },
+    });
+    return res;
+  }
+
+  async addTotalSalesAndDeductions(
+    estimatedCost: number,
+    restaurantId,
+  ): Promise<any> {
+    const res = await this.restaurantModel.findById({ _id: restaurantId });
+    if (!res)
+      throw new HttpException(
+        'No Such Restaurant Found',
+        HttpStatus.BAD_REQUEST,
+      );
+    const totalSales = res.totalSales + estimatedCost;
+    const percent = 0.1 * estimatedCost;
+    const totalDeductions = res.totalDeductions + percent;
+    const availableDeposit = res.availableDeposit - percent;
+    return res.update({
+      $set: {
+        totalSales: totalSales,
+        totalDeductions: totalDeductions,
+        availableDeposit: availableDeposit,
+      },
+    });
+  }
+
+  generateLookupAndProjectStage(fieldName) {
+    return [
+      {
+        $lookup: {
+          from: 'restaurantreviews',
+          localField: '_id',
+          foreignField: 'restaurantId',
+          as: 'restaurantReviews',
+        },
+      },
+      {
+        $project: {
+          _id: '$_id',
+          restaurantName: '$restaurantName',
+          profileImage: '$profileImage',
+          description: '$description',
+          phoneNumber: '$phoneNumber',
+          media: '$media',
+          isSponsored: '$isSponsored',
+          location: '$location',
+          totalVoucherCount: '$totalVoucherCount',
+          reviewCount: '$reviewCount',
+          [`${fieldName}`]: '$restaurantReviews.reviewObject.rating',
+        },
+      },
+    ];
   }
 }

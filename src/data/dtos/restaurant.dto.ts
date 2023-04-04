@@ -35,8 +35,6 @@ export class RestaurantDto {
   @ApiProperty({ type: () => String })
   description: string;
 
-  @ApiProperty({ type: () => Number })
-  voucherCount: number;
   @ApiProperty({ description: 'location' })
   location: LocationDto;
 
@@ -73,7 +71,7 @@ export class RestaurantDto {
   reviewCount: number;
 
   @ApiProperty({ type: Number })
-  totalVoucherCreated: number;
+  totalVoucherCount: number;
 
   @ApiProperty({ type: Number })
   distanceFromMe: number;
@@ -94,15 +92,41 @@ export class RestaurantResponseDto {
     type: String,
   })
   profileImage: string;
+  @ApiProperty({
+    type: String,
+  })
+  description: string;
+  @ApiProperty({
+    type: String,
+  })
+  phoneNumber: string;
 
   @ApiProperty({
-    type: Number,
+    type: [String],
   })
-  totalVouchers: number;
+  media: [string];
+
+  @ApiProperty({
+    type: Boolean,
+  })
+  isSponsored: boolean;
+
+  @ApiProperty({ description: 'location' })
+  location: LocationDto;
   @ApiProperty({
     type: Number,
   })
-  totalReviews: number;
+  totalVoucherCount: number;
+  @ApiProperty({
+    type: Number,
+  })
+  reviewCount: number;
+
+  @ApiProperty({ type: Number })
+  distanceFromMe: number;
+
+  @ApiProperty({ type: [[Number]], example: '[[15,2]]' })
+  reviewObject: [[number]];
 }
 
 export class SingleRestaurantResponseDto {

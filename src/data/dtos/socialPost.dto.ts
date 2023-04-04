@@ -3,9 +3,11 @@ import { IsNotEmpty } from 'class-validator';
 import { LocationDto } from './location.dto';
 
 export class SocialPostDto {
-  @ApiProperty({ description: 'user Id', example: '63d2549476e862ed7649bfac' })
+  @ApiProperty({ description: 'user Id' })
   @IsNotEmpty()
   userId: string;
+  @ApiProperty({ description: 'voucher Id' })
+  voucherId: string;
 
   @ApiProperty({ description: 'location' })
   location: LocationDto;
@@ -23,6 +25,9 @@ export class SocialPostDto {
     description: 'Post visible to audience',
   })
   postAudiencePreference: string;
+
+  @ApiProperty({ description: 'is it feed or review type post' })
+  postType: string;
 }
 
 export class UpdateSocialPost {

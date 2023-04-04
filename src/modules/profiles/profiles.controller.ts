@@ -26,7 +26,10 @@ import {
 import { PaginationDto } from '../../common/auth/dto/pagination.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtAuthGuard } from '../../common/auth/guards/jwt-auth.guard';
-import { RestaurantDto } from '../../data/dtos/restaurant.dto';
+import {
+  RestaurantDto,
+  RestaurantResponseDto,
+} from '../../data/dtos/restaurant.dto';
 
 @ApiTags('Person')
 @Controller('persons')
@@ -104,11 +107,10 @@ export class ProfilesController {
   }
 
   @ApiBody({ type: RestaurantFilter })
-  // @ApiQuery({ type: PaginationDto })
-  @ApiCreatedResponse({ type: RestaurantDto })
+  @ApiQuery({ type: PaginationDto })
+  @ApiCreatedResponse({ type: RestaurantResponseDto })
   @Post('near-by-restaurants')
   getNearByRestaurants(@Body() data, @Query() paginationQuery: PaginationDto) {
-    console.log(data);
     return this.profileService.restaurantFilters(data, paginationQuery);
   }
 

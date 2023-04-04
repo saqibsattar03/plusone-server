@@ -15,7 +15,6 @@ import {
 } from '../../data/dtos/restaurant.dto';
 import { ProfileDto } from '../../data/dtos/profile.dto';
 import { PaginationDto } from '../../common/auth/dto/pagination.dto';
-import { JwtAuthGuard } from '../../common/auth/guards/jwt-auth.guard';
 @ApiTags('Restaurants')
 @Controller('restaurant')
 export class RestaurantController {
@@ -33,7 +32,6 @@ export class RestaurantController {
   @ApiBadRequestResponse({ description: 'can not create Restaurant' })
   // @UseGuards(JwtAuthGuard)
   createRestaurant(@Body() data) {
-    console.log(data);
     // data.userId = request.user.userId;
     return this.restaurantService.createRestaurant(data);
   }

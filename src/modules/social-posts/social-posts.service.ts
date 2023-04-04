@@ -6,10 +6,8 @@ import {
   LikedPost,
   LikedPostDocument,
 } from 'src/data/schemas/postLiked.schema';
-import {
-  SocialPostDto,
-  UpdateSocialPost,
-} from '../../data/dtos/socialPost.dto';
+import { UpdateSocialPost } from '../../data/dtos/socialPost.dto';
+import { Constants } from '../../common/constants';
 
 @Injectable()
 export class SocialPostsService {
@@ -20,10 +18,50 @@ export class SocialPostsService {
     private readonly postLikedModel: Model<LikedPostDocument>,
   ) {}
 
-  async createPost(createPostDto: SocialPostDto): Promise<PostDocument> {
-    return this.socialPostModel.create(createPostDto);
+  async createPost(createPostDto: any): Promise<PostDocument> {
+    try {
+      if (createPostDto.postType == Constants.FEED) {
+        return this.socialPostModel.create(createPostDto);
+      } else {
+        return this.socialPostModel.create({
+          userId: createPostDto.userId,
+          voucherId: createPostDto.reviewObject.voucherId,
+          caption: createPostDto.reviewObject.reviewText,
+          postType: Constants.REVIEW,
+        });
+      }
+    } catch (e) {
+      throw new HttpException(e.toString(), HttpStatus.BAD_REQUEST);
+    }
   }
 
+  async getAllPost(paginationDto): Promise<any> {
+    const { limit, offset } = paginationDto;
+    return this.socialPostModel
+      .aggregate([
+        {
+          $lookup: {
+            from: 'vouchers',
+            let: { voucherId: '$voucherId' },
+            as: 'voucher',
+            pipeline: [
+              {
+                $unwind: '$voucherObject',
+              },
+              {
+                $match: {
+                  $expr: {
+                    $eq: ['$voucherObject._id', '$$voucherId'],
+                  },
+                },
+              },
+            ],
+          },
+        },
+      ])
+      .skip(offset)
+      .limit(limit);
+  }
   async getPost(postId): Promise<PostDocument> {
     return this.socialPostModel.findById(postId);
     // .populate('comments')

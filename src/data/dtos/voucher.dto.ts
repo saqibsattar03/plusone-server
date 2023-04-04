@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 export class VoucherDto {
-  @ApiProperty({ type: String, example: '64082da2a264b35fa2a3e9cf' })
+  @ApiProperty({ type: String })
   restaurantId: any;
 
   @ApiProperty()
@@ -14,10 +14,14 @@ export class VoucherDto {
     voucherImage: string;
     estimatedSavings: string;
     estimatedCost: number;
+    // voucherDisable: [VoucherDisableDates];
   };
 }
 class VoucherPreference {
   preference: string;
+}
+class VoucherDisableDates {
+  dates: Date;
 }
 
 export class UpdateVoucherDto {

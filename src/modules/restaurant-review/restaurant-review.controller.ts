@@ -1,4 +1,13 @@
-import { Body, Controller, Delete, Patch, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { RestaurantReviewService } from './restaurant-review.service';
 import {
   ApiBadRequestResponse,
@@ -12,6 +21,8 @@ import {
   UpdateReviewDto,
 } from '../../data/dtos/restaurant.dto';
 import { Get } from '@nestjs/common/decorators';
+import { JwtAuthGuard } from '../../common/auth/guards/jwt-auth.guard';
+import { PaginationDto } from '../../common/auth/dto/pagination.dto';
 
 @ApiTags('Restaurant Reviews')
 @Controller('review')
@@ -30,8 +41,9 @@ export class RestaurantReviewController {
     description: 'Created review object as response',
   })
   @ApiBadRequestResponse({ description: 'can not create review' })
-  createReview(@Body() data) {
-    console.log('here');
+  @UseGuards(JwtAuthGuard)
+  createReview(@Request() request, @Body() data) {
+    data.userId = request.user.userId;
     return this.restaurantReviewService.createReview(data);
   }
 
@@ -71,11 +83,19 @@ export class RestaurantReviewController {
     description: 'Review Fetched Successfully',
   })
   @ApiQuery({ name: 'restaurantId', type: 'string' })
+  @ApiQuery({ name: 'limit', type: 'number' })
+  @ApiQuery({ name: 'offset', type: 'number' })
   @ApiBadRequestResponse({
     description: 'can not fetch all review',
   })
   @Get('all')
-  getRestaurantReviews(@Query('restaurantId') restaurantId) {
-    return this.restaurantReviewService.getRestaurantReviews(restaurantId);
+  getRestaurantReviews(
+    @Query('restaurantId') restaurantId,
+    @Query() paginationDto: PaginationDto,
+  ) {
+    return this.restaurantReviewService.getRestaurantReviews(
+      restaurantId,
+      paginationDto,
+    );
   }
 }

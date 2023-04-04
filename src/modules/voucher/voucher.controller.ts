@@ -64,34 +64,26 @@ export class VoucherController {
           );
     }
   }
-  @Post('create-for-non-student')
-  @ApiBody({
-    type: VoucherDto,
-    description: 'Request body to create a Voucher for non-student',
-  })
-  @ApiCreatedResponse({
-    type: VoucherDto,
-    description: 'Created Voucher object as response',
-  })
-  @ApiBadRequestResponse({ description: 'can not create voucher' })
-  createNonStudentVoucher(@Body() data) {
-    if (data.voucherObject.voucherImage) {
-      return this.voucherService.createNonStudentVoucher(data);
-    }
-    throw new HttpException(
-      'Picture must be provided to create voucher',
-      HttpStatus.BAD_REQUEST,
-    );
-  }
-
-  @Get('get-all-vouchers-by-restaurant')
+  @Get('all-by-restaurant')
   @ApiQuery({ type: 'string', name: 'restaurantId' })
-  @ApiQuery({ type: 'string', name: 'voucherType' })
   @ApiCreatedResponse({ type: VoucherDto })
   @ApiBadRequestResponse({ description: 'can not fetch voucher' })
   getAllVouchersByRestaurant(@Query('restaurantId') restaurantId) {
     return this.voucherService.getAllVouchersByRestaurant(restaurantId);
   }
+
+  @Get('single')
+  @ApiQuery({ type: 'string', name: 'restaurantId' })
+  @ApiQuery({ type: 'string', name: 'voucherId' })
+  @ApiCreatedResponse({ type: VoucherDto })
+  @ApiBadRequestResponse({ description: 'can not fetch voucher' })
+  getSingleVoucher(
+    @Query('voucherId') voucherId,
+    @Query('restaurantId') restaurantId,
+  ) {
+    return this.voucherService.getSingleVoucher(voucherId, restaurantId);
+  }
+
   @Patch('')
   @ApiQuery({ type: 'string', name: 'voucherId' })
   @ApiBody({ type: UpdateVoucherDto })
@@ -120,20 +112,6 @@ export class VoucherController {
     return this.voucherService.deleteAllVoucher(restaurantId);
   }
 
-  // @Get('ask-for-restaurant-code')
-  // @ApiQuery({ type: 'string', name: 'restaurantId' })
-  // @ApiQuery({ type: 'string', name: 'restaurantCode' })
-  // @ApiCreatedResponse({ type: 'object' })
-  // @ApiBadRequestResponse({ description: 'can not retrieve code' })
-  // askForRestaurantCode(
-  //   @Query('restaurantId') restaurantId,
-  //   @Query('restaurantCode') restaurantCode,
-  // ) {
-  //   return this.voucherService.askForRestaurantCode(
-  //     restaurantId,
-  //     restaurantCode,
-  //   );
-  // }
   @Post('verify-restaurant-code')
   @ApiBody({
     schema: {
@@ -173,5 +151,25 @@ export class VoucherController {
   })
   getUserWhoRedeemVoucher(@Query('voucherId') voucherId) {
     return this.voucherService.getUserWhoRedeemVoucher(voucherId);
+  }
+
+  @Patch('disable')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        voucherId: { type: 'string' },
+        voucherDisableDates: {
+          type: 'string',
+          example: ['20-12-23', '20-12-23'],
+        },
+      },
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'can not disable voucher',
+  })
+  voucherDisableDates(@Body() data) {
+    return this.voucherService.disableVoucherForSpecificDays(data);
   }
 }

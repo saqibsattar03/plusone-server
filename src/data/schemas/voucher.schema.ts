@@ -19,7 +19,7 @@ export class VoucherStructure {
   @Prop()
   _id: mongoose.Schema.Types.ObjectId;
 
-  @Prop()
+  @Prop({ type: String, required: true })
   title: string;
 
   @Prop({ type: () => Number, default: 0 })
@@ -42,12 +42,19 @@ export class VoucherStructure {
     type: () => String,
   })
   estimatedSavings: string;
+
   @Prop({
     type: Number,
     default: 0,
   })
   estimatedCost: number;
+
   @Prop({ type: () => String })
   voucherImage: string;
+
+  @Prop({
+    type: () => [Date],
+  })
+  voucherDisableDates: [Date];
 }
 export const VoucherSchema = SchemaFactory.createForClass(Voucher);

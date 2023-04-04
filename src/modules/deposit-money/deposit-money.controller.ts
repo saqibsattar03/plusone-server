@@ -14,7 +14,14 @@ export class DepositMoneyController {
   }
 
   @Get()
-  sumOfDepositedAmount(@Query('restaurantId') restaurantId) {
-    return this.depositMoneyService.sumOfDepositedAmount(restaurantId);
+  sumOfDepositedAmountOfSingleRestaurant(@Query('restaurantId') restaurantId) {
+    return this.depositMoneyService.sumOfDepositedAmountOfSingleRestaurant(
+      restaurantId,
+    );
+  }
+
+  @Get('all-restaurants')
+  sumOfDepositedAmountOfAllRestaurant() {
+    return this.depositMoneyService.sumOfDepositedAmountOfAllRestaurant();
   }
 }

@@ -2,14 +2,12 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { Comment } from 'src/data/schemas/comment.schema';
-import { Post, PostDocument } from 'src/data/schemas/post.schema';
 import * as moment from 'moment';
 import { CommentDto } from '../../../data/dtos/socialPost.dto';
 import { SocialPostsService } from '../social-posts.service';
 
 @Injectable()
 export class CommentsService {
-  private commentCount = 0;
   constructor(
     @InjectModel(Comment.name) private readonly commentModel: Model<Comment>,
     private readonly socialPostService: SocialPostsService,
@@ -39,11 +37,7 @@ export class CommentsService {
       });
       c = await this.socialPostService.getCommentCount(postId);
       c = c.commentCount + 1;
-      console.log('commentCount = ', c.commentCount);
       await this.socialPostService.updateCommentCount(postId, c);
-      // await this.socialPostModel.updateOne({
-      //   $set: { commentCount: this.commentCount },
-      // });
     } else if (res) {
       await res.updateOne({
         $push: {

@@ -18,6 +18,7 @@ import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { imageValidation } from './common/auth/configs/image.config';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiConsumes,
   ApiCreatedResponse,
@@ -53,7 +54,6 @@ export class AppController {
   @ApiCreatedResponse({ type: String, description: 'uploaded file name' })
   @ApiBadRequestResponse({ description: 'could not upload file' })
   @UseInterceptors(FileInterceptor('media', imageValidation))
-  @UseGuards(JwtAuthGuard)
   async uploadProfileImage(
     @UploadedFile() media: Express.Multer.File,
   ): Promise<any> {
@@ -82,7 +82,6 @@ export class AppController {
   @ApiCreatedResponse({ type: String, description: 'uploaded file names' })
   @ApiBadRequestResponse({ description: 'could not upload files' })
   @UseInterceptors(FilesInterceptor('media', 5, imageValidation))
-  @UseGuards(JwtAuthGuard)
   async uploadMultipleProfileImage(
     @UploadedFiles() media: Array<Express.Multer.File>,
   ): Promise<any> {
@@ -105,16 +104,16 @@ export class AppController {
     },
     status: HttpStatus.OK,
   })
-  @UseGuards(JwtAuthGuard)
   @ApiBadRequestResponse({ description: 'could not upload files' })
   async getFile(@Query('file') file: string): Promise<any> {
     return 'http://192.168.18.56:3000/uploads/' + file;
   }
-  @UseGuards(JwtAuthGuard)
+
+  @ApiQuery({ name: 'media', type: String })
   @Delete('remove-file')
   async removeProfileImage(@Query('media') media, @Res() res): Promise<any> {
     if (media) {
-      const filePath = path.join(__dirname, '..', '..', 'uploads/' + media);
+      const filePath = path.join(__dirname, '..', '..', '/uploads/' + media);
       try {
         fs.unlink(filePath, (err) => {
           if (err)

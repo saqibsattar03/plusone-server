@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { RestaurantReviewController } from './restaurant-review.controller';
 import { RestaurantReviewService } from './restaurant-review.service';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -6,12 +6,8 @@ import {
   RestaurantReview,
   RestaurantReviewSchema,
 } from '../../data/schemas/restaurantReview.schema';
-import { Profile, ProfileSchema } from '../../data/schemas/profile.schema';
-import {
-  Restaurant,
-  RestaurantSchema,
-} from '../../data/schemas/restaurant.schema';
 import { RestaurantModule } from '../restaurant/restaurant.module';
+import { SocialPostsModule } from '../social-posts/social-posts.module';
 
 @Module({
   imports: [
@@ -20,11 +16,8 @@ import { RestaurantModule } from '../restaurant/restaurant.module';
         name: RestaurantReview.name,
         schema: RestaurantReviewSchema,
       },
-      {
-        name: Profile.name,
-        schema: ProfileSchema,
-      },
     ]),
+    SocialPostsModule,
     RestaurantModule,
   ],
   controllers: [RestaurantReviewController],

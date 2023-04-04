@@ -9,4 +9,6 @@ export enum Constants {
   ADMIN = 'ADMIN',
   MERCHANT = 'MERCHANT',
   USER = 'USER',
+  FEED = 'FEED',
+  REVIEW = 'REVIEW',
 }

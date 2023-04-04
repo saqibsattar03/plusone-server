@@ -138,6 +138,14 @@ export class ProfilesService {
     );
   }
 
+  async updatedEstimatedSavings(userId, estimatedSavings): Promise<any> {
+    await this.profileModel.findByIdAndUpdate(
+      {
+        _id: userId,
+      },
+      { estimatedSavings: estimatedSavings },
+    );
+  }
   async getAllUsers(role: string): Promise<any> {
     return this.profileModel.aggregate([
       {
@@ -196,7 +204,6 @@ export class ProfilesService {
   }
 
   async getUser(email: string) {
-    console.log('getUser = ', email);
     return this.profileModel
       .findOne({
         $or: [{ email: email }, { username: email }],

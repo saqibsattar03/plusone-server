@@ -7,6 +7,7 @@ import {
 import mongoose, { Model } from 'mongoose';
 import { RestaurantReviewDto } from '../../data/dtos/restaurant.dto';
 import { RestaurantService } from '../restaurant/restaurant.service';
+import { SocialPostsService } from '../social-posts/social-posts.service';
 
 @Injectable()
 export class RestaurantReviewService {
@@ -14,6 +15,7 @@ export class RestaurantReviewService {
     @InjectModel(RestaurantReview.name)
     private readonly restaurantReviewModel: Model<RestaurantReviewDocument>,
     private readonly restaurantService: RestaurantService,
+    private readonly socialPostService: SocialPostsService,
   ) {}
 
   async createReview(restaurantReviewDto: RestaurantReviewDto): Promise<any> {
@@ -51,6 +53,7 @@ export class RestaurantReviewService {
         restaurantReviewDto.restaurantId,
         res.reviewCount + 1,
       );
+      await this.socialPostService.createPost(restaurantReviewDto);
       return res;
     } else if (res) {
       await res.updateOne({
@@ -71,10 +74,11 @@ export class RestaurantReviewService {
         restaurantReviewDto.restaurantId,
         r.reviewCount + 1,
       );
+      await this.socialPostService.createPost(restaurantReviewDto);
       return res;
     } else
       throw new HttpException(
-        'no such restaurantssss found',
+        'no such restaurant found',
         HttpStatus.BAD_REQUEST,
       );
   }
@@ -138,8 +142,12 @@ export class RestaurantReviewService {
       restaurantId: restaurantId,
     });
   }
-  async getRestaurantReviews(restaurantId): Promise<any> {
-    return this.restaurantReviewModel.findOne({ restaurantId: restaurantId });
+  async getRestaurantReviews(restaurantId, paginationDto): Promise<any> {
+    const { limit, offset } = paginationDto;
+    return this.restaurantReviewModel
+      .findOne({ restaurantId: restaurantId })
+      .skip(offset)
+      .limit(limit);
   }
   async deleteAllReviewsOfUser(userId): Promise<any> {
     await this.restaurantReviewModel.updateMany(

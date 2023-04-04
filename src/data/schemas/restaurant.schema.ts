@@ -16,14 +16,12 @@ export class Restaurant {
   phoneNumber: string;
   @Prop()
   menu: [string];
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: [true, 'profile image is missing'] })
   profileImage: string;
 
   @Prop()
   description: string;
-  @Prop({ type: Number, default: 6 })
-  voucherCount: number;
-  @Prop({ type: [String] })
+  @Prop({ type: [String], required: [true, 'profile image is missing'] })
   media: string[];
 
   @Prop({ type: PointSchema })
@@ -59,7 +57,22 @@ export class Restaurant {
   @Prop({ type: Number, default: 0 })
   reviewCount: number;
   @Prop({ type: Number, default: 0 })
-  totalVoucherCreated: number;
+  totalVoucherCount: number;
+
+  @Prop({ type: Number, default: 0 })
+  totalDeposit: number;
+
+  @Prop({ type: Number, default: 0 })
+  availableDeposit: number;
+
+  @Prop({ type: Number, default: 0 })
+  totalSales: number;
+
+  @Prop({ type: Number, default: 0 })
+  totalDeductions: number;
+
+  @Prop({ type: Number, default: 0 })
+  pendingPayments: number;
 }
 
 export const RestaurantSchema = SchemaFactory.createForClass(Restaurant);

@@ -23,4 +23,4 @@ class DepositStructure {
   createdAt?: Date;
 }
 
-export const depositMoneySchema = SchemaFactory.createForClass(DepositMoney);
+export const DepositMoneySchema = SchemaFactory.createForClass(DepositMoney);

@@ -23,6 +23,16 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('Plus-One')
     .setVersion('1.0')
+    // .addBearerAuth(
+    //   {
+    //     description: 'Default JWT Authorization',
+    //     type: 'http',
+    //     in: 'header',
+    //     scheme: 'bearer',
+    //     bearerFormat: 'JWT',
+    //   },
+    //   'defaultBearerAuth',
+    // )
     .build();
   app.useStaticAssets(join(__dirname, '..', '..', 'uploads'), {
     prefix: '/uploads/',

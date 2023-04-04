@@ -19,7 +19,6 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
-  ApiConsumes,
   ApiCreatedResponse,
   ApiParam,
   ApiQuery,
@@ -31,6 +30,7 @@ import {
 } from '../../data/dtos/socialPost.dto';
 import { SocialPostsService } from './social-posts.service';
 import { JwtAuthGuard } from '../../common/auth/guards/jwt-auth.guard';
+import { PaginationDto } from '../../common/auth/dto/pagination.dto';
 
 @ApiTags('Social Post')
 @Controller('post')
@@ -53,12 +53,12 @@ export class SocialPostsController {
   @UseGuards(JwtAuthGuard)
   createPost(@Request() request, @Body() data) {
     data.userId = request.user.userId;
-    if (data.media.length > 0) return this.socialPostService.createPost(data);
-    else
-      throw new HttpException(
-        'Photos/video must be provided to create a post',
-        HttpStatus.BAD_REQUEST,
-      );
+    return this.socialPostService.createPost(data);
+  }
+
+  @Get('all')
+  getAllPost(@Query() paginationDto: PaginationDto) {
+    return this.socialPostService.getAllPost(paginationDto);
   }
 
   //Retrieve Single Post Route
@@ -97,7 +97,6 @@ export class SocialPostsController {
   @ApiBadRequestResponse({ description: 'could not update post' })
   @UseGuards(JwtAuthGuard)
   async updatePost(@Request() request, @Body() data) {
-    console.log('request = ', request.user);
     const post = await this.socialPostService.updatePost(
       request.user.userId,
       data,

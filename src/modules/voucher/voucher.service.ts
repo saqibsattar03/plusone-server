@@ -11,6 +11,7 @@ import {
 import { RestaurantService } from '../restaurant/restaurant.service';
 import { ProfilesService } from '../profiles/profiles.service';
 import { Constants } from '../../common/constants';
+import { DepositMoneyService } from '../deposit-money/deposit-money.service';
 
 @Injectable()
 export class VoucherService {
@@ -21,6 +22,7 @@ export class VoucherService {
     private readonly redeemVoucherModel: Model<RedeemVoucherDocument>,
     private readonly restaurantService: RestaurantService,
     private readonly profileService: ProfilesService,
+    private readonly depositMoneyService: DepositMoneyService,
   ) {}
 
   async testing(voucherDto: VoucherDto): Promise<any> {
@@ -45,9 +47,16 @@ export class VoucherService {
     return query;
   }
 
+  async getRestaurantTotalVoucherCount(
+    restaurantId,
+    voucherCount,
+  ): Promise<any> {
+    console.log(restaurantId);
+    const r = await this.restaurantService.getRestaurantProfile(restaurantId);
+    const sum = r.totalVoucherCount + voucherCount;
+    await r.updateOne({ totalVoucherCount: sum });
+  }
   async createStudentVoucher(voucherDto: VoucherDto): Promise<any> {
-    const r = await this.testing(voucherDto);
-    console.log(r);
     const oid = new mongoose.Types.ObjectId(voucherDto.voucherObject._id);
     const res = await this.voucherModel.findOne({
       restaurantId: voucherDto.restaurantId,
@@ -68,6 +77,7 @@ export class VoucherService {
             voucherImage: voucherDto.voucherObject.voucherImage,
             estimatedSavings: voucherDto.voucherObject.estimatedSavings,
             estimatedCost: voucherDto.voucherObject.estimatedCost,
+            voucherDisableDates: [],
           },
         },
       });
@@ -80,6 +90,7 @@ export class VoucherService {
         { restaurantId: voucherDto.restaurantId },
         { studentVoucherCount: c.studentVoucherCount + 1 },
       );
+      await this.getRestaurantTotalVoucherCount(voucherDto.restaurantId, 1);
     } else if (res) {
       let c;
       await this.voucherModel.aggregate([
@@ -105,6 +116,7 @@ export class VoucherService {
               voucherImage: voucherDto.voucherObject.voucherImage,
               estimatedSavings: voucherDto.voucherObject.estimatedSavings,
               estimatedCost: voucherDto.voucherObject.estimatedCost,
+              voucherDisableDates: [],
             },
           },
         });
@@ -112,6 +124,7 @@ export class VoucherService {
           { restaurantId: voucherDto.restaurantId },
           { studentVoucherCount: c.studentVoucherCount + 1 },
         );
+        await this.getRestaurantTotalVoucherCount(voucherDto.restaurantId, 1);
       } else
         throw new HttpException(
           'Not Allowed to create more than 3 vouchers for student',
@@ -142,6 +155,7 @@ export class VoucherService {
             voucherImage: voucherDto.voucherObject.voucherImage,
             estimatedSavings: voucherDto.voucherObject.estimatedSavings,
             estimatedCost: voucherDto.voucherObject.estimatedCost,
+            voucherDisableDates: [],
           },
         },
       });
@@ -154,6 +168,7 @@ export class VoucherService {
         { restaurantId: voucherDto.restaurantId },
         { nonStudentVoucherCount: c.nonStudentVoucherCount + 1 },
       );
+      await this.getRestaurantTotalVoucherCount(voucherDto.restaurantId, 1);
     } else if (res) {
       let c;
       await this.voucherModel.aggregate([
@@ -180,6 +195,7 @@ export class VoucherService {
               voucherImage: voucherDto.voucherObject.voucherImage,
               estimatedSavings: voucherDto.voucherObject.estimatedSavings,
               estimatedCost: voucherDto.voucherObject.estimatedCost,
+              voucherDisableDates: [],
             },
           },
         });
@@ -187,6 +203,7 @@ export class VoucherService {
           { restaurantId: voucherDto.restaurantId },
           { nonStudentVoucherCount: c.nonStudentVoucherCount + 1 },
         );
+        await this.getRestaurantTotalVoucherCount(voucherDto.restaurantId, 1);
       } else
         throw new HttpException(
           'Not Allowed to create more than 3 vouchers for non student',
@@ -219,6 +236,7 @@ export class VoucherService {
             voucherImage: voucherDto.voucherObject.voucherImage,
             estimatedSavings: voucherDto.voucherObject.estimatedSavings,
             estimatedCost: voucherDto.voucherObject.estimatedCost,
+            voucherDisableDates: [],
           },
         },
       });
@@ -227,7 +245,6 @@ export class VoucherService {
           restaurantId: voucherDto.restaurantId,
         })
         .select('studentVoucherCount nonStudentVoucherCount -_id');
-      console.log(sCount);
       await this.voucherModel.findOneAndUpdate(
         { restaurantId: voucherDto.restaurantId },
         {
@@ -235,6 +252,7 @@ export class VoucherService {
           nonStudentVoucherCount: sCount.nonStudentVoucherCount + 1,
         },
       );
+      await this.getRestaurantTotalVoucherCount(voucherDto.restaurantId, 2);
     } else if (res) {
       await this.voucherModel.aggregate([
         { $unwind: '$voucherObject' },
@@ -259,6 +277,7 @@ export class VoucherService {
               voucherImage: voucherDto.voucherObject.voucherImage,
               estimatedSavings: voucherDto.voucherObject.estimatedSavings,
               estimatedCost: voucherDto.voucherObject.estimatedCost,
+              voucherDisableDates: [],
             },
           },
         });
@@ -269,6 +288,7 @@ export class VoucherService {
             studentVoucherCount: sCount.studentVoucherCount + 1,
           },
         );
+        await this.getRestaurantTotalVoucherCount(voucherDto.restaurantId, 2);
       } else
         throw new HttpException(
           'one of your voucher type has reached the limit',
@@ -278,6 +298,25 @@ export class VoucherService {
     throw new HttpException('voucher created Successfully', HttpStatus.OK);
   }
 
+  async getSingleVoucher(voucherId, restaurantId): Promise<any> {
+    const oid = new mongoose.Types.ObjectId(restaurantId);
+    const oid1 = new mongoose.Types.ObjectId(voucherId);
+    return this.voucherModel.aggregate([
+      {
+        $match: {
+          restaurantId: oid,
+        },
+      },
+      {
+        $unwind: '$voucherObject',
+      },
+      {
+        $match: {
+          'voucherObject._id': oid1,
+        },
+      },
+    ]);
+  }
   async getAllVouchersByRestaurant(restaurantId): Promise<any> {
     return this.voucherModel.findOne({ restaurantId: restaurantId });
   }
@@ -293,6 +332,18 @@ export class VoucherService {
             data.voucherObject.estimatedSavings,
           'voucherObject.$.estimatedCost': data.voucherObject.estimatedCost,
           'voucherObject.$.voucherImage': data.voucherObject.voucherImage,
+        },
+      },
+      { returnDocument: 'after' },
+    );
+  }
+  async disableVoucherForSpecificDays(data): Promise<any> {
+    const oid = new mongoose.Types.ObjectId(data.voucherId);
+    return this.voucherModel.findOneAndUpdate(
+      { 'voucherObject._id': oid },
+      {
+        $set: {
+          'voucherObject.$.voucherDisableDates': data.voucherDisableDates,
         },
       },
       { returnDocument: 'after' },
@@ -339,10 +390,29 @@ export class VoucherService {
           restaurantId: data.restaurantId,
           verificationCode: verificationCode,
         });
+        const oid = new mongoose.Types.ObjectId(data.voucherId);
         const rPoints = await this.profileService.getSingleProfile(data.userId);
         await this.profileService.updateRewardPoints(
           data.userId,
           rPoints.rewardPoints + 1,
+        );
+        const voucher = await this.voucherModel.aggregate([
+          {
+            $unwind: '$voucherObject',
+          },
+          {
+            $match: {
+              'voucherObject._id': oid,
+            },
+          },
+        ]);
+        await this.restaurantService.addTotalSalesAndDeductions(
+          voucher[0].voucherObject.estimatedCost,
+          data.restaurantId,
+        );
+        await this.profileService.updatedEstimatedSavings(
+          data.userId,
+          voucher[0].voucherObject.estimatedSavings,
         );
         return res.verificationCode;
       } else
@@ -412,7 +482,6 @@ export class VoucherService {
       },
     ]);
   }
-
   async getTotalVoucherRedeemedCount(restaurantId): Promise<any> {
     const oid = new mongoose.Types.ObjectId(restaurantId);
     return this.redeemVoucherModel.aggregate([
@@ -430,7 +499,6 @@ export class VoucherService {
     const oid = new mongoose.Types.ObjectId(voucherId);
     return this.redeemVoucherModel.find({ voucherId: oid });
   }
-
   async fourDigitCode(length) {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 

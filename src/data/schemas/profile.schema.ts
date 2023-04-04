@@ -49,13 +49,6 @@ export class Profile extends User {
   })
   postAudiencePreference: string;
 
-  // @Prop({
-  //   type: String,
-  //   unique: true,
-  //   required: [true, 'username is required'],
-  // })
-  // username: string;
-
   @Prop({ type: String })
   profileImage: string;
 
@@ -88,6 +81,9 @@ export class Profile extends User {
 
   @Prop({ type: [String] })
   scopes: [string];
+
+  @Prop({ type: String })
+  estimatedSavings: string;
 }
 
 export const ProfileSchema = SchemaFactory.createForClass(Profile);

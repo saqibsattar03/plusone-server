@@ -9,6 +9,7 @@ import {
 } from '../../data/schemas/redeemVoucher.schema';
 import { RestaurantModule } from '../restaurant/restaurant.module';
 import { ProfilesModule } from '../profiles/profiles.module';
+import { DepositMoneyModule } from '../deposit-money/deposit-money.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ProfilesModule } from '../profiles/profiles.module';
     ]),
     RestaurantModule,
     ProfilesModule,
+    DepositMoneyModule,
   ],
   controllers: [VoucherController],
   providers: [VoucherService],
