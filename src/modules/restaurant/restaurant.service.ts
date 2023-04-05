@@ -40,32 +40,11 @@ export class RestaurantService {
   }
 
   async getAllRestaurants(paginationDto: PaginationDto): Promise<any> {
+    const fieldName = 'reviewObject';
+    const lookupAndProjectStage = this.generateLookupAndProjectStage(fieldName);
     const { limit, offset } = paginationDto;
     return this.restaurantModel
-      .aggregate([
-        {
-          $lookup: {
-            from: 'restaurantreviews',
-            localField: '_id',
-            foreignField: 'restaurantId',
-            as: 'restaurantReviews',
-          },
-        },
-        {
-          $project: {
-            _id: '$_id',
-            restaurantName: '$restaurantName',
-            profileImage: '$profileImage',
-            description: '$description',
-            phoneNumber: '$phoneNumber',
-            media: '$media',
-            isSponsored: '$isSponsored',
-            totalVoucherCount: '$totalVoucherCount',
-            reviewCount: '$reviewCount',
-            reviewObject: '$restaurantReviews.reviewObject.rating',
-          },
-        },
-      ])
+      .aggregate([...lookupAndProjectStage])
       .skip(offset)
       .limit(limit);
   }
@@ -102,12 +81,21 @@ export class RestaurantService {
           preserveNullAndEmptyArrays: true,
         },
       },
+
       {
         $lookup: {
           from: 'redeemvouchers',
           localField: '_id',
           foreignField: 'restaurantId',
           as: 'redeemedVoucher',
+        },
+      },
+      {
+        $lookup: {
+          from: 'profiles',
+          localField: 'review.reviewObject.userId',
+          foreignField: '_id',
+          as: 'users',
         },
       },
       {
@@ -120,7 +108,32 @@ export class RestaurantService {
           vouchers: '$voucher.voucherObject',
           media: '$media',
           redeemedVouchers: '$redeemedVoucher',
+          users: '$users',
         },
+      },
+      {
+        $unset: [
+          'user.password',
+          'user.email',
+          'user.username',
+          'user.confirmationCode',
+          'user.status',
+          'user.role',
+          'user.accountType',
+          'user.socialLinks',
+          'user.postAudiencePreference',
+          'user.dietRequirements',
+          'user.favoriteRestaurants',
+          'user.favoriteCuisines',
+          'user.favoriteChefs',
+          'user.rewardPoints',
+          'user.isPremium',
+          'user.isSkip',
+          'user.accountHolderType',
+          'user.scopes',
+          'user.bio',
+          'user.estimatedSavings',
+        ],
       },
     ]);
   }
@@ -176,7 +189,6 @@ export class RestaurantService {
       })
       .select('uniqueCode -_id');
   }
-
   async restaurantFilters(data, paginationQuery): Promise<any> {
     const fieldName = 'reviewObject';
     const lookupAndProjectStage = this.generateLookupAndProjectStage(fieldName);
@@ -206,7 +218,7 @@ export class RestaurantService {
       query.push(diet);
     }
     if (data.nearest) {
-      maxDistance = 1609.34 * 5;
+      maxDistance = 1609.34 * 2;
       sort = -1;
     }
     if (
@@ -235,33 +247,9 @@ export class RestaurantService {
                 ],
               },
               distanceField: 'distanceFromMe',
-              maxDistance: maxDistance ?? 500 * METERS_PER_MILE, //!*** distance in meters ***!//
-              distanceMultiplier: 0.000621371,
+              maxDistance: maxDistance ?? 100 * METERS_PER_MILE, //!*** distance in meters ***!//
+              distanceMultiplier: 1 / 1609.34,
               spherical: true,
-            },
-          },
-          {
-            $lookup: {
-              from: 'restaurantreviews',
-              localField: '_id',
-              foreignField: 'restaurantId',
-              as: 'restaurantReviews',
-            },
-          },
-          {
-            $project: {
-              _id: '$_id',
-              restaurantName: '$restaurantName',
-              profileImage: '$profileImage',
-              description: '$description',
-              phoneNumber: '$phoneNumber',
-              media: '$media',
-              isSponsored: '$isSponsored',
-              totalVoucherCount: '$totalVoucherCount',
-              reviewCount: '$reviewCount',
-              location: '$location',
-              distanceFromMe: '$distanceFromMe',
-              reviewObject: '$restaurantReviews.reviewObject.rating',
             },
           },
         ];
@@ -400,9 +388,25 @@ export class RestaurantService {
           location: '$location',
           totalVoucherCount: '$totalVoucherCount',
           reviewCount: '$reviewCount',
+          createdAt: '$createdAt',
+          updatedAt: '$updatedAt',
           [`${fieldName}`]: '$restaurantReviews.reviewObject.rating',
         },
       },
     ];
+  }
+
+  async adminStats(): Promise<any> {
+    return this.restaurantModel.aggregate([
+      {
+        $group: {
+          _id: 0,
+          totalDeposit: { $sum: '$totalDeposit' },
+          totalSales: { $sum: '$totalSales' },
+          totalDeductions: { $sum: '$totalDeductions' },
+          availableDeposit: { $sum: '$availableDeposit' },
+        },
+      },
+    ]);
   }
 }

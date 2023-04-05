@@ -32,6 +32,9 @@ export class Post {
   @Prop({ type: [String] })
   media: string[];
 
+  @Prop({ type: String, enum: ['IMAGE', 'VIDEO'] })
+  mediaType: string;
+
   @Prop({ type: Number, default: 0 })
   likesCount: number;
 

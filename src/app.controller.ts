@@ -6,7 +6,6 @@ import {
   Post,
   Query,
   UploadedFile,
-  UseGuards,
 } from '@nestjs/common';
 import {
   Get,
@@ -18,7 +17,6 @@ import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { imageValidation } from './common/auth/configs/image.config';
 import {
   ApiBadRequestResponse,
-  ApiBearerAuth,
   ApiBody,
   ApiConsumes,
   ApiCreatedResponse,
@@ -28,7 +26,8 @@ import {
 } from '@nestjs/swagger';
 import * as fs from 'fs';
 import * as path from 'path';
-import { JwtAuthGuard } from './common/auth/guards/jwt-auth.guard';
+import { createReadStream } from 'fs';
+import { parse } from 'csv-parse';
 
 @ApiTags('Main')
 @Controller()
@@ -81,7 +80,7 @@ export class AppController {
   })
   @ApiCreatedResponse({ type: String, description: 'uploaded file names' })
   @ApiBadRequestResponse({ description: 'could not upload files' })
-  @UseInterceptors(FilesInterceptor('media', 5, imageValidation))
+  @UseInterceptors(FilesInterceptor('media', 6, imageValidation))
   async uploadMultipleProfileImage(
     @UploadedFiles() media: Array<Express.Multer.File>,
   ): Promise<any> {
@@ -130,5 +129,30 @@ export class AppController {
         });
       }
     } else throw new HttpException('file not selected', HttpStatus.BAD_REQUEST);
+  }
+
+  @Post('csv')
+  @UseInterceptors(FileInterceptor('media', imageValidation))
+  async uploadCSVFile(@UploadedFile() media: Express.Multer.File) {
+    try {
+      const stream = createReadStream(media.path);
+      const menu = [];
+      stream
+        .pipe(parse({ columns: true }))
+        .on('error', (error) => {
+          return error;
+        })
+        .on('data', (data) => {
+          menu.push(data);
+        })
+        .on('end', async () => {
+          // insert data into data collection here in end method
+          console.log(menu);
+        });
+      // console.log(menu[0]);
+      return media.filename;
+    } catch (e) {
+      throw new HttpException(e.toString(), HttpStatus.BAD_REQUEST);
+    }
   }
 }

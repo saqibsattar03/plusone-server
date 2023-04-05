@@ -11,6 +11,7 @@ import {
 import { RestaurantReviewService } from './restaurant-review.service';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
   ApiQuery,
@@ -32,6 +33,7 @@ export class RestaurantReviewController {
   ) {}
 
   @Post('')
+  @ApiBearerAuth('access-token')
   @ApiBody({
     type: RestaurantReviewDto,
     description: 'Request body to create a review',
@@ -42,8 +44,7 @@ export class RestaurantReviewController {
   })
   @ApiBadRequestResponse({ description: 'can not create review' })
   @UseGuards(JwtAuthGuard)
-  createReview(@Request() request, @Body() data) {
-    data.userId = request.user.userId;
+  createReview(@Body() data) {
     return this.restaurantReviewService.createReview(data);
   }
 

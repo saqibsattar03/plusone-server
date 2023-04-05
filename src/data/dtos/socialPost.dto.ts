@@ -3,44 +3,49 @@ import { IsNotEmpty } from 'class-validator';
 import { LocationDto } from './location.dto';
 
 export class SocialPostDto {
-  @ApiProperty({ description: 'user Id' })
+  @ApiProperty({ type: String, name: 'userId' })
   @IsNotEmpty()
   userId: string;
-  @ApiProperty({ description: 'voucher Id' })
+  @ApiProperty({ type: String, name: 'voucherId' })
   voucherId: string;
 
-  @ApiProperty({ description: 'location' })
+  @ApiProperty({ type: LocationDto, name: 'location' })
   location: LocationDto;
 
-  @ApiProperty({ description: 'caption for the post' })
+  @ApiProperty({ type: String, name: 'caption' })
   caption: string;
 
   @ApiProperty({
-    description: 'images/video address for the post',
+    name: 'media',
     type: [String],
   })
   media: string[];
 
+  @ApiProperty({ type: String, name: 'mediaType' })
+  mediaType: string;
+
   @ApiProperty({
-    description: 'Post visible to audience',
+    type: String,
+    name: 'postAudiencePreference',
   })
   postAudiencePreference: string;
 
-  @ApiProperty({ description: 'is it feed or review type post' })
+  @ApiProperty({ type: String, name: 'postType' })
   postType: string;
 }
 
 export class UpdateSocialPost {
-  @ApiProperty()
+  @ApiProperty({ type: String, name: 'postId' })
   postId: string;
-  @ApiProperty({ description: 'location' })
+  @ApiProperty({ type: LocationDto, name: 'location' })
   location: LocationDto;
 
-  @ApiProperty({ description: 'caption for the post' })
+  @ApiProperty({ type: String, name: 'caption' })
   caption: string;
 
   @ApiProperty({
-    description: 'Post visible to audience',
+    type: String,
+    name: 'postAudiencePreference',
   })
   postAudiencePreference: string;
 }
@@ -60,9 +65,9 @@ export class CommentDto {
   // @IsNotEmpty()
   // userId: string;
 
-  // @ApiProperty()
-  // @IsNotEmpty()
-  // postId: string;
+  @ApiProperty()
+  @IsNotEmpty()
+  postId: string;
 
   @ApiProperty()
   @IsNotEmpty()

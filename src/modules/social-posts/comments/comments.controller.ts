@@ -6,9 +6,12 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
   ApiParam,
@@ -18,6 +21,7 @@ import {
 import { CommentsService } from './comments.service';
 import { Get } from '@nestjs/common/decorators';
 import { CommentDto } from '../../../data/dtos/socialPost.dto';
+import { JwtAuthGuard } from '../../../common/auth/guards/jwt-auth.guard';
 
 @ApiTags('Comments')
 @Controller('comment')
@@ -26,7 +30,8 @@ export class CommentsController {
 
   //create comment route
 
-  @Post(':postId')
+  @Post('')
+  @ApiBearerAuth('access-token')
   @ApiParam({ name: 'postId', type: 'string' })
   @ApiBody({ type: CommentDto, description: 'create comment' })
   @ApiCreatedResponse({
@@ -34,8 +39,12 @@ export class CommentsController {
     description: 'Comment created successfully',
   })
   @ApiBadRequestResponse({ description: 'comment could not be created' })
-  async postComment(@Body() data, @Param('postId') postId) {
-    return this.commentService.postComment(data, postId);
+  @UseGuards(JwtAuthGuard)
+  async postComment(@Request() request, @Body() data) {
+    console.log('request.userId = ', request.user.usrId);
+    data.commentObject.userId = request.user.userId;
+    console.log('data.userId = ', data.commentObject.userId);
+    return this.commentService.postComment(data);
   }
 
   @Get()
@@ -53,13 +62,16 @@ export class CommentsController {
 
   //remove comment route
   @Delete('remove')
+  @ApiBearerAuth('access-token')
   @ApiQuery({ name: 'commentId', type: 'string' })
   @ApiQuery({ name: 'postId', type: 'string' })
   @ApiCreatedResponse({
     description: 'Comment removed successfully',
   })
   @ApiBadRequestResponse({ description: 'comment could not removed' })
-  async removeComment(@Query('commentId') commentId, @Query('postId') postId) {
-    return this.commentService.deleteComment(commentId, postId);
+  @UseGuards(JwtAuthGuard)
+  async removeComment(@Request() request, @Body() data) {
+    data.userId = request.use.userId;
+    return this.commentService.deleteComment(data);
   }
 }

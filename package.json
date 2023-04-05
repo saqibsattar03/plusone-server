@@ -36,6 +36,8 @@
     "class-validator": "^0.14.0",
     "crypto": "^1.0.1",
     "crypto-js": "^4.1.1",
+    "csv-parse": "^5.3.6",
+    "csv-parser": "^3.0.0",
     "dotenv": "^16.0.3",
     "moment": "^2.29.4",
     "mongoose": "^6.10.0",

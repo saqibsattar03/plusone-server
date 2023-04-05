@@ -127,6 +127,10 @@ export class RestaurantResponseDto {
 
   @ApiProperty({ type: [[Number]], example: '[[15,2]]' })
   reviewObject: [[number]];
+  @ApiProperty()
+  createdAt: Date;
+  @ApiProperty()
+  updatedAt: Date;
 }
 
 export class SingleRestaurantResponseDto {
@@ -187,6 +191,18 @@ export class SingleRestaurantResponseDto {
     ],
   })
   redeemedVouchers: [object];
+  @ApiProperty({
+    type: [Object],
+    example: [
+      {
+        _id: '641abb0494db69e13473326f',
+        firstname: 'abc',
+        surname: 'xyz',
+        profileImage: 'dsgkdsjdhsk.jpg',
+      },
+    ],
+  })
+  users: [object];
 }
 
 export class UpdateRestaurantDto {

@@ -44,6 +44,16 @@ export const imageValidation = {
         );
       }
       cb(null, true);
+    } else if (file.mimetype.match(/\/(csv)$/)) {
+      if (fileSize > 2000000) {
+        cb(
+          new HttpException(
+            'file size is too large',
+            HttpStatus.NOT_ACCEPTABLE,
+          ),
+        );
+      }
+      cb(null, true);
     } else {
       // Reject file
       cb(

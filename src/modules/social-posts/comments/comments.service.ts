@@ -13,45 +13,45 @@ export class CommentsService {
     private readonly socialPostService: SocialPostsService,
   ) {}
 
-  async postComment(createCommentDto: CommentDto, postId): Promise<Comment> {
-    createCommentDto.commentObject._id = new mongoose.Types.ObjectId(
-      createCommentDto.commentObject._id,
+  async postComment(commentDto: CommentDto): Promise<Comment> {
+    commentDto.commentObject._id = new mongoose.Types.ObjectId(
+      commentDto.commentObject._id,
     );
 
-    createCommentDto.commentObject.userId = new mongoose.Types.ObjectId(
-      createCommentDto.commentObject.userId,
+    commentDto.commentObject.userId = new mongoose.Types.ObjectId(
+      commentDto.commentObject.userId,
     );
     let c;
-    const res = await this.commentModel.findOne({ postId: postId });
+    const res = await this.commentModel.findOne({ postId: commentDto.postId });
     if (!res) {
-      const r = await this.commentModel.create({ postId: postId });
+      const r = await this.commentModel.create({ postId: commentDto.postId });
       await r.updateOne({
         $push: {
           commentObject: {
-            _id: createCommentDto.commentObject._id,
-            userId: createCommentDto.commentObject.userId,
-            commentText: createCommentDto.commentObject.commentText,
+            _id: commentDto.commentObject._id,
+            userId: commentDto.commentObject.userId,
+            commentText: commentDto.commentObject.commentText,
             updatedAt: moment().format(),
           },
         },
       });
-      c = await this.socialPostService.getCommentCount(postId);
+      c = await this.socialPostService.getCommentCount(commentDto.postId);
       c = c.commentCount + 1;
-      await this.socialPostService.updateCommentCount(postId, c);
+      await this.socialPostService.updateCommentCount(commentDto.postId, c);
     } else if (res) {
       await res.updateOne({
         $push: {
           commentObject: {
-            _id: createCommentDto.commentObject._id,
-            userId: createCommentDto.commentObject.userId,
-            commentText: createCommentDto.commentObject.commentText,
+            _id: commentDto.commentObject._id,
+            userId: commentDto.commentObject.userId,
+            commentText: commentDto.commentObject.commentText,
             updatedAt: moment().format(),
           },
         },
       });
-      c = await this.socialPostService.getCommentCount(postId);
+      c = await this.socialPostService.getCommentCount(commentDto.postId);
       c = c.commentCount + 1;
-      await this.socialPostService.updateCommentCount(postId, c);
+      await this.socialPostService.updateCommentCount(commentDto.postId, c);
     }
     throw new HttpException('comment created ', HttpStatus.OK);
   }
@@ -111,23 +111,23 @@ export class CommentsService {
     ]);
   }
 
-  async deleteComment(commentId, postId): Promise<any> {
+  async deleteComment(data): Promise<any> {
     const res = await this.commentModel.findOne({
-      postId: postId,
+      postId: data.postId,
     });
     if (!res)
       throw new HttpException('no such Post found', HttpStatus.NOT_FOUND);
     else if (res) {
-      const oid = mongoose.Types.ObjectId.createFromHexString(commentId);
+      const oid = mongoose.Types.ObjectId.createFromHexString(data.commentId);
 
       const r = await this.commentModel.updateOne(
-        { postId: postId },
+        { postId: data.postId },
         { $pull: { commentObject: { _id: oid } } },
         { safe: true },
       );
-      let c = await this.socialPostService.getCommentCount(postId);
+      let c = await this.socialPostService.getCommentCount(data.postId);
       c = c.commentCount - 1;
-      await this.socialPostService.updateCommentCount(postId, c);
+      await this.socialPostService.updateCommentCount(data.postId, c);
       return r;
     }
     throw new HttpException('no such comment found', HttpStatus.NOT_FOUND);

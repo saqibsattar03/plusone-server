@@ -18,15 +18,15 @@ export class SocialPostsService {
     private readonly postLikedModel: Model<LikedPostDocument>,
   ) {}
 
-  async createPost(createPostDto: any): Promise<PostDocument> {
+  async createPost(postDto: any): Promise<PostDocument> {
     try {
-      if (createPostDto.postType == Constants.FEED) {
-        return this.socialPostModel.create(createPostDto);
+      if (postDto.postType == Constants.FEED) {
+        return this.socialPostModel.create(postDto);
       } else {
         return this.socialPostModel.create({
-          userId: createPostDto.userId,
-          voucherId: createPostDto.reviewObject.voucherId,
-          caption: createPostDto.reviewObject.reviewText,
+          userId: postDto.userId,
+          voucherId: postDto.reviewObject.voucherId,
+          caption: postDto.reviewObject.reviewText,
           postType: Constants.REVIEW,
         });
       }

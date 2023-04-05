@@ -107,7 +107,6 @@ export class ProfilesController {
   }
 
   @ApiBody({ type: RestaurantFilter })
-  @ApiQuery({ type: PaginationDto })
   @ApiCreatedResponse({ type: RestaurantResponseDto })
   @Post('near-by-restaurants')
   getNearByRestaurants(@Body() data, @Query() paginationQuery: PaginationDto) {

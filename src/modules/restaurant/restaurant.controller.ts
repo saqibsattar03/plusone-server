@@ -108,4 +108,9 @@ export class RestaurantController {
   filterPopularRestaurant() {
     return this.restaurantService.filterPopularRestaurant();
   }
+
+  @Get('admin-stats')
+  adminStats() {
+    return this.restaurantService.adminStats();
+  }
 }
