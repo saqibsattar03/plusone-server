@@ -25,7 +25,9 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  GetSocialPostDto,
   SocialPostDto,
+  SocialPostResponseDto,
   UpdateSocialPost,
 } from '../../data/dtos/socialPost.dto';
 import { SocialPostsService } from './social-posts.service';
@@ -37,7 +39,7 @@ import { PaginationDto } from '../../common/auth/dto/pagination.dto';
 export class SocialPostsController {
   constructor(private readonly socialPostService: SocialPostsService) {}
 
-  //Create Post Route
+  /*** Create Post Route ***/
 
   @Post('')
   @ApiBearerAuth('access_token')
@@ -57,12 +59,16 @@ export class SocialPostsController {
     return this.socialPostService.createPost(data);
   }
 
-  @Post('all')
-  getAllPost(@Body() data) {
-    return this.socialPostService.getAllPost(data);
+  /*** get all public posts or following posts ***/
+  @ApiQuery({ type: GetSocialPostDto })
+  @ApiCreatedResponse({ type: SocialPostResponseDto })
+  @ApiBadRequestResponse({ description: 'can not fetch posts' })
+  @Get('all')
+  getAllPost(@Query() paginationDto: PaginationDto, @Body() data) {
+    return this.socialPostService.getAllPost(paginationDto, data);
   }
 
-  //Retrieve Single Post Route
+  /***Retrieve Single Post Route***/
 
   @Get(':postId')
   @ApiParam({ name: 'postId', type: 'string' })
@@ -82,7 +88,7 @@ export class SocialPostsController {
     }
   }
 
-  //Post Update Route
+  /***Post Update Route ***/
 
   @Patch('')
   @ApiBearerAuth('access_token')
@@ -105,7 +111,7 @@ export class SocialPostsController {
     if (!post) throw new NotFoundException(' Post does not exist');
     return post;
   }
-  //Delete Post Route
+  /***Delete Post Route ***/
 
   @Delete(':postId')
   @ApiBearerAuth('access_token')
@@ -117,7 +123,7 @@ export class SocialPostsController {
     return this.socialPostService.removePost(request.user.userId, postId);
   }
 
-  //Like Post  Route
+  /***Like Post  Route ***/
 
   @Post('like')
   @ApiBearerAuth('access_token')
@@ -139,7 +145,7 @@ export class SocialPostsController {
     }
   }
 
-  //Remove Like Route
+  /***Remove Like Route ***/
 
   @Patch('remove-like')
   @ApiBearerAuth('access_token')
@@ -157,6 +163,7 @@ export class SocialPostsController {
     }
   }
 
+  /*** search post by caption ***/
   @Get('caption')
   filterRestaurantBasedOnCaption(@Query('keyword') keyword) {
     return this.socialPostService.filterPostBasedOnCaption(keyword);

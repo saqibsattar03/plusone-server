@@ -35,6 +35,10 @@ export class SocialPostDto {
 }
 
 export class GetSocialPostDto {
+  postType: string;
+  userId: string;
+}
+export class SocialPostResponseDto {
   @ApiProperty({ type: String, name: 'userId' })
   @IsNotEmpty()
   userId: string;
