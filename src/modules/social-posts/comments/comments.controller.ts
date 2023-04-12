@@ -41,9 +41,7 @@ export class CommentsController {
   @ApiBadRequestResponse({ description: 'comment could not be created' })
   @UseGuards(JwtAuthGuard)
   async postComment(@Request() request, @Body() data) {
-    console.log('request.userId = ', request.user.usrId);
     data.commentObject.userId = request.user.userId;
-    console.log('data.userId = ', data.commentObject.userId);
     return this.commentService.postComment(data);
   }
 

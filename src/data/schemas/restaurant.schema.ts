@@ -71,8 +71,8 @@ export class Restaurant {
   @Prop({ type: Number, default: 0 })
   totalDeductions: number;
 
-  @Prop({ type: Number, default: 0 })
-  pendingPayments: number;
+  @Prop({ type: String })
+  locationName: string;
 }
 
 export const RestaurantSchema = SchemaFactory.createForClass(Restaurant);

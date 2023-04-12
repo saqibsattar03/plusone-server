@@ -73,15 +73,11 @@ export class VoucherController {
   }
 
   @Get('single')
-  @ApiQuery({ type: 'string', name: 'restaurantId' })
   @ApiQuery({ type: 'string', name: 'voucherId' })
   @ApiCreatedResponse({ type: VoucherDto })
   @ApiBadRequestResponse({ description: 'can not fetch voucher' })
-  getSingleVoucher(
-    @Query('voucherId') voucherId,
-    @Query('restaurantId') restaurantId,
-  ) {
-    return this.voucherService.getSingleVoucher(voucherId, restaurantId);
+  getSingleVoucher(@Query('voucherId') voucherId) {
+    return this.voucherService.getSingleVoucher(voucherId);
   }
 
   @Patch('')
@@ -171,5 +167,11 @@ export class VoucherController {
   })
   voucherDisableDates(@Body() data) {
     return this.voucherService.disableVoucherForSpecificDays(data);
+  }
+
+  @ApiQuery({ type: String, name: 'restaurantId', required: false })
+  @Get('all-redeemed')
+  getRedeemedVoucher(@Query('restaurantId') restaurantId) {
+    return this.voucherService.getAllRedeemedVouchers(restaurantId);
   }
 }

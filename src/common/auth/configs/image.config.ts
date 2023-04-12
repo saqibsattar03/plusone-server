@@ -44,7 +44,7 @@ export const imageValidation = {
         );
       }
       cb(null, true);
-    } else if (file.mimetype.match(/\/(csv)$/)) {
+    } else if (file.mimetype.match(/\/(pdf)$/)) {
       if (fileSize > 2000000) {
         cb(
           new HttpException(

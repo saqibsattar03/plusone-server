@@ -212,4 +212,7 @@ export class RestaurantFilter {
 
   @ApiProperty({ type: Number })
   latitude: number;
+
+  @ApiProperty({ type: Boolean })
+  popular: boolean;
 }

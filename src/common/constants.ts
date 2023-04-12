@@ -11,4 +11,6 @@ export enum Constants {
   USER = 'USER',
   FEED = 'FEED',
   REVIEW = 'REVIEW',
+  PUBLIC = 'PUBLIC',
+  FOLLOWING = 'FOLLOWING',
 }

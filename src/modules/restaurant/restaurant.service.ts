@@ -14,6 +14,8 @@ import mongoose, { Model } from 'mongoose';
 import { RestaurantDto } from '../../data/dtos/restaurant.dto';
 import { PaginationDto } from '../../common/auth/dto/pagination.dto';
 import { ProfilesService } from '../profiles/profiles.service';
+import * as moment from 'moment';
+import { random } from 'nanoid';
 
 @Injectable()
 export class RestaurantService {
@@ -49,8 +51,18 @@ export class RestaurantService {
       .limit(limit);
   }
   async getSingleRestaurantDetails(restaurantId): Promise<any> {
+    // console.log(
+    //   'date shjfkhf = ',
+    //   `${moment(new Date()).format('YYYY-MM-DD')}T00:00:00.000+00:00`,
+    //   // moment(
+    //   //   moment(new Date()).utc().format('YYYY-MM-DD'),
+    //   //   moment.defaultFormatUtc,
+    //   // )
+    //   //   .utc()
+    //   //   .format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+    // );
     const oid = new mongoose.Types.ObjectId(restaurantId);
-    return this.restaurantModel.aggregate([
+    const pipeline = [
       {
         $match: {
           _id: oid,
@@ -81,7 +93,6 @@ export class RestaurantService {
           preserveNullAndEmptyArrays: true,
         },
       },
-
       {
         $lookup: {
           from: 'redeemvouchers',
@@ -113,29 +124,92 @@ export class RestaurantService {
       },
       {
         $unset: [
-          'user.password',
-          'user.email',
-          'user.username',
-          'user.confirmationCode',
-          'user.status',
-          'user.role',
-          'user.accountType',
-          'user.socialLinks',
-          'user.postAudiencePreference',
-          'user.dietRequirements',
-          'user.favoriteRestaurants',
-          'user.favoriteCuisines',
-          'user.favoriteChefs',
-          'user.rewardPoints',
-          'user.isPremium',
-          'user.isSkip',
-          'user.accountHolderType',
-          'user.scopes',
-          'user.bio',
-          'user.estimatedSavings',
+          'users.password',
+          'users.confirmationCode',
+          'users.status',
+          'users.role',
+          'users.accountType',
+          'users.socialLinks',
+          'users.postAudiencePreference',
+          'users.dietRequirements',
+          'users.favoriteRestaurants',
+          'users.favoriteCuisines',
+          'users.favoriteChefs',
+          'users.rewardPoints',
+          'users.isPremium',
+          'users.isSkip',
+          'users.scopes',
+          'users.bio',
+          'users.estimatedSavings',
         ],
       },
-    ]);
+      {
+        $unwind: {
+          path: '$vouchers',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          restaurantName: 1,
+          profileImage: 1,
+          reviews: 1,
+          vouchers: {
+            $cond: {
+              if: {
+                $in: [
+                  new Date(
+                    `${moment(new Date()).format(
+                      'YYYY-MM-DD',
+                    )}T00:00:00.000+00:00`,
+                  ),
+                  '$vouchers.voucherDisableDates',
+                ],
+              },
+              then: null,
+              else: '$vouchers',
+            },
+          },
+          media: 1,
+          redeemedVouchers: 1,
+          users: 1,
+        },
+      },
+      {
+        $match: {
+          vouchers: {
+            $ne: null,
+          },
+        },
+      },
+      {
+        $group: {
+          _id: '$_id',
+          restaurantName: {
+            $first: '$restaurantName',
+          },
+          profileImage: {
+            $first: '$profileImage',
+          },
+          reviews: {
+            $first: '$reviews',
+          },
+          media: {
+            $first: '$media',
+          },
+          redeemedVouchers: {
+            $first: '$redeemedVouchers',
+          },
+          users: {
+            $first: '$users',
+          },
+          vouchers: {
+            $push: '$vouchers',
+          },
+        },
+      },
+    ];
+    return this.restaurantModel.aggregate(pipeline);
   }
 
   async getRestaurantProfile(restaurantId): Promise<any> {
@@ -152,6 +226,8 @@ export class RestaurantService {
           restaurantName: data.restaurantName,
           phoneNumber: data.phoneNumber,
           menu: data.menu,
+          profileImage: data.profileImage,
+          media: data.media,
           description: data.description,
           location: data.location,
           tags: data.tags,
@@ -159,6 +235,7 @@ export class RestaurantService {
           culinaryOptions: data.culinaryOptions,
           status: data.status,
           isSponsored: data.isSponsored,
+          locationName: data.locationName,
         },
       },
       { returnDocument: 'after' },
@@ -190,14 +267,53 @@ export class RestaurantService {
       .select('uniqueCode -_id');
   }
   async restaurantFilters(data, paginationQuery): Promise<any> {
+    console.log('longitude = ', data.longitude);
+    console.log('latitude = ', data.latitude);
+    console.log('popular = ', data.popular);
     const fieldName = 'reviewObject';
     const lookupAndProjectStage = this.generateLookupAndProjectStage(fieldName);
     const { limit, offset } = paginationQuery;
     const METERS_PER_MILE = 1609.34;
     const query = [];
     let maxDistance;
-    let sort;
-    let pipeline;
+    let sort = Math.random() < 0.5 ? -1 : 1;
+    console.log(sort);
+    let pipeline = [];
+
+    if (data.nearest) {
+      maxDistance = 1609.34 * 2;
+      sort = -1;
+      pipeline.push({
+        $geoNear: {
+          near: {
+            type: 'Point',
+            coordinates: [
+              parseFloat(data.longitude),
+              parseFloat(data.latitude),
+            ],
+          },
+          distanceField: 'distanceFromMe',
+          maxDistance: maxDistance ?? 100 * METERS_PER_MILE, //!*** distance in meters ***!//
+          distanceMultiplier: 0.001,
+          spherical: true,
+        },
+      });
+    }
+
+    if (data.popular) {
+      pipeline.push({
+        $match: {
+          isSponsored: true,
+        },
+      });
+      // const popular = {};
+      // popular['$match'] = {
+      //   isSponsored: true,
+      // };
+      // console.log('popular = ', popular);
+      // // return;
+      // query.push(popular);
+    }
 
     if (data.cuisine) {
       const cuisine = {
@@ -217,67 +333,42 @@ export class RestaurantService {
       };
       query.push(diet);
     }
-    if (data.nearest) {
-      maxDistance = 1609.34 * 2;
-      sort = -1;
-    }
+    console.log('query = ', query);
     if (
       !data.cuisine &&
+      !data.popular &&
       !data.tags &&
       !data.nearest &&
       !data.longitude &&
       !data.latitude &&
       !data.dietaryRestrictions
     ) {
-      return this.restaurantModel
-        .find()
-        .skip(offset)
-        .limit(limit)
-        .sort({ isSponsored: -1 });
+      console.log('no filter selected');
+      return this.getAllRestaurants(paginationQuery);
     } else {
-      if (data.latitude && data.longitude) {
-        pipeline = [
-          {
-            $geoNear: {
-              near: {
-                type: 'Point',
-                coordinates: [
-                  parseFloat(data.longitude),
-                  parseFloat(data.latitude),
-                ],
-              },
-              distanceField: 'distanceFromMe',
-              maxDistance: maxDistance ?? 100 * METERS_PER_MILE, //!*** distance in meters ***!//
-              distanceMultiplier: 1 / 1609.34,
-              spherical: true,
-            },
-          },
-        ];
-      }
       if (query.length > 0) {
-        if (pipeline) {
-          pipeline = [
-            ...pipeline,
-            {
-              $match: {
-                $or: query,
-              },
-            },
-            ...lookupAndProjectStage,
-          ];
+        if (pipeline.length > 0) {
+          const match = { $and: query };
+          pipeline.push({ $match: match });
+          console.log(pipeline);
+          // pipeline.push({
+          //   $match: {
+          //     $or: query,
+          //   },
+          // });
         } else {
           pipeline = [
             {
               $match: {
-                $or: query,
+                $and: query,
               },
             },
-            ...lookupAndProjectStage,
           ];
         }
       }
       pipeline = [
         ...pipeline,
+        ...lookupAndProjectStage,
         { $unset: ['verificationCode', 'uniqueCode'] },
         { $skip: offset },
         { $limit: limit },
@@ -286,6 +377,7 @@ export class RestaurantService {
       return this.restaurantModel.aggregate(pipeline);
     }
   }
+
   async dietFilter(dietaryRestrictions: [string]): Promise<any> {
     return this.restaurantModel.aggregate([
       {
@@ -303,26 +395,10 @@ export class RestaurantService {
   async filterPopularRestaurant(): Promise<any> {
     return this.restaurantModel.aggregate([
       {
-        $lookup: {
-          from: 'redeemvouchers',
-          localField: '_id',
-          foreignField: 'restaurantId',
-          as: 'restaurant',
-        },
-      },
-      {
         $match: {
-          'restaurant.0': { $exists: true },
+          isSponsored: true,
         },
       },
-      {
-        $count: 'count',
-      },
-      // { $group: { _id: '$restaurantName', popularity: { $sum: 1 } } },
-      {
-        $unset: ['restaurant.uniqueCode', 'restaurant.verificationCode'],
-      },
-      { $sort: { popularity: -1 } },
     ]);
   }
   async depositMoney(restaurantId, amount): Promise<any> {
@@ -368,6 +444,11 @@ export class RestaurantService {
 
   generateLookupAndProjectStage(fieldName) {
     return [
+      // {
+      //   $match: {
+      //     isSponsored: ,
+      //   },
+      // },
       {
         $lookup: {
           from: 'restaurantreviews',
@@ -386,6 +467,7 @@ export class RestaurantService {
           media: '$media',
           isSponsored: '$isSponsored',
           location: '$location',
+          distanceFromMe: '$distanceFromMe',
           totalVoucherCount: '$totalVoucherCount',
           reviewCount: '$reviewCount',
           createdAt: '$createdAt',

@@ -126,8 +126,7 @@ export class ProfilesController {
   @ApiResponse({ description: 'password updated successfully' })
   @ApiBadRequestResponse({ description: 'could not update  password' })
   @Patch('update-password')
-  changePassword(data) {
-    console.log('password update');
+  changePassword(@Body() data) {
     return this.profileService.changePassword(data);
   }
 }

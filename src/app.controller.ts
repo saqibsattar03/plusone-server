@@ -56,6 +56,7 @@ export class AppController {
   async uploadProfileImage(
     @UploadedFile() media: Express.Multer.File,
   ): Promise<any> {
+    console.log('hjksjkfhd ', media);
     if (media) {
       return media.filename;
     }
@@ -84,6 +85,7 @@ export class AppController {
   async uploadMultipleProfileImage(
     @UploadedFiles() media: Array<Express.Multer.File>,
   ): Promise<any> {
+    console.log('djkfkldfjkf', media.length);
     if (media.length > 0) {
       const names = [];
       for (let i = 0; i < media.length; i++) {
@@ -105,6 +107,7 @@ export class AppController {
   })
   @ApiBadRequestResponse({ description: 'could not upload files' })
   async getFile(@Query('file') file: string): Promise<any> {
+    console.log(file);
     return 'http://192.168.18.56:3000/uploads/' + file;
   }
 
@@ -131,28 +134,28 @@ export class AppController {
     } else throw new HttpException('file not selected', HttpStatus.BAD_REQUEST);
   }
 
-  @Post('csv')
-  @UseInterceptors(FileInterceptor('media', imageValidation))
-  async uploadCSVFile(@UploadedFile() media: Express.Multer.File) {
-    try {
-      const stream = createReadStream(media.path);
-      const menu = [];
-      stream
-        .pipe(parse({ columns: true }))
-        .on('error', (error) => {
-          return error;
-        })
-        .on('data', (data) => {
-          menu.push(data);
-        })
-        .on('end', async () => {
-          // insert data into data collection here in end method
-          console.log(menu);
-        });
-      // console.log(menu[0]);
-      return media.filename;
-    } catch (e) {
-      throw new HttpException(e.toString(), HttpStatus.BAD_REQUEST);
-    }
-  }
+  // @Post('csv')
+  // @UseInterceptors(FileInterceptor('media', imageValidation))
+  // async uploadCSVFile(@UploadedFile() media: Express.Multer.File) {
+  //   try {
+  //     const stream = createReadStream(media.path);
+  //     const menu = [];
+  //     stream
+  //       .pipe(parse({ columns: true }))
+  //       .on('error', (error) => {
+  //         return error;
+  //       })
+  //       .on('data', (data) => {
+  //         menu.push(data);
+  //       })
+  //       .on('end', async () => {
+  //         // insert data into data collection here in end method
+  //         console.log(menu);
+  //       });
+  //     // console.log(menu[0]);
+  //     return media.filename;
+  //   } catch (e) {
+  //     throw new HttpException(e.toString(), HttpStatus.BAD_REQUEST);
+  //   }
+  // }
 }

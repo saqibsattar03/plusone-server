@@ -76,6 +76,9 @@ export class RestaurantDto {
   @ApiProperty({ type: Number })
   distanceFromMe: number;
 
+  @ApiProperty({ type: String })
+  locationName: string;
+
   @ApiProperty({ type: () => Date })
   createdAt: Date;
   @ApiProperty({ type: () => Date })
@@ -215,8 +218,10 @@ export class UpdateRestaurantDto {
   @ApiProperty({ type: () => String })
   description: string;
 
-  @ApiProperty({ description: 'location' })
+  @ApiProperty({ type: LocationDto })
   location: LocationDto;
+  @ApiProperty({ type: String })
+  profileImage: string;
 
   @ApiProperty({ type: () => [String] })
   tags: [string];

@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { PostDocument, Post } from 'src/data/schemas/post.schema';
 import {
   LikedPost,
@@ -8,6 +8,7 @@ import {
 } from 'src/data/schemas/postLiked.schema';
 import { UpdateSocialPost } from '../../data/dtos/socialPost.dto';
 import { Constants } from '../../common/constants';
+import { FollowingService } from '../following/following.service';
 
 @Injectable()
 export class SocialPostsService {
@@ -16,15 +17,17 @@ export class SocialPostsService {
     private readonly socialPostModel: Model<PostDocument>,
     @InjectModel(LikedPost.name)
     private readonly postLikedModel: Model<LikedPostDocument>,
+    private readonly followingService: FollowingService,
   ) {}
 
   async createPost(postDto: any): Promise<PostDocument> {
+    console.log('postDto = ', postDto);
     try {
       if (postDto.postType == Constants.FEED) {
         return this.socialPostModel.create(postDto);
       } else {
         return this.socialPostModel.create({
-          userId: postDto.userId,
+          userId: postDto.reviewObject.userId,
           voucherId: postDto.reviewObject.voucherId,
           caption: postDto.reviewObject.reviewText,
           postType: Constants.REVIEW,
@@ -35,32 +38,179 @@ export class SocialPostsService {
     }
   }
 
-  async getAllPost(paginationDto): Promise<any> {
+  async getAllPublicPost(paginationDto, data): Promise<any> {
     const { limit, offset } = paginationDto;
-    return this.socialPostModel
-      .aggregate([
-        {
-          $lookup: {
-            from: 'vouchers',
-            let: { voucherId: '$voucherId' },
-            as: 'voucher',
-            pipeline: [
-              {
-                $unwind: '$voucherObject',
+    switch (data.postType) {
+      case Constants.PUBLIC: {
+        console.log('here');
+        return this.socialPostModel
+          .aggregate([
+            {
+              $match: {
+                postAudiencePreference: Constants.PUBLIC,
               },
-              {
-                $match: {
-                  $expr: {
-                    $eq: ['$voucherObject._id', '$$voucherId'],
-                  },
+            },
+            {
+              $lookup: {
+                from: 'vouchers',
+                localField: 'voucherId',
+                foreignField: 'voucherObject._id',
+                as: 'result',
+              },
+            },
+            {
+              $unwind: {
+                path: '$result',
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
+              $unwind: {
+                path: '$result.voucherObject',
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
+              $project: {
+                caption: 1,
+                postAudiencePreference: 1,
+                postType: 1,
+                voucherId: 1,
+                media: 1,
+                likesCount: 1,
+                commentCount: 1,
+                voucher: '$result.voucherObject',
+                createdAt: 1,
+                updatedAt: 1,
+                v: {
+                  $cond: [
+                    {
+                      $eq: ['$voucherId', '$result.voucherObject._id'],
+                    },
+                    '$result.voucherObject',
+                    null,
+                  ],
                 },
               },
-            ],
-          },
-        },
-      ])
-      .skip(offset)
-      .limit(limit);
+            },
+            {
+              $match: {
+                v: {
+                  $ne: null,
+                },
+              },
+            },
+            {
+              $project: {
+                v: 0,
+              },
+            },
+          ])
+          .skip(offset)
+          .limit(limit);
+      }
+      case Constants.FOLLOWING: {
+        try {
+          const followings = await this.followingService.getFollowingIds(
+            data.userId,
+          );
+          const followingsArray = [];
+
+          followings.forEach((obj) => {
+            followingsArray.push(obj.followings);
+          });
+          return this.socialPostModel.aggregate([
+            {
+              $match: {
+                userId: {
+                  $in: followingsArray,
+                },
+              },
+            },
+            // {
+            //   $lookup: {
+            //     from: 'vouchers',
+            //     localField: 'voucherId',
+            //     foreignField: 'voucherObject._id',
+            //     as: 'result',
+            //   },
+            // },
+            // {
+            //   $unwind: {
+            //     path: '$result',
+            //     preserveNullAndEmptyArrays: false,
+            //   },
+            // },
+            // {
+            //   $unwind: {
+            //     path: '$result.voucherObject',
+            //     preserveNullAndEmptyArrays: false,
+            //   },
+            // },
+            // {
+            //   $project: {
+            //     caption: 1,
+            //     postAudiencePreference: 1,
+            //     postType: 1,
+            //     voucherId: 1,
+            //     media: 1,
+            //     likesCount: 1,
+            //     commentCount: 1,
+            //     voucher: '$result.voucherObject',
+            //     createdAt: 1,
+            //     updatedAt: 1,
+            //     v: {
+            //       $cond: [
+            //         {
+            //           $eq: ['$voucherId', '$result.voucherObject._id'],
+            //         },
+            //         '$result.voucherObject',
+            //         null,
+            //       ],
+            //     },
+            //   },
+            // },
+            // {
+            //   $match: {
+            //     v: {
+            //       $ne: null,
+            //     },
+            //   },
+            // },
+            // {
+            //   $project: {
+            //     v: 0,
+            //   },
+            // },
+            // {
+            //   $lookup: {
+            //     from: 'likedposts',
+            //     localField: '_id',
+            //     foreignField: 'postId',
+            //     as: 'postLiked',
+            //   },
+            // },
+            // {
+            //   $match: {
+            //     'postsLiked.userId': {
+            //       $in: [data.userId],
+            //     },
+            //   },
+            // },
+          ]);
+
+          /*** Below code is reference ***/
+          // return this.socialPostModel
+          //   .find({
+          //     userId: { $in: followingsArray },
+          //   })
+          //   .skip(paginationDto.offset)
+          //   .limit(paginationDto.limit);
+        } catch (e) {
+          console.log(e);
+        }
+      }
+    }
   }
   async getPost(postId): Promise<PostDocument> {
     return this.socialPostModel.findById(postId);

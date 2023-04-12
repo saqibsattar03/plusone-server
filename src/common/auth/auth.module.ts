@@ -23,7 +23,7 @@ import {
       //save secret key in env file
       // secret: jwtConstants.secret,
       secret: jwtConstants.secret,
-      signOptions: { expiresIn: '50000s' },
+      signOptions: { expiresIn: '168 hours' },
     }),
     MongooseModule.forFeature([
       {

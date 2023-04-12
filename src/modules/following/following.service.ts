@@ -62,21 +62,40 @@ export class FollowingService {
           as: 'followings',
         },
       },
+      // {
+      //   $project: {
+      //     fistName: '$followings.firstName',
+      //     surName: '$followings.surName',
+      //     profileImage: '$followings.profileImage',
+      //   },
+      // },
       {
-        $project: {
-          'followings._id': 1,
-          'followings.firstName': 1,
-          'followings.surName': 1,
-          'followings.profileImage': 1,
-        },
-      },
-      {
-        $unset: ['_id'],
+        $unset: ['_id', 'followings.password', 'followings.confirmationCode'],
       },
     ]);
   }
 
   async deleteAllFollwees(userId): Promise<any> {
     return this.followingModel.findOneAndDelete({ userId: userId });
+  }
+
+  async getFollowingIds(userId): Promise<any> {
+    console.log('here');
+    const oi = new mongoose.Types.ObjectId(userId);
+    return this.followingModel.aggregate([
+      {
+        $match: {
+          userId: oi,
+        },
+      },
+      {
+        $unwind: '$followings',
+      },
+      // {
+      //   $project: {
+      //     followingId: { $arrayElemAt: ['$followings', 0] },
+      //   },
+      // },
+    ]);
   }
 }

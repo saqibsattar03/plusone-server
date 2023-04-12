@@ -116,7 +116,8 @@ export class ProfilesService {
       );
     return fetchedUser;
   }
-  async updateProfile(data: UpdateProfileDto, profileId): Promise<any> {
+  async updateProfile(data, profileId): Promise<any> {
+    console.log('data = ', data);
     const profile = await this.profileModel.findById({ _id: profileId });
     if (!profile) throw new NotFoundException(' Profile does not exist');
 
@@ -126,9 +127,23 @@ export class ProfilesService {
         HttpStatus.UNAUTHORIZED,
       );
 
-    return this.profileModel.findByIdAndUpdate(profileId, data, {
-      returnDocument: 'after',
-    });
+    return this.profileModel.findByIdAndUpdate(
+      { _id: profileId },
+      {
+        $set: {
+          bio: data.bio,
+          socialLinks: data.socialLinks,
+          favoriteRestaurants: data.favoriteRestaurants,
+          favoriteCuisines: data.favoriteCuisines,
+          favoriteChefs: data.favoriteChefs,
+          dietRequirements: data.dietRequirements,
+          scopes: data.scopes,
+        },
+      },
+      {
+        returnDocument: 'after',
+      },
+    );
   }
 
   async updateRewardPoints(userId, rewardPoints): Promise<any> {

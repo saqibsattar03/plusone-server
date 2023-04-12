@@ -30,5 +30,7 @@ export class UpdateVoucherDto {
     discount: number;
     description: string;
     voucherImage: string;
+    estimatedSavings: string;
+    estimatedCost: number;
   };
 }

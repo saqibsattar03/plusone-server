@@ -52,13 +52,14 @@ export class SocialPostsController {
   @ApiBadRequestResponse({ description: 'can not create post' })
   @UseGuards(JwtAuthGuard)
   createPost(@Request() request, @Body() data) {
+    console.log(data);
     data.userId = request.user.userId;
     return this.socialPostService.createPost(data);
   }
 
   @Get('all')
-  getAllPost(@Query() paginationDto: PaginationDto) {
-    return this.socialPostService.getAllPost(paginationDto);
+  getAllPost(@Query() paginationDto: PaginationDto, @Body() data) {
+    return this.socialPostService.getAllPublicPost(paginationDto, data);
   }
 
   //Retrieve Single Post Route
