@@ -57,9 +57,9 @@ export class SocialPostsController {
     return this.socialPostService.createPost(data);
   }
 
-  @Get('all')
-  getAllPost(@Query() paginationDto: PaginationDto, @Body() data) {
-    return this.socialPostService.getAllPublicPost(paginationDto, data);
+  @Post('all')
+  getAllPost(@Body() data) {
+    return this.socialPostService.getAllPost(data);
   }
 
   //Retrieve Single Post Route

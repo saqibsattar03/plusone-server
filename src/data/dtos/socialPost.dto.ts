@@ -34,6 +34,45 @@ export class SocialPostDto {
   postType: string;
 }
 
+export class GetSocialPostDto {
+  @ApiProperty({ type: String, name: 'userId' })
+  @IsNotEmpty()
+  userId: string;
+  @ApiProperty({ type: String, name: 'voucherId' })
+  voucherId: string;
+
+  @ApiProperty({ type: LocationDto, name: 'location' })
+  location: LocationDto;
+
+  @ApiProperty({ type: String, name: 'caption' })
+  caption: string;
+
+  @ApiProperty({
+    name: 'media',
+    type: [String],
+  })
+  media: string[];
+
+  @ApiProperty({
+    type: String,
+    name: 'postAudiencePreference',
+  })
+  postAudiencePreference: string;
+
+  @ApiProperty({ type: String, name: 'postType' })
+  postType: string;
+
+  username: string;
+  profileImage: string;
+  voucher: {
+    title: string;
+    voucherPreference: string;
+    discount: number;
+    description: string;
+    voucherImage: string;
+    estimatedSavings: string;
+  };
+}
 export class UpdateSocialPost {
   @ApiProperty({ type: String, name: 'postId' })
   postId: string;

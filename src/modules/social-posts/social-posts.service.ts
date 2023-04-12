@@ -38,8 +38,8 @@ export class SocialPostsService {
     }
   }
 
-  async getAllPublicPost(paginationDto, data): Promise<any> {
-    const { limit, offset } = paginationDto;
+  async getAllPost(data): Promise<any> {
+    // const { limit, offset } = paginationDto;
     switch (data.postType) {
       case Constants.PUBLIC: {
         console.log('here');
@@ -47,7 +47,7 @@ export class SocialPostsService {
           .aggregate([
             {
               $match: {
-                postAudiencePreference: Constants.PUBLIC,
+                postAudiencePreference: 'PUBLIC',
               },
             },
             {
@@ -71,7 +71,22 @@ export class SocialPostsService {
               },
             },
             {
+              $lookup: {
+                from: 'profiles',
+                localField: 'userId',
+                foreignField: '_id',
+                as: 'user',
+              },
+            },
+            {
+              $unwind: {
+                path: '$user',
+              },
+            },
+            {
               $project: {
+                username: '$user.username',
+                profileImage: '$user.profileImage',
                 caption: 1,
                 postAudiencePreference: 1,
                 postType: 1,
@@ -83,15 +98,31 @@ export class SocialPostsService {
                 createdAt: 1,
                 updatedAt: 1,
                 v: {
-                  $cond: [
-                    {
-                      $eq: ['$voucherId', '$result.voucherObject._id'],
+                  $cond: {
+                    if: {
+                      $eq: ['$postType', 'FEED'],
                     },
-                    '$result.voucherObject',
-                    null,
-                  ],
+                    then: {},
+                    else: {
+                      $cond: {
+                        if: {
+                          $eq: ['$voucherId', '$result.voucherObject._id'],
+                        },
+                        then: '$result.voucherObject',
+                        else: null,
+                      },
+                    },
+                  },
                 },
               },
+            },
+            {
+              $unset: [
+                'voucher._id',
+                'voucher.voucherType',
+                'voucher.estimatedCost',
+                'voucher.voucherDisableDates',
+              ],
             },
             {
               $match: {
@@ -106,108 +137,119 @@ export class SocialPostsService {
               },
             },
           ])
-          .skip(offset)
-          .limit(limit);
+          .skip(data.offset)
+          .limit(data.limit);
       }
       case Constants.FOLLOWING: {
+        console.log('here in following');
         try {
           const followings = await this.followingService.getFollowingIds(
             data.userId,
           );
           const followingsArray = [];
-
           followings.forEach((obj) => {
             followingsArray.push(obj.followings);
           });
-          return this.socialPostModel.aggregate([
-            {
-              $match: {
-                userId: {
-                  $in: followingsArray,
+          return this.socialPostModel
+            .aggregate([
+              {
+                $match: {
+                  userId: {
+                    $in: followingsArray,
+                  },
                 },
               },
-            },
-            // {
-            //   $lookup: {
-            //     from: 'vouchers',
-            //     localField: 'voucherId',
-            //     foreignField: 'voucherObject._id',
-            //     as: 'result',
-            //   },
-            // },
-            // {
-            //   $unwind: {
-            //     path: '$result',
-            //     preserveNullAndEmptyArrays: false,
-            //   },
-            // },
-            // {
-            //   $unwind: {
-            //     path: '$result.voucherObject',
-            //     preserveNullAndEmptyArrays: false,
-            //   },
-            // },
-            // {
-            //   $project: {
-            //     caption: 1,
-            //     postAudiencePreference: 1,
-            //     postType: 1,
-            //     voucherId: 1,
-            //     media: 1,
-            //     likesCount: 1,
-            //     commentCount: 1,
-            //     voucher: '$result.voucherObject',
-            //     createdAt: 1,
-            //     updatedAt: 1,
-            //     v: {
-            //       $cond: [
-            //         {
-            //           $eq: ['$voucherId', '$result.voucherObject._id'],
-            //         },
-            //         '$result.voucherObject',
-            //         null,
-            //       ],
-            //     },
-            //   },
-            // },
-            // {
-            //   $match: {
-            //     v: {
-            //       $ne: null,
-            //     },
-            //   },
-            // },
-            // {
-            //   $project: {
-            //     v: 0,
-            //   },
-            // },
-            // {
-            //   $lookup: {
-            //     from: 'likedposts',
-            //     localField: '_id',
-            //     foreignField: 'postId',
-            //     as: 'postLiked',
-            //   },
-            // },
-            // {
-            //   $match: {
-            //     'postsLiked.userId': {
-            //       $in: [data.userId],
-            //     },
-            //   },
-            // },
-          ]);
-
-          /*** Below code is reference ***/
-          // return this.socialPostModel
-          //   .find({
-          //     userId: { $in: followingsArray },
-          //   })
-          //   .skip(paginationDto.offset)
-          //   .limit(paginationDto.limit);
+              {
+                $lookup: {
+                  from: 'vouchers',
+                  localField: 'voucherId',
+                  foreignField: 'voucherObject._id',
+                  as: 'result',
+                },
+              },
+              {
+                $unwind: {
+                  path: '$result',
+                  preserveNullAndEmptyArrays: true,
+                },
+              },
+              {
+                $unwind: {
+                  path: '$result.voucherObject',
+                  preserveNullAndEmptyArrays: true,
+                },
+              },
+              {
+                $lookup: {
+                  from: 'profiles',
+                  localField: 'userId',
+                  foreignField: '_id',
+                  as: 'user',
+                },
+              },
+              {
+                $unwind: {
+                  path: '$user',
+                },
+              },
+              {
+                $project: {
+                  username: '$user.username',
+                  profileImage: '$user.profileImage',
+                  caption: 1,
+                  postAudiencePreference: 1,
+                  postType: 1,
+                  voucherId: 1,
+                  media: 1,
+                  likesCount: 1,
+                  commentCount: 1,
+                  voucher: '$result.voucherObject',
+                  createdAt: 1,
+                  updatedAt: 1,
+                  v: {
+                    $cond: {
+                      if: {
+                        $eq: ['$postType', 'FEED'],
+                      },
+                      then: {},
+                      else: {
+                        $cond: {
+                          if: {
+                            $eq: ['$voucherId', '$result.voucherObject._id'],
+                          },
+                          then: '$result.voucherObject',
+                          else: null,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              {
+                $unset: [
+                  'voucher._id',
+                  'voucher.voucherType',
+                  'voucher.estimatedCost',
+                  'voucher.voucherDisableDates',
+                ],
+              },
+              {
+                $match: {
+                  v: {
+                    $ne: null,
+                  },
+                },
+              },
+              {
+                $project: {
+                  v: 0,
+                },
+              },
+            ])
+            .skip(data.offset)
+            .limit(data.limit);
         } catch (e) {
-          console.log(e);
+          throw new HttpException(e.toString(), HttpStatus.BAD_REQUEST);
         }
       }
     }
