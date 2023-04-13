@@ -88,9 +88,9 @@ export class FollowingService {
           userId: oi,
         },
       },
-      {
-        $unwind: '$followings',
-      },
+      // {
+      //   $unwind: '$followings',
+      // },
       // {
       //   $project: {
       //     followingId: { $arrayElemAt: ['$followings', 0] },

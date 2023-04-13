@@ -1,14 +1,6 @@
-import {
-  Controller,
-  Delete,
-  Param,
-  Patch,
-  Query,
-  UseFilters,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Delete, Param, Patch, Query } from '@nestjs/common';
 import { ProfilesService } from './profiles.service';
-import { Body, Get, Post, Request } from '@nestjs/common/decorators';
+import { Body, Get, Post } from '@nestjs/common/decorators';
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -24,12 +16,7 @@ import {
   UpdateProfileDto,
 } from '../../data/dtos/profile.dto';
 import { PaginationDto } from '../../common/auth/dto/pagination.dto';
-import * as bcrypt from 'bcrypt';
-import { JwtAuthGuard } from '../../common/auth/guards/jwt-auth.guard';
-import {
-  RestaurantDto,
-  RestaurantResponseDto,
-} from '../../data/dtos/restaurant.dto';
+import { RestaurantResponseDto } from '../../data/dtos/restaurant.dto';
 
 @ApiTags('Person')
 @Controller('persons')
@@ -128,5 +115,12 @@ export class ProfilesController {
   @Patch('update-password')
   changePassword(@Body() data) {
     return this.profileService.changePassword(data);
+  }
+
+  /*** temporary route ***/
+  @ApiQuery({ name: 'userId', type: String })
+  @Patch('change-status')
+  changeUserStatus(@Query('userId') userId) {
+    return this.profileService.changeUserStatus(userId);
   }
 }

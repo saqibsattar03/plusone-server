@@ -268,6 +268,7 @@ export class VoucherService {
     });
   }
   async verifyRestaurantCode(data): Promise<any> {
+    console.log('data = ', data);
     const res = await this.restaurantService.getRestaurantVerificationCode(
       data.restaurantId,
       data.restaurantCode,

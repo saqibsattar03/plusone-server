@@ -138,6 +138,7 @@ export class ProfilesService {
           favoriteChefs: data.favoriteChefs,
           dietRequirements: data.dietRequirements,
           scopes: data.scopes,
+          isSkip: data.isSkip,
         },
       },
       {
@@ -271,5 +272,14 @@ export class ProfilesService {
         'old password and new password can not be same',
         HttpStatus.NOT_ACCEPTABLE,
       );
+  }
+
+  /*** temporary route ***/
+  async changeUserStatus(userId): Promise<any> {
+    return this.profileModel.findOneAndUpdate(
+      { _id: userId },
+      { status: 'ACTIVE' },
+      { returnDocument: 'after' },
+    );
   }
 }

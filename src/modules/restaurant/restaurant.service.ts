@@ -15,7 +15,6 @@ import { RestaurantDto } from '../../data/dtos/restaurant.dto';
 import { PaginationDto } from '../../common/auth/dto/pagination.dto';
 import { ProfilesService } from '../profiles/profiles.service';
 import * as moment from 'moment';
-import { random } from 'nanoid';
 
 @Injectable()
 export class RestaurantService {
@@ -51,16 +50,6 @@ export class RestaurantService {
       .limit(limit);
   }
   async getSingleRestaurantDetails(restaurantId): Promise<any> {
-    // console.log(
-    //   'date shjfkhf = ',
-    //   `${moment(new Date()).format('YYYY-MM-DD')}T00:00:00.000+00:00`,
-    //   // moment(
-    //   //   moment(new Date()).utc().format('YYYY-MM-DD'),
-    //   //   moment.defaultFormatUtc,
-    //   // )
-    //   //   .utc()
-    //   //   .format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-    // );
     const oid = new mongoose.Types.ObjectId(restaurantId);
     const pipeline = [
       {
@@ -217,8 +206,6 @@ export class RestaurantService {
     return this.restaurantModel.findById(oid);
   }
   async editRestaurant(restaurantId, data): Promise<RestaurantDocument> {
-    // const res = await this.restaurantModel.findById({ _id: restaurantId });
-    // const user = await this.profileService.updateProfile(data, res.userId);
     return this.restaurantModel.findByIdAndUpdate(
       { _id: restaurantId },
       {
@@ -444,11 +431,11 @@ export class RestaurantService {
 
   generateLookupAndProjectStage(fieldName) {
     return [
-      // {
-      //   $match: {
-      //     isSponsored: ,
-      //   },
-      // },
+      {
+        $match: {
+          status: 'ACTIVE',
+        },
+      },
       {
         $lookup: {
           from: 'restaurantreviews',
