@@ -21,7 +21,7 @@ import { MulterModule } from '@nestjs/platform-express';
 @Module({
   imports: [
     SocialPostsModule,
-    MongooseModule.forRoot('mongodb://127.0.0.1:27017/plus-one', {
+    MongooseModule.forRoot('mongodb://plusoneadmin:4vxm5SSBXm@172.17.02:27017/plusone--db?authSource=admin&retryWrites=true&w=majority', {
       useNewUrlParser: true,
     }),
     CommentsModule,
