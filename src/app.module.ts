@@ -6,7 +6,7 @@ import { SocialPostsModule } from './social-posts/social-posts.module';
 import { CommentsModule } from './social-posts/comments/comments.module';
 import { ProfilesModule } from './User/profiles/profiles.module';
 import { FollowerModule } from './User/follower/follower.module';
-import { FollowingModule } from './user/following/following.module';
+import { FollowingModule } from './User/following/following.module';
 import { RestaurantReviewModule } from './restaurant/restaurant-review/restaurant-review.module';
 import { ChatModule } from './chat/chat.module';
 import { RestaurantModule } from './restaurant/restaurant/restaurant.module';
@@ -14,7 +14,7 @@ import { VoucherModule } from './restaurant/voucher/voucher.module';
 import { QuoteModule } from './quote/quote.module';
 import { CustomerServiceModule } from './customer-service/customer-service.module';
 import { AuthModule } from './auth/auth.module';
-import { UserModule } from './user/user.module';
+import { UserModule } from './User/user.module';
 import { FilterModule } from './filter/filter.module';
 import { MulterModule } from '@nestjs/platform-express';
 
