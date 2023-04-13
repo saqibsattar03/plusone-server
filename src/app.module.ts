@@ -24,7 +24,7 @@ import { ConfigModule } from '@nestjs/config';
     //To use .env variables
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env.' + process.env.NODE_ENVIRONMENT,
+      envFilePath: '.env.development',
     }),
     SocialPostsModule,
     DbModule,
