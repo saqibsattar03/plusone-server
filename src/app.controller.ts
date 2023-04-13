@@ -14,7 +14,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common/decorators';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { imageValidation } from './common/image.config';
+import { imageValidation } from './common/configs/image.config';
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -26,8 +26,8 @@ import {
 } from '@nestjs/swagger';
 import * as fs from 'fs';
 import * as path from 'path';
-import { ImageSchema } from './Schemas/image.schema';
-import { ImageDto } from './User/profiles/dto/image.dto';
+import { createReadStream } from 'fs';
+import { parse } from 'csv-parse';
 
 @ApiTags('Main')
 @Controller()
@@ -56,6 +56,7 @@ export class AppController {
   async uploadProfileImage(
     @UploadedFile() media: Express.Multer.File,
   ): Promise<any> {
+    console.log('hjksjkfhd ', media);
     if (media) {
       return media.filename;
     }
@@ -69,7 +70,7 @@ export class AppController {
       type: 'object',
       properties: {
         media: {
-          type: 'array', // 👈  array of files
+          type: 'array', //   array of files
           items: {
             type: 'string',
             format: 'binary',
@@ -80,10 +81,11 @@ export class AppController {
   })
   @ApiCreatedResponse({ type: String, description: 'uploaded file names' })
   @ApiBadRequestResponse({ description: 'could not upload files' })
-  @UseInterceptors(FilesInterceptor('media', 5, imageValidation))
+  @UseInterceptors(FilesInterceptor('media', 6, imageValidation))
   async uploadMultipleProfileImage(
     @UploadedFiles() media: Array<Express.Multer.File>,
   ): Promise<any> {
+    console.log('djkfkldfjkf', media.length);
     if (media.length > 0) {
       const names = [];
       for (let i = 0; i < media.length; i++) {
@@ -105,12 +107,15 @@ export class AppController {
   })
   @ApiBadRequestResponse({ description: 'could not upload files' })
   async getFile(@Query('file') file: string): Promise<any> {
+    console.log(file);
     return 'http://192.168.18.56:3000/uploads/' + file;
   }
+
+  @ApiQuery({ name: 'media', type: String })
   @Delete('remove-file')
   async removeProfileImage(@Query('media') media, @Res() res): Promise<any> {
     if (media) {
-      const filePath = path.join(__dirname, '..', '..', 'uploads/' + media);
+      const filePath = path.join(__dirname, '..', '..', '/uploads/' + media);
       try {
         fs.unlink(filePath, (err) => {
           if (err)
@@ -128,4 +133,29 @@ export class AppController {
       }
     } else throw new HttpException('file not selected', HttpStatus.BAD_REQUEST);
   }
+
+  // @Post('csv')
+  // @UseInterceptors(FileInterceptor('media', imageValidation))
+  // async uploadCSVFile(@UploadedFile() media: Express.Multer.File) {
+  //   try {
+  //     const stream = createReadStream(media.path);
+  //     const menu = [];
+  //     stream
+  //       .pipe(parse({ columns: true }))
+  //       .on('error', (error) => {
+  //         return error;
+  //       })
+  //       .on('data', (data) => {
+  //         menu.push(data);
+  //       })
+  //       .on('end', async () => {
+  //         // insert data into data collection here in end method
+  //         console.log(menu);
+  //       });
+  //     // console.log(menu[0]);
+  //     return media.filename;
+  //   } catch (e) {
+  //     throw new HttpException(e.toString(), HttpStatus.BAD_REQUEST);
+  //   }
+  // }
 }

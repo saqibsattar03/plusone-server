@@ -2,28 +2,32 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { SocialPostsModule } from './social-posts/social-posts.module';
-import { CommentsModule } from './social-posts/comments/comments.module';
-import { ProfilesModule } from './User/profiles/profiles.module';
-import { FollowerModule } from './User/follower/follower.module';
-import { FollowingModule } from './User/following/following.module';
-import { RestaurantReviewModule } from './restaurant/restaurant-review/restaurant-review.module';
-import { ChatModule } from './chat/chat.module';
-import { RestaurantModule } from './restaurant/restaurant/restaurant.module';
-import { VoucherModule } from './restaurant/voucher/voucher.module';
-import { QuoteModule } from './quote/quote.module';
-import { CustomerServiceModule } from './customer-service/customer-service.module';
-import { AuthModule } from './auth/auth.module';
-import { UserModule } from './User/user.module';
-import { FilterModule } from './filter/filter.module';
+import { SocialPostsModule } from './modules/social-posts/social-posts.module';
+import { CommentsModule } from './modules/social-posts/comments/comments.module';
+import { ProfilesModule } from './modules/profiles/profiles.module';
+import { FollowerModule } from './modules/follower/follower.module';
+import { FollowingModule } from './modules/following/following.module';
+import { RestaurantReviewModule } from './modules/restaurant-review/restaurant-review.module';
+import { ChatModule } from './modules/chat/chat.module';
+import { RestaurantModule } from './modules/restaurant/restaurant.module';
+import { VoucherModule } from './modules/voucher/voucher.module';
+import { QuoteModule } from './modules/quote/quote.module';
+import { CustomerServiceModule } from './modules/customer-service/customer-service.module';
+import { AuthModule } from './common/auth/auth.module';
 import { MulterModule } from '@nestjs/platform-express';
+import { DepositMoneyModule } from './modules/deposit-money/deposit-money.module';
+import { DbModule } from './common/db/db.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
-    SocialPostsModule,
-    MongooseModule.forRoot('mongodb://plusoneadmin:4vxm5SSBXm@plusone.sparkosol.com:27017/plusone--db?authSource=admin&retryWrites=true&w=majority', {
-      useNewUrlParser: true,
+    //To use .env variables
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env.' + process.env.NODE_ENVIRONMENT,
     }),
+    SocialPostsModule,
+    DbModule,
     CommentsModule,
     ProfilesModule,
     FollowerModule,
@@ -35,11 +39,10 @@ import { MulterModule } from '@nestjs/platform-express';
     QuoteModule,
     CustomerServiceModule,
     AuthModule,
-    UserModule,
-    FilterModule,
     MulterModule.register({
       dest: '../uploads',
     }),
+    DepositMoneyModule,
   ],
   controllers: [AppController],
   providers: [AppService],

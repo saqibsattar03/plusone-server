@@ -5,6 +5,7 @@ import { SwaggerModule } from '@nestjs/swagger/dist';
 import { AppModule } from './app.module';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { json, urlencoded } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -13,12 +14,19 @@ async function bootstrap() {
       whitelist: true,
       forbidNonWhitelisted: true,
       forbidUnknownValues: false,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
     }),
   );
 
   const config = new DocumentBuilder()
     .setTitle('Plus-One')
     .setVersion('1.0')
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'access-token',
+    )
     .build();
   app.useStaticAssets(join(__dirname, '..', '..', 'uploads'), {
     prefix: '/uploads/',
@@ -28,6 +36,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('Plus-One-api', app, document);
   const port = 3000;
+  app.use(json({ limit: '50mb' }));
+  app.use(urlencoded({ extended: true, limit: '50mb' }));
   await app.listen(port, '0.0.0.0');
   console.log(`App is running on ${port}`);
 }
