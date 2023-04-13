@@ -6,7 +6,6 @@ import {
   Post,
   Query,
   UseGuards,
-  Request,
 } from '@nestjs/common';
 import { RestaurantReviewService } from './restaurant-review.service';
 import {

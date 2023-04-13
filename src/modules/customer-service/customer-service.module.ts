@@ -6,7 +6,6 @@ import {
   CustomerService,
   CustomerServiceSchema,
 } from '../../data/schemas/customerService.schema';
-import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [

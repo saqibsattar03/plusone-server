@@ -6,9 +6,7 @@ import {
   Restaurant,
   RestaurantSchema,
 } from '../../data/schemas/restaurant.schema';
-import { ProfilesService } from '../profiles/profiles.service';
 import { ProfilesModule } from '../profiles/profiles.module';
-import { ProfileDto } from '../../data/dtos/profile.dto';
 
 @Module({
   imports: [
