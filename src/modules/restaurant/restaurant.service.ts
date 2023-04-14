@@ -42,7 +42,8 @@ export class RestaurantService {
 
   async getAllRestaurants(paginationDto: PaginationDto): Promise<any> {
     const fieldName = 'reviewObject';
-    const lookupAndProjectStage = this.generateLookupAndProjectStage(fieldName);
+    const lookupAndProjectStage =
+      this.generateLookupAndProjectStageForRestaurantFilter(fieldName);
     const { limit, offset } = paginationDto;
     return this.restaurantModel
       .aggregate([...lookupAndProjectStage])
@@ -258,17 +259,19 @@ export class RestaurantService {
     console.log('latitude = ', data.latitude);
     console.log('popular = ', data.popular);
     const fieldName = 'reviewObject';
-    const lookupAndProjectStage = this.generateLookupAndProjectStage(fieldName);
+    const lookupAndProjectStage =
+      this.generateLookupAndProjectStageForRestaurantFilter(fieldName);
     const { limit, offset } = paginationQuery;
     const METERS_PER_MILE = 1609.34;
     const query = [];
     let maxDistance;
     let sort = Math.random() < 0.5 ? -1 : 1;
-    console.log(sort);
     let pipeline = [];
+    // const nearest = true;
 
-    if (data.nearest) {
-      maxDistance = 1609.34 * 2;
+    if (data.longitude && data.latitude) {
+      console.log('here in nearest');
+      // maxDistance = 1609.34 * 2;
       sort = -1;
       pipeline.push({
         $geoNear: {
@@ -280,7 +283,7 @@ export class RestaurantService {
             ],
           },
           distanceField: 'distanceFromMe',
-          maxDistance: maxDistance ?? 100 * METERS_PER_MILE, //!*** distance in meters ***!//
+          // maxDistance: 100 * METERS_PER_MILE, //!*** distance in meters ***!//
           distanceMultiplier: 0.001,
           spherical: true,
         },
@@ -338,11 +341,6 @@ export class RestaurantService {
           const match = { $and: query };
           pipeline.push({ $match: match });
           console.log(pipeline);
-          // pipeline.push({
-          //   $match: {
-          //     $or: query,
-          //   },
-          // });
         } else {
           pipeline = [
             {
@@ -429,7 +427,7 @@ export class RestaurantService {
     });
   }
 
-  generateLookupAndProjectStage(fieldName) {
+  generateLookupAndProjectStageForRestaurantFilter(fieldName) {
     return [
       {
         $match: {
