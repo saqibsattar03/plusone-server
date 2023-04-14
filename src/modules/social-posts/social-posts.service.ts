@@ -57,58 +57,456 @@ export class SocialPostsService {
       }
       case Constants.FOLLOWING: {
         try {
-          const followings = await this.followingService.getFollowingIds(
-            data.userId,
-          );
-          const followingsArray = [];
-          followings.forEach((obj) => {
-            followingsArray.push(obj.followings);
-          });
-          const r = followingsArray.flat();
-          console.log(r);
-          const re = await this.socialPostModel
-            .aggregate([
-              {
-                $project: {
-                  _id: 1,
-                  userId: 1,
-                  location: 1,
-                  caption: 1,
-                  postAudiencePreference: 1,
-                  postType: 1,
-                  media: 1,
-                  likesCount: 1,
-                  commentCount: 1,
-                  createdAt: 1,
-                  voucherId: 1,
-                  updatedAt: 1,
-                  followingsArray: { $literal: [r] },
-                },
-              },
-              {
-                $unwind: '$followingsArray',
-              },
-              {
-                $match: {
-                  userId: '$followingsArray',
-                },
-              },
-              // {
-              //   $unwind: '$followingsArray',
-              // },
-              // {
-              //   $match: {
-              //     // userId: '$followingsArray',
-              //     userId: new mongoose.Types.ObjectId(
-              //       '64364fa540eb588f9a424939',
-              //     ),
+          // const followings = await this.followingService.getFollowingIds(
+          //   data.userId,
+          // );
+          // const followingsArray = [];
+          // followings.forEach((obj) => {
+          //   followingsArray.push(obj.followings);
+          // });
+          // const r = followingsArray.flat();
+          // console.log(r);
+          return this.socialPostModel
+            .aggregate(
+              // [
+              //   {
+              //     $lookup: {
+              //       from: 'followings',
+              //       localField: 'userId',
+              //       foreignField: 'userId',
+              //       as: 'following',
+              //     },
               //   },
-              // },
-              // ...pipeLine,
-            ])
+              //   {
+              //     $unwind: {
+              //       path: '$following',
+              //       preserveNullAndEmptyArrays: true,
+              //     },
+              //   },
+              //   {
+              //     $unwind: {
+              //       path: '$following.followings',
+              //       preserveNullAndEmptyArrays: true,
+              //     },
+              //   },
+              //   {
+              //     $project: {
+              //       _id: 1,
+              //       userId: 1,
+              //       location: 1,
+              //       caption: 1,
+              //       postAudiencePreference: 1,
+              //       postType: 1,
+              //       voucherId: 1,
+              //       media: 1,
+              //       likesCount: 1,
+              //       commentCount: 1,
+              //       createdAt: 1,
+              //       updatedAt: 1,
+              //       data: {
+              //         $ifNull: ['$following', null],
+              //       },
+              //     },
+              //   },
+              //   // {
+              //   //   $group: {
+              //   //     _id: "$data",
+              //   //     d1: {
+              //   //       $push: {
+              //   //         $cond: {
+              //   //           if: {
+              //   //             $eq: ["$data", null],
+              //   //           },
+              //   //           then: "$$ROOT",
+              //   //           else: "$$ROOT",
+              //   //         },
+              //   //       },
+              //   //     },
+              //   //   },
+              //   // }
+              //   {
+              //     $group: {
+              //       _id: null,
+              //       data: {
+              //         $push: '$$ROOT',
+              //       },
+              //     },
+              //   },
+              //   {
+              //     $project: {
+              //       a: {
+              //         $filter: {
+              //           input: '$data',
+              //           as: 'd',
+              //           cond: {
+              //             $eq: ['$$d.data', null],
+              //           },
+              //         },
+              //       },
+              //       b: {
+              //         $filter: {
+              //           input: '$data',
+              //           as: 'd',
+              //           cond: {
+              //             $ne: ['$$d.data', null],
+              //           },
+              //         },
+              //       },
+              //     },
+              //   },
+              //   {
+              //     $unwind: {
+              //       path: '$b',
+              //       preserveNullAndEmptyArrays: true,
+              //     },
+              //   },
+              //   {
+              //     $project: {
+              //       a: {
+              //         $filter: {
+              //           input: '$a',
+              //           as: 'aa',
+              //           cond: {
+              //             $eq: ['$$aa.userId', '$b.data.followings'],
+              //           },
+              //         },
+              //       },
+              //     },
+              //   },
+              //   {
+              //     $unwind:
+              //       /**
+              //        * path: Path to the array field.
+              //        * includeArrayIndex: Optional name for index.
+              //        * preserveNullAndEmptyArrays: Optional
+              //        *   toggle to unwind null and empty values.
+              //        */
+              //       {
+              //         path: '$a',
+              //       },
+              //   },
+              //   {
+              //     $project:
+              //       /**
+              //        * specifications: The fields to
+              //        *   include or exclude.
+              //        */
+              //       {
+              //         a: '$a',
+              //       },
+              //   },
+              //   // {
+              //   //   $group: {
+              //   //     _id: "$b",
+              //   //     a: {
+              //   //       $addToSet: "$a",
+              //   //     },
+              //   //   },
+              //   // }
+              //   // {
+              //   //   $unwind: {
+              //   //     path: "$a",
+              //   //     preserveNullAndEmptyArrays: true,
+              //   //   },
+              //   // }
+              //   // {
+              //   //   $match: {
+              //   //     userId: ObjectId("64364fa540eb588f9a424939"),
+              //   //   },
+              //   // }
+              //   {
+              //     $unwind:
+              //       /**
+              //        * path: Path to the array field.
+              //        * includeArrayIndex: Optional name for index.
+              //        * preserveNullAndEmptyArrays: Optional
+              //        *   toggle to unwind null and empty values.
+              //        */
+              //       {
+              //         path: '$a',
+              //       },
+              //   },
+              //   {
+              //     $project: {
+              //       _id: 1,
+              //       userId: '$a.userId',
+              //       location: '$a.location',
+              //       caption: '$a.caption',
+              //       voucherId: '$a.voucherId',
+              //       postAudiencePreference: '$a.postAudiencePreference',
+              //       postType: '$a.postType',
+              //       media: '$a.media',
+              //       likesCount: '$a.likesCount',
+              //       commentCount: '$a.commentCount',
+              //       createdAt: '$a.createdAt',
+              //       updatedAt: '$a.updatedAt',
+              //       fo: '$f',
+              //     },
+              //   },
+              //   // {
+              //   //   $unwind: {
+              //   //     path: "$fo.followings",
+              //   //     preserveNullAndEmptyArrays: true,
+              //   //   },
+              //   // }
+              //   // {
+              //   //   $project: {
+              //   //     _id: 1,
+              //   //     userId: 1,
+              //   //     location: 1,
+              //   //     caption: 1,
+              //   //     postAudiencePreference: 1,
+              //   //     postType: 1,
+              //   //     media: 1,
+              //   //     likesCount: 1,
+              //   //     commentCount: 1,
+              //   //     createdAt: 1,
+              //   //     updatedAt: 1,
+              //   //     fo: "$fo.followings",
+              //   //   },
+              //   // }
+              //   // {
+              //   //   $match: {
+              //   //     userId: "$fo",
+              //   //     userId: ObjectId("64364fa540eb588f9a424939"),
+              //   //   },
+              //   // }
+              //   {
+              //     $lookup: {
+              //       from: 'vouchers',
+              //       localField: 'voucherId',
+              //       foreignField: 'voucherObject._id',
+              //       as: 'result',
+              //     },
+              //   },
+              //   {
+              //     $unwind: {
+              //       path: '$result',
+              //       preserveNullAndEmptyArrays: true,
+              //     },
+              //   },
+              //   {
+              //     $unwind: {
+              //       path: '$result.voucherObject',
+              //       preserveNullAndEmptyArrays: true,
+              //     },
+              //   },
+              //   {
+              //     $lookup: {
+              //       from: 'profiles',
+              //       localField: 'userId',
+              //       foreignField: '_id',
+              //       as: 'user',
+              //     },
+              //   },
+              //   {
+              //     $unwind: {
+              //       path: '$user',
+              //     },
+              //   },
+              //   {
+              //     $lookup: {
+              //       from: 'likedposts',
+              //       localField: '_id',
+              //       foreignField: 'postId',
+              //       as: 'liked',
+              //     },
+              //   },
+              //   {
+              //     $unwind: {
+              //       path: '$liked',
+              //       preserveNullAndEmptyArrays: true,
+              //     },
+              //   },
+              //   {
+              //     $unwind: {
+              //       path: '$liked.userId',
+              //       preserveNullAndEmptyArrays: true,
+              //     },
+              //   },
+              //   {
+              //     $project: {
+              //       username: '$user.username',
+              //       profileImage: '$user.profileImage',
+              //       caption: 1,
+              //       postAudiencePreference: 1,
+              //       postType: 1,
+              //       postLiked: {
+              //         $cond: {
+              //           if: {
+              //             $eq: ['$userId', '$liked.userId'],
+              //           },
+              //           then: true,
+              //           else: false,
+              //         },
+              //       },
+              //       voucherId: 1,
+              //       media: 1,
+              //       likesCount: 1,
+              //       commentCount: 1,
+              //       voucher: '$result.voucherObject',
+              //       createdAt: 1,
+              //       updatedAt: 1,
+              //       v: {
+              //         $cond: {
+              //           if: {
+              //             $eq: ['$postType', 'FEED'],
+              //           },
+              //           then: {},
+              //           else: {
+              //             $cond: {
+              //               if: {
+              //                 $eq: ['$voucherId', '$result.voucherObject._id'],
+              //               },
+              //               then: '$result.voucherObject',
+              //               else: null,
+              //             },
+              //           },
+              //         },
+              //       },
+              //     },
+              //   },
+              //   {
+              //     $match: {
+              //       v: {
+              //         $ne: null,
+              //       },
+              //     },
+              //   },
+              //   {
+              //     $project: {
+              //       v: 0,
+              //     },
+              //   },
+              // ],
+
+              [
+                {
+                  $lookup: {
+                    from: 'followings',
+                    localField: 'userId',
+                    foreignField: 'userId',
+                    as: 'following',
+                  },
+                },
+                {
+                  $unwind: {
+                    path: '$following',
+                    preserveNullAndEmptyArrays: true,
+                  },
+                },
+                {
+                  $unwind: {
+                    path: '$following.followings',
+                    preserveNullAndEmptyArrays: true,
+                  },
+                },
+                {
+                  $project: {
+                    _id: 1,
+                    userId: 1,
+                    location: 1,
+                    caption: 1,
+                    postAudiencePreference: 1,
+                    postType: 1,
+                    voucherId: 1,
+                    media: 1,
+                    likesCount: 1,
+                    commentCount: 1,
+                    createdAt: 1,
+                    updatedAt: 1,
+                    data: {
+                      $ifNull: ['$following', null],
+                    },
+                  },
+                },
+                {
+                  $group: {
+                    _id: null,
+                    data: {
+                      $push: '$$ROOT',
+                    },
+                  },
+                },
+                {
+                  $project: {
+                    a: {
+                      $filter: {
+                        input: '$data',
+                        as: 'd',
+                        cond: {
+                          $eq: ['$$d.data', null],
+                        },
+                      },
+                    },
+                    b: {
+                      $filter: {
+                        input: '$data',
+                        as: 'd',
+                        cond: {
+                          $ne: ['$$d.data', null],
+                        },
+                      },
+                    },
+                  },
+                },
+                {
+                  $unwind: {
+                    path: '$b',
+                    preserveNullAndEmptyArrays: true,
+                  },
+                },
+                {
+                  $project: {
+                    a: {
+                      $filter: {
+                        input: '$a',
+                        as: 'aa',
+                        cond: {
+                          $eq: ['$$aa.userId', '$b.data.followings'],
+                        },
+                      },
+                    },
+                  },
+                },
+                {
+                  $unwind: {
+                    path: '$a',
+                  },
+                },
+                {
+                  $project: {
+                    a: '$a',
+                  },
+                },
+                {
+                  $unwind: {
+                    path: '$a',
+                  },
+                },
+                {
+                  $project: {
+                    _id: 1,
+                    userId: '$a.userId',
+                    location: '$a.location',
+                    caption: '$a.caption',
+                    voucherId: '$a.voucherId',
+                    postAudiencePreference: '$a.postAudiencePreference',
+                    postType: '$a.postType',
+                    media: '$a.media',
+                    likesCount: '$a.likesCount',
+                    commentCount: '$a.commentCount',
+                    createdAt: '$a.createdAt',
+                    updatedAt: '$a.updatedAt',
+                    fo: '$f',
+                  },
+                },
+                ...pipeLine,
+              ],
+            )
             .skip(offset)
             .limit(limit);
-          console.log('re = ', re);
+          // console.log('r = ', r);
         } catch (e) {
           throw new HttpException(e.toString(), HttpStatus.BAD_REQUEST);
         }
@@ -282,6 +680,7 @@ export class SocialPostsService {
       {
         $project: {
           username: '$user.username',
+          userId: 1,
           profileImage: '$user.profileImage',
           caption: 1,
           postAudiencePreference: 1,

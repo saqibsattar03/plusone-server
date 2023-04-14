@@ -12,7 +12,6 @@ import { RestaurantService } from '../restaurant/restaurant.service';
 import { ProfilesService } from '../profiles/profiles.service';
 import { Constants } from '../../common/constants';
 import { DepositMoneyService } from '../deposit-money/deposit-money.service';
-import * as moment from 'moment';
 
 @Injectable()
 export class VoucherService {
@@ -377,11 +376,11 @@ export class VoucherService {
   async getTotalVoucherRedeemedCount(restaurantId): Promise<any> {
     const oid = new mongoose.Types.ObjectId(restaurantId);
     return this.redeemVoucherModel.aggregate([
-      {
-        $match: {
-          restaurantId: oid,
-        },
-      },
+      // {
+      //   $match: {
+      //     restaurantId: oid,
+      //   },
+      // },
       {
         $count: 'total count',
       },
