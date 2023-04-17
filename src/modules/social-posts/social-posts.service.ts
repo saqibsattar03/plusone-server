@@ -199,12 +199,12 @@ export class SocialPostsService {
       .findOne({ _id: postId })
       .select('commentCount -_id');
   }
-  async updateCommentCount(postId, count): Promise<any> {
-    return this.socialPostModel.findOneAndUpdate(
-      { _id: postId },
-      { commentCount: count },
-    );
-  }
+  // async updateCommentCount(postId, count): Promise<any> {
+  //   return this.socialPostModel.findOneAndUpdate(
+  //     { _id: postId },
+  //     { commentCount: count },
+  //   );
+  // }
   async filterPostBasedOnCaption(keyword: string): Promise<any> {
     return this.socialPostModel.find({ $text: { $search: keyword } });
   }
