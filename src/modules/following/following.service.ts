@@ -80,7 +80,6 @@ export class FollowingService {
   }
 
   async getFollowingIds(userId): Promise<any> {
-    console.log('here');
     const oi = new mongoose.Types.ObjectId(userId);
     return this.followingModel.aggregate([
       {

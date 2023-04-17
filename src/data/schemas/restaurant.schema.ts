@@ -14,18 +14,28 @@ export class Restaurant {
 
   @Prop({ type: String, required: true })
   phoneNumber: string;
+
   @Prop()
   menu: [string];
+
   @Prop({ type: String, required: [true, 'profile image is missing'] })
   profileImage: string;
 
-  @Prop()
+  @Prop({
+    type: String,
+    required: true,
+  })
   description: string;
-  @Prop({ type: [String], required: [true, 'profile image is missing'] })
+
+  @Prop({
+    type: [String],
+    required: [true, 'at least one timeline image is required'],
+  })
   media: string[];
 
-  @Prop({ type: PointSchema })
+  @Prop({ type: PointSchema, required: true })
   location: PointSchema;
+
   @Prop()
   tags: [string];
   @Prop()

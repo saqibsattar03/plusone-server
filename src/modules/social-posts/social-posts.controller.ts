@@ -68,6 +68,14 @@ export class SocialPostsController {
     return this.socialPostService.getAllPost(paginationDto, data);
   }
 
+  @ApiParam({ type: String, name: 'userId' })
+  @ApiCreatedResponse({ type: SocialPostDto })
+  @ApiBadRequestResponse({ description: 'can not fetch posts' })
+  @Get('all/:userId')
+  getAllPostsOfSingleUser(@Param('userId') userId) {
+    return this.socialPostService.getAllPostsOfSingleUser(userId);
+  }
+
   /***Retrieve Single Post Route***/
 
   @Get(':postId')
@@ -77,9 +85,9 @@ export class SocialPostsController {
     description: 'post fetched successfully',
   })
   @ApiBadRequestResponse({ description: 'could not fetch the post object' })
-  async getPost(@Param('postId') postId) {
+  async getSinglePost(@Param('postId') postId) {
     if (postId) {
-      return this.socialPostService.getPost(postId);
+      return this.socialPostService.getSinglePost(postId);
     } else {
       throw new HttpException(
         'No Post Id was Provided',
@@ -164,8 +172,11 @@ export class SocialPostsController {
   }
 
   /*** search post by caption ***/
-  @Get('caption')
-  filterRestaurantBasedOnCaption(@Query('keyword') keyword) {
-    return this.socialPostService.filterPostBasedOnCaption(keyword);
+  @ApiQuery({ type: String, name: 'keyword' })
+  @Post('search-by-caption')
+  filterRestaurantBasedOnCaption(@Body() data) {
+    console.log('here');
+    console.log(data.keyword);
+    return this.socialPostService.filterPostBasedOnCaption(data.keyword);
   }
 }

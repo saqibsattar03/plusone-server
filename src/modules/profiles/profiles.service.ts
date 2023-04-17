@@ -41,7 +41,7 @@ export class ProfilesService {
     });
     if (userName)
       throw new HttpException(
-        'Username already taken',
+        'A user with this email already exists.',
         HttpStatus.UNAUTHORIZED,
       );
     const user = await this.profileModel.findOne({

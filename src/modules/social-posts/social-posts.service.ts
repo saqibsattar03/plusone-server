@@ -41,13 +41,20 @@ export class SocialPostsService {
   async getAllPost(paginationDto, data): Promise<any> {
     const { limit, offset } = paginationDto;
     const pipeLine = await this.getPostPipeline();
+    const followings = await this.followingService.getFollowingIds(data.userId);
+    const followingsArray = [];
+    followings.forEach((obj) => {
+      followingsArray.push(obj.followings);
+    });
+    const r = followingsArray.flat();
     switch (data.postAudiencePreference) {
       case Constants.PUBLIC: {
+        console.log('in public');
         return this.socialPostModel
           .aggregate([
             {
               $match: {
-                $or: [{ postAudiencePreference: 'PUBLIC' }],
+                postAudiencePreference: 'PUBLIC',
               },
             },
             ...pipeLine,
@@ -56,16 +63,8 @@ export class SocialPostsService {
           .limit(limit);
       }
       case Constants.FOLLOWING: {
+        console.log(data.userId);
         try {
-          const followings = await this.followingService.getFollowingIds(
-            data.userId,
-          );
-          const followingsArray = [];
-          followings.forEach((obj) => {
-            followingsArray.push(obj.followings);
-          });
-          const r = followingsArray.flat();
-          console.log(r);
           return this.socialPostModel
             .aggregate([
               {
@@ -75,139 +74,29 @@ export class SocialPostsService {
                   },
                 },
               },
-              // {
-              //   $lookup: {
-              //     from: 'followings',
-              //     localField: 'userId',
-              //     foreignField: 'userId',
-              //     as: 'following',
-              //   },
-              // },
-              // {
-              //   $unwind: {
-              //     path: '$following',
-              //     preserveNullAndEmptyArrays: true,
-              //   },
-              // },
-              // {
-              //   $unwind: {
-              //     path: '$following.followings',
-              //     preserveNullAndEmptyArrays: true,
-              //   },
-              // },
-              // {
-              //   $project: {
-              //     _id: 1,
-              //     userId: 1,
-              //     location: 1,
-              //     caption: 1,
-              //     postAudiencePreference: 1,
-              //     postType: 1,
-              //     voucherId: 1,
-              //     media: 1,
-              //     likesCount: 1,
-              //     commentCount: 1,
-              //     createdAt: 1,
-              //     updatedAt: 1,
-              //     data: {
-              //       $ifNull: ['$following', null],
-              //     },
-              //   },
-              // },
-              // {
-              //   $group: {
-              //     _id: null,
-              //     data: {
-              //       $push: '$$ROOT',
-              //     },
-              //   },
-              // },
-              // {
-              //   $project: {
-              //     a: {
-              //       $filter: {
-              //         input: '$data',
-              //         as: 'd',
-              //         cond: {
-              //           $eq: ['$$d.data', null],
-              //         },
-              //       },
-              //     },
-              //     b: {
-              //       $filter: {
-              //         input: '$data',
-              //         as: 'd',
-              //         cond: {
-              //           $ne: ['$$d.data', null],
-              //         },
-              //       },
-              //     },
-              //   },
-              // },
-              // {
-              //   $unwind: {
-              //     path: '$b',
-              //     preserveNullAndEmptyArrays: true,
-              //   },
-              // },
-              // {
-              //   $project: {
-              //     a: {
-              //       $filter: {
-              //         input: '$a',
-              //         as: 'aa',
-              //         cond: {
-              //           $eq: ['$$aa.userId', '$b.data.followings'],
-              //         },
-              //       },
-              //     },
-              //   },
-              // },
-              // {
-              //   $unwind: {
-              //     path: '$a',
-              //   },
-              // },
-              // {
-              //   $project: {
-              //     a: '$a',
-              //   },
-              // },
-              // {
-              //   $unwind: {
-              //     path: '$a',
-              //   },
-              // },
-              // {
-              //   $project: {
-              //     _id: 1,
-              //     userId: '$a.userId',
-              //     location: '$a.location',
-              //     caption: '$a.caption',
-              //     voucherId: '$a.voucherId',
-              //     postAudiencePreference: '$a.postAudiencePreference',
-              //     postType: '$a.postType',
-              //     media: '$a.media',
-              //     likesCount: '$a.likesCount',
-              //     commentCount: '$a.commentCount',
-              //     createdAt: '$a.createdAt',
-              //     updatedAt: '$a.updatedAt',
-              //     fo: '$f',
-              //   },
-              // },
+              {
+                $match: {
+                  postAudiencePreference: {
+                    $ne: 'ONLY-ME',
+                  },
+                },
+              },
               ...pipeLine,
             ])
             .skip(offset)
             .limit(limit);
-          // console.log('r = ', r);
         } catch (e) {
           throw new HttpException(e.toString(), HttpStatus.BAD_REQUEST);
         }
       }
     }
   }
-  async getPost(postId): Promise<PostDocument> {
+  async getSinglePost(postId): Promise<PostDocument> {
     return this.socialPostModel.findById(postId);
+  }
+
+  async getAllPostsOfSingleUser(userId): Promise<any> {
+    return this.socialPostModel.find({ userId: userId });
   }
 
   async updatePost(
@@ -313,27 +202,22 @@ export class SocialPostsService {
   async getPostPipeline() {
     return [
       {
-        $match: {
-          postAudiencePreference: 'PUBLIC',
-        },
-      },
-      {
         $lookup: {
           from: 'vouchers',
           localField: 'voucherId',
           foreignField: 'voucherObject._id',
-          as: 'result',
+          as: 'voucher',
         },
       },
       {
         $unwind: {
-          path: '$result',
+          path: '$voucher',
           preserveNullAndEmptyArrays: true,
         },
       },
       {
         $unwind: {
-          path: '$result.voucherObject',
+          path: '$voucher.voucherObject',
           preserveNullAndEmptyArrays: true,
         },
       },
@@ -350,6 +234,24 @@ export class SocialPostsService {
           path: '$user',
         },
       },
+      {
+        $lookup: {
+          from: 'followings',
+          localField: 'userId',
+          foreignField: 'userId',
+          as: 'followed',
+        },
+      },
+      // {
+      //   $unwind: {
+      //     path: '$followed',
+      //   },
+      // },
+      // {
+      //   $unwind: {
+      //     path: '$followed.followings',
+      //   },
+      // },
       {
         $lookup: {
           from: 'likedposts',
@@ -382,6 +284,15 @@ export class SocialPostsService {
             $cond: {
               if: {
                 $eq: ['$userId', '$liked.userId'],
+              },
+              then: true,
+              else: false,
+            },
+          },
+          userFollowed: {
+            $cond: {
+              if: {
+                $eq: ['$userId', '$followed.followings'],
               },
               then: true,
               else: false,
@@ -425,6 +336,123 @@ export class SocialPostsService {
           v: 0,
         },
       },
+
+      // {
+      //   $lookup: {
+      //     from: 'vouchers',
+      //     localField: 'voucherId',
+      //     foreignField: 'voucherObject._id',
+      //     as: 'voucher',
+      //   },
+      // },
+      // {
+      //   $unwind: {
+      //     path: '$voucher',
+      //     preserveNullAndEmptyArrays: true,
+      //   },
+      // },
+      // {
+      //   $unwind: {
+      //     path: '$voucher.voucherObject',
+      //     preserveNullAndEmptyArrays: true,
+      //   },
+      // },
+      // {
+      //   $lookup: {
+      //     from: 'profiles',
+      //     localField: 'userId',
+      //     foreignField: '_id',
+      //     as: 'user',
+      //   },
+      // },
+      // {
+      //   $unwind: {
+      //     path: '$user',
+      //   },
+      // },
+      // {
+      //   $lookup: {
+      //     from: 'followings',
+      //     localField: 'userId',
+      //     foreignField: 'userId',
+      //     as: 'followed',
+      //   },
+      // },
+      // {
+      //   $lookup: {
+      //     from: 'likedposts',
+      //     localField: '_id',
+      //     foreignField: 'postId',
+      //     as: 'liked',
+      //   },
+      // },
+      // {
+      //   $unwind: {
+      //     path: '$liked',
+      //     preserveNullAndEmptyArrays: true,
+      //   },
+      // },
+      // {
+      //   $unwind: {
+      //     path: '$liked.userId',
+      //     preserveNullAndEmptyArrays: true,
+      //   },
+      // },
+      // {
+      //   $project: {
+      //     username: '$user.username',
+      //     userId: 1,
+      //     profileImage: '$user.profileImage',
+      //     caption: 1,
+      //     postAudiencePreference: 1,
+      //     postType: 1,
+      //     postLiked: {
+      //       $cond: {
+      //         if: {
+      //           $eq: ['$userId', '$liked.userId'],
+      //         },
+      //         then: true,
+      //         else: false,
+      //       },
+      //     },
+      //     voucherId: 1,
+      //     media: 1,
+      //     likesCount: 1,
+      //     commentCount: 1,
+      //     voucher: '$result.voucherObject',
+      //     createdAt: 1,
+      //     updatedAt: 1,
+      //     v: {
+      //       $cond: {
+      //         if: {
+      //           $eq: ['$postType', 'FEED'],
+      //         },
+      //         then: {},
+      //         else: {
+      //           $cond: {
+      //             if: {
+      //               $eq: ['$voucherId', '$result.voucherObject._id'],
+      //             },
+      //             then: '$result.voucherObject',
+      //             else: null,
+      //           },
+      //         },
+      //       },
+      //     },
+      //   },
+      // },
+      // {
+      //   $match: {
+      //     v: {
+      //       $ne: null,
+      //     },
+      //   },
+      // },
+      // {
+      //   $project: {
+      //     v: 0,
+      //   },
+      // },
     ];
   }
 }

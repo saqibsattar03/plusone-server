@@ -21,9 +21,6 @@ export class SocialPostDto {
   })
   media: string[];
 
-  @ApiProperty({ type: String, name: 'mediaType' })
-  mediaType: string;
-
   @ApiProperty({
     type: String,
     name: 'postAudiencePreference',
@@ -39,6 +36,8 @@ export class GetSocialPostDto {
   userId: string;
 }
 export class SocialPostResponseDto {
+  @ApiProperty({ type: String })
+  _id: string;
   @ApiProperty({ type: String, name: 'userId' })
   @IsNotEmpty()
   userId: string;
@@ -65,6 +64,12 @@ export class SocialPostResponseDto {
 
   @ApiProperty({ type: String, name: 'postType' })
   postType: string;
+
+  @ApiProperty({ type: Boolean })
+  postLiked: boolean;
+
+  @ApiProperty({ type: Boolean })
+  userFollowed: boolean;
 
   username: string;
   profileImage: string;
