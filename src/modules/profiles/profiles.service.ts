@@ -282,4 +282,11 @@ export class ProfilesService {
       { returnDocument: 'after' },
     );
   }
+
+  async filterUserByName(username): Promise<any> {
+    const regex = new RegExp(username, 'i');
+    return this.profileModel
+      .find({ username: regex })
+      .select('_id username firstname surname profileImage');
+  }
 }

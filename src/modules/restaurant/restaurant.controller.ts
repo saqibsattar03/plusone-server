@@ -113,4 +113,20 @@ export class RestaurantController {
   adminStats() {
     return this.restaurantService.adminStats();
   }
+
+  @ApiQuery({ name: 'restaurantName', type: String })
+  @ApiCreatedResponse({
+    schema: {
+      properties: {
+        _id: { type: 'string' },
+        username: { type: 'string' },
+        description: { type: 'string' },
+        profileImage: { type: 'string' },
+      },
+    },
+  })
+  @Get('search-by-name')
+  filterByRestaurantName(@Query('restaurantName') restaurantName) {
+    return this.restaurantService.filterByRestaurantName(restaurantName);
+  }
 }

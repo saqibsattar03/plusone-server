@@ -62,13 +62,6 @@ export class FollowingService {
           as: 'followings',
         },
       },
-      // {
-      //   $project: {
-      //     fistName: '$followings.firstName',
-      //     surName: '$followings.surName',
-      //     profileImage: '$followings.profileImage',
-      //   },
-      // },
       {
         $unset: ['_id', 'followings.password', 'followings.confirmationCode'],
       },

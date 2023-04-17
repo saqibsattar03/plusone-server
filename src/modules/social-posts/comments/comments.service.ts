@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { Comment } from 'src/data/schemas/comment.schema';
@@ -10,6 +16,7 @@ import { SocialPostsService } from '../social-posts.service';
 export class CommentsService {
   constructor(
     @InjectModel(Comment.name) private readonly commentModel: Model<Comment>,
+    @Inject(forwardRef(() => SocialPostsService))
     private readonly socialPostService: SocialPostsService,
   ) {}
 
@@ -111,7 +118,7 @@ export class CommentsService {
     ]);
   }
 
-  async deleteComment(data): Promise<any> {
+  async deleteSingleComment(data): Promise<any> {
     const res = await this.commentModel.findOne({
       postId: data.postId,
     });
@@ -131,5 +138,9 @@ export class CommentsService {
       return r;
     }
     throw new HttpException('no such comment found', HttpStatus.NOT_FOUND);
+  }
+
+  async deleteAllComment(postId): Promise<any> {
+    return this.commentModel.findOneAndDelete(postId);
   }
 }

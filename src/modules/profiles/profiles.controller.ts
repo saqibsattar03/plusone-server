@@ -123,4 +123,21 @@ export class ProfilesController {
   changeUserStatus(@Query('userId') userId) {
     return this.profileService.changeUserStatus(userId);
   }
+
+  @ApiQuery({ name: 'username', type: String })
+  @ApiCreatedResponse({
+    schema: {
+      properties: {
+        _id: { type: 'string' },
+        username: { type: 'string' },
+        firstname: { type: 'string' },
+        surname: { type: 'string' },
+        profileImage: { type: 'string' },
+      },
+    },
+  })
+  @Get('search-by-name')
+  filterUserByName(@Query('username') username) {
+    return this.profileService.filterUserByName(username);
+  }
 }

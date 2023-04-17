@@ -54,16 +54,15 @@ export class SocialPostsController {
   @ApiBadRequestResponse({ description: 'can not create post' })
   @UseGuards(JwtAuthGuard)
   createPost(@Request() request, @Body() data) {
-    console.log(data);
     data.userId = request.user.userId;
     return this.socialPostService.createPost(data);
   }
 
   /*** get all public posts or following posts ***/
-  @ApiQuery({ type: GetSocialPostDto })
+  @ApiBody({ type: GetSocialPostDto })
   @ApiCreatedResponse({ type: SocialPostResponseDto })
   @ApiBadRequestResponse({ description: 'can not fetch posts' })
-  @Get('all')
+  @Post('all')
   getAllPost(@Query() paginationDto: PaginationDto, @Body() data) {
     return this.socialPostService.getAllPost(paginationDto, data);
   }
@@ -99,7 +98,7 @@ export class SocialPostsController {
   /***Post Update Route ***/
 
   @Patch('')
-  @ApiBearerAuth('access_token')
+  @ApiBearerAuth('access-token')
   @ApiQuery({ name: 'postId', type: String })
   @ApiBody({
     type: UpdateSocialPost,
@@ -122,7 +121,7 @@ export class SocialPostsController {
   /***Delete Post Route ***/
 
   @Delete(':postId')
-  @ApiBearerAuth('access_token')
+  @ApiBearerAuth('access-token')
   @ApiParam({ name: 'postId', type: 'string' })
   @ApiCreatedResponse({ description: 'post deleted successfully' })
   @ApiBadRequestResponse({ description: 'could not delete post' })
@@ -134,7 +133,7 @@ export class SocialPostsController {
   /***Like Post  Route ***/
 
   @Post('like')
-  @ApiBearerAuth('access_token')
+  @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ description: 'post liked successfully' })
   @ApiQuery({
     name: 'postId',
@@ -156,7 +155,7 @@ export class SocialPostsController {
   /***Remove Like Route ***/
 
   @Patch('remove-like')
-  @ApiBearerAuth('access_token')
+  @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ description: 'post unliked successfully' })
   @ApiBadRequestResponse({ description: 'could not unlike post' })
   @UseGuards(JwtAuthGuard)
@@ -175,8 +174,6 @@ export class SocialPostsController {
   @ApiQuery({ type: String, name: 'keyword' })
   @Post('search-by-caption')
   filterRestaurantBasedOnCaption(@Body() data) {
-    console.log('here');
-    console.log(data.keyword);
     return this.socialPostService.filterPostBasedOnCaption(data.keyword);
   }
 }

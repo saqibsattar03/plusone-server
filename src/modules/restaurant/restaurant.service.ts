@@ -476,4 +476,11 @@ export class RestaurantService {
       },
     ]);
   }
+
+  async filterByRestaurantName(restaurantName: string): Promise<any> {
+    const regex = new RegExp(restaurantName, 'i');
+    return this.restaurantModel
+      .find({ restaurantName: regex })
+      .select('_id restaurantName description profileImage');
+  }
 }

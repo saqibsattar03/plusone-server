@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
 import { LocationDto } from './location.dto';
+import { VoucherDto } from './voucher.dto';
 
 export class SocialPostDto {
   @ApiProperty({ type: String, name: 'userId' })
@@ -32,7 +33,9 @@ export class SocialPostDto {
 }
 
 export class GetSocialPostDto {
-  postType: string;
+  postAudiencePreference: string;
+
+  @ApiProperty({ type: String, required: false })
   userId: string;
 }
 export class SocialPostResponseDto {
@@ -71,9 +74,16 @@ export class SocialPostResponseDto {
   @ApiProperty({ type: Boolean })
   userFollowed: boolean;
 
+  @ApiProperty({ type: Number })
+  likesCount: number;
+
+  @ApiProperty({ type: Number })
+  commentCount: number;
+
   username: string;
   profileImage: string;
   voucher: {
+    restaurantId: string;
     title: string;
     voucherPreference: string;
     discount: number;

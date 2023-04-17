@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Post, PostDocument } from 'src/data/schemas/post.schema';
@@ -9,6 +15,7 @@ import {
 import { UpdateSocialPost } from '../../data/dtos/socialPost.dto';
 import { Constants } from '../../common/constants';
 import { FollowingService } from '../following/following.service';
+import { CommentsService } from './comments/comments.service';
 
 @Injectable()
 export class SocialPostsService {
@@ -18,12 +25,14 @@ export class SocialPostsService {
     @InjectModel(LikedPost.name)
     private readonly postLikedModel: Model<LikedPostDocument>,
     private readonly followingService: FollowingService,
+    @Inject(forwardRef(() => CommentsService))
+    private readonly commentService: CommentsService,
   ) {}
 
   async createPost(postDto: any): Promise<PostDocument> {
-    console.log('postDto = ', postDto);
     try {
       if (postDto.postType == Constants.FEED) {
+        postDto.voucherId = null;
         return this.socialPostModel.create(postDto);
       } else {
         return this.socialPostModel.create({
@@ -129,6 +138,7 @@ export class SocialPostsService {
         HttpStatus.UNAUTHORIZED,
       );
     await this.postLikedModel.findOneAndDelete({ postId: postId });
+    await this.commentService.deleteAllComment(postId);
     await post.deleteOne();
     throw new HttpException('post deleted successfully', HttpStatus.OK);
   }
@@ -198,7 +208,6 @@ export class SocialPostsService {
   async filterPostBasedOnCaption(keyword: string): Promise<any> {
     return this.socialPostModel.find({ $text: { $search: keyword } });
   }
-
   async getPostPipeline() {
     return [
       {
@@ -242,16 +251,6 @@ export class SocialPostsService {
           as: 'followed',
         },
       },
-      // {
-      //   $unwind: {
-      //     path: '$followed',
-      //   },
-      // },
-      // {
-      //   $unwind: {
-      //     path: '$followed.followings',
-      //   },
-      // },
       {
         $lookup: {
           from: 'likedposts',
@@ -302,24 +301,42 @@ export class SocialPostsService {
           media: 1,
           likesCount: 1,
           commentCount: 1,
-          voucher: '$result.voucherObject',
+          voucher: {
+            restaurantId: '$voucher.restaurantId',
+            _id: '$voucher.voucherObject._id',
+            title: '$voucher.voucherObject.title',
+            voucherType: '$voucher.voucherObject.voucherType',
+            voucherPreference: '$voucher.voucherObject.voucherPreference',
+            discount: '$voucher.voucherObject.discount',
+            description: '$voucher.voucherObject.description',
+            voucherImage: '$voucher.voucherObject.voucherImage',
+            estimatedSavings: '$voucher.voucherObject.estimatedSavings',
+          },
           createdAt: 1,
           updatedAt: 1,
           v: {
             $cond: {
               if: {
-                $eq: ['$postType', 'FEED'],
+                $or: [
+                  {
+                    $eq: ['$postType', 'FEED'],
+                  },
+                  {
+                    $eq: ['$postType', 'REVIEW'],
+                  },
+                ],
               },
               then: {},
-              else: {
-                $cond: {
-                  if: {
-                    $eq: ['$voucherId', '$result.voucherObject._id'],
-                  },
-                  then: '$result.voucherObject',
-                  else: null,
-                },
-              },
+              else: null,
+              // else: {
+              //   $cond: {
+              //     if: {
+              //       $eq: ['$voucherId', '$result.voucherObject._id'],
+              //     },
+              //     then: '$result.voucherObject',
+              //     else: null,
+              //   },
+              // },
             },
           },
         },
@@ -336,123 +353,25 @@ export class SocialPostsService {
           v: 0,
         },
       },
-
-      // {
-      //   $lookup: {
-      //     from: 'vouchers',
-      //     localField: 'voucherId',
-      //     foreignField: 'voucherObject._id',
-      //     as: 'voucher',
-      //   },
-      // },
-      // {
-      //   $unwind: {
-      //     path: '$voucher',
-      //     preserveNullAndEmptyArrays: true,
-      //   },
-      // },
-      // {
-      //   $unwind: {
-      //     path: '$voucher.voucherObject',
-      //     preserveNullAndEmptyArrays: true,
-      //   },
-      // },
-      // {
-      //   $lookup: {
-      //     from: 'profiles',
-      //     localField: 'userId',
-      //     foreignField: '_id',
-      //     as: 'user',
-      //   },
-      // },
-      // {
-      //   $unwind: {
-      //     path: '$user',
-      //   },
-      // },
-      // {
-      //   $lookup: {
-      //     from: 'followings',
-      //     localField: 'userId',
-      //     foreignField: 'userId',
-      //     as: 'followed',
-      //   },
-      // },
-      // {
-      //   $lookup: {
-      //     from: 'likedposts',
-      //     localField: '_id',
-      //     foreignField: 'postId',
-      //     as: 'liked',
-      //   },
-      // },
-      // {
-      //   $unwind: {
-      //     path: '$liked',
-      //     preserveNullAndEmptyArrays: true,
-      //   },
-      // },
-      // {
-      //   $unwind: {
-      //     path: '$liked.userId',
-      //     preserveNullAndEmptyArrays: true,
-      //   },
-      // },
-      // {
-      //   $project: {
-      //     username: '$user.username',
-      //     userId: 1,
-      //     profileImage: '$user.profileImage',
-      //     caption: 1,
-      //     postAudiencePreference: 1,
-      //     postType: 1,
-      //     postLiked: {
-      //       $cond: {
-      //         if: {
-      //           $eq: ['$userId', '$liked.userId'],
-      //         },
-      //         then: true,
-      //         else: false,
-      //       },
-      //     },
-      //     voucherId: 1,
-      //     media: 1,
-      //     likesCount: 1,
-      //     commentCount: 1,
-      //     voucher: '$result.voucherObject',
-      //     createdAt: 1,
-      //     updatedAt: 1,
-      //     v: {
-      //       $cond: {
-      //         if: {
-      //           $eq: ['$postType', 'FEED'],
-      //         },
-      //         then: {},
-      //         else: {
-      //           $cond: {
-      //             if: {
-      //               $eq: ['$voucherId', '$result.voucherObject._id'],
-      //             },
-      //             then: '$result.voucherObject',
-      //             else: null,
-      //           },
-      //         },
-      //       },
-      //     },
-      //   },
-      // },
-      // {
-      //   $match: {
-      //     v: {
-      //       $ne: null,
-      //     },
-      //   },
-      // },
-      // {
-      //   $project: {
-      //     v: 0,
-      //   },
-      // },
+      {
+        $unset: [
+          'voucher.studentVoucherCount',
+          'voucher.nonStudentVoucherCount',
+        ],
+      },
+      {
+        $group: {
+          _id: '$_id',
+          doc: {
+            $first: '$$ROOT',
+          },
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: '$doc',
+        },
+      },
     ];
   }
 }
