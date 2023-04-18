@@ -12,18 +12,20 @@ export class Restaurant {
   @Prop({ type: String, required: true })
   restaurantName: string;
 
-  @Prop({ type: String, required: true })
+  // , required: true
+  @Prop({ type: String })
   phoneNumber: string;
 
   @Prop()
   menu: [string];
 
-  @Prop({ type: String, required: [true, 'profile image is missing'] })
+  // required: [true, 'profile image is missing']
+  @Prop({ type: String })
   profileImage: string;
 
   @Prop({
     type: String,
-    required: true,
+    // required: true,
   })
   description: string;
 
@@ -33,7 +35,7 @@ export class Restaurant {
   })
   media: string[];
 
-  @Prop({ type: PointSchema, required: true })
+  @Prop({ type: PointSchema })
   location: PointSchema;
 
   @Prop()
@@ -46,7 +48,7 @@ export class Restaurant {
 
   @Prop({
     type: Number,
-    required: true,
+    // required: true,
     index: { unique: true },
   })
   uniqueCode: number;
