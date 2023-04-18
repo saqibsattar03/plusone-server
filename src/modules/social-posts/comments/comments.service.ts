@@ -60,7 +60,7 @@ export class CommentsService {
       c = c.commentCount + 1;
       await this.socialPostService.updateCommentCount(commentDto.postId, c);
     }
-    throw new HttpException('comment created ', HttpStatus.OK);
+    throw new HttpException('comment posted successfully ', HttpStatus.OK);
   }
 
   async editComment(postId, data): Promise<any> {
@@ -108,12 +108,15 @@ export class CommentsService {
       },
       {
         $project: {
-          'users.firstName': 1,
-          'users.surName': 1,
+          postId: 1,
+          'users.surname': 1,
+          'users.firstname': 1,
           'user.profileImage': 1,
-          'commentObject.commentText': 1,
-          'commentObject.updatedAt': 1,
+          commentObject: 1,
         },
+      },
+      {
+        $unset: ['_id'],
       },
     ]);
   }

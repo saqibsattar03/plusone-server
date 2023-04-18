@@ -34,8 +34,19 @@ export class CommentsController {
 
   @Post('')
   @ApiBearerAuth('access-token')
-  @ApiParam({ name: 'postId', type: 'string' })
-  @ApiBody({ type: CommentDto, description: 'create comment' })
+  @ApiBody({
+    schema: {
+      properties: {
+        postId: { type: 'string' },
+        commentObject: {
+          type: 'object',
+          properties: {
+            commentText: { type: 'string' },
+          },
+        },
+      },
+    },
+  })
   @ApiCreatedResponse({
     type: CommentDto,
     description: 'Comment created successfully',
@@ -47,7 +58,36 @@ export class CommentsController {
     return this.commentService.postComment(data);
   }
 
-  @Get()
+  @Get('all')
+  @ApiQuery({ type: String, name: 'postId' })
+  @ApiCreatedResponse({
+    schema: {
+      properties: {
+        postId: { type: 'string' },
+        commentObject: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            userId: { type: 'string' },
+            commentText: { type: 'string' },
+            updatedAt: { type: 'string' },
+          },
+        },
+        users: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              firstname: { type: 'string' },
+              surname: { type: 'string' },
+              profileImage: { type: 'string' },
+            },
+          },
+        },
+      },
+    },
+  })
+  @ApiBadRequestResponse({ description: 'comment could not be created' })
   getPostComment(@Query('postId') postId) {
     return this.commentService.getPostComment(postId);
   }

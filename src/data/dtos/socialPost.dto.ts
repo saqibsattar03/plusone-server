@@ -119,10 +119,6 @@ export class PostLikedDto {
 }
 
 export class CommentDto {
-  // @ApiProperty()
-  // @IsNotEmpty()
-  // userId: string;
-
   @ApiProperty()
   @IsNotEmpty()
   postId: string;
