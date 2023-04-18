@@ -277,21 +277,6 @@ export class SocialPostsService {
           preserveNullAndEmptyArrays: true,
         },
       },
-      // {
-      //   $project: {
-      //     useId: '$userId',
-      //     uId: '$liked.userId',
-      //     eq: {
-      //       $cond: {
-      //         if: {
-      //           $eq: ['$userId', '$liked.userId'],
-      //         },
-      //         then: true,
-      //         else: false,
-      //       },
-      //     },
-      //   },
-      // },
       {
         $project: {
           username: '$user.username',
@@ -362,37 +347,37 @@ export class SocialPostsService {
           },
         },
       },
-      // {
-      //   $match: {
-      //     v: {
-      //       $ne: null,
-      //     },
-      //   },
-      // },
-      // {
-      //   $project: {
-      //     v: 0,
-      //   },
-      // },
-      // {
-      //   $unset: [
-      //     'voucher.studentVoucherCount',
-      //     'voucher.nonStudentVoucherCount',
-      //   ],
-      // },
-      // {
-      //   $group: {
-      //     _id: '$_id',
-      //     doc: {
-      //       $first: '$$ROOT',
-      //     },
-      //   },
-      // },
-      // {
-      //   $replaceRoot: {
-      //     newRoot: '$doc',
-      //   },
-      // },
+      {
+        $match: {
+          v: {
+            $ne: null,
+          },
+        },
+      },
+      {
+        $project: {
+          v: 0,
+        },
+      },
+      {
+        $unset: [
+          'voucher.studentVoucherCount',
+          'voucher.nonStudentVoucherCount',
+        ],
+      },
+      {
+        $group: {
+          _id: '$_id',
+          doc: {
+            $first: '$$ROOT',
+          },
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: '$doc',
+        },
+      },
     ];
   }
 }

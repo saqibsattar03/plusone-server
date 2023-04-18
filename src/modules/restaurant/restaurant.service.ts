@@ -36,6 +36,7 @@ export class RestaurantService {
     restaurantDto.userId = user._id;
     restaurantDto.uniqueCode = uniqueCode;
     const restaurant = await this.restaurantModel.create(restaurantDto);
+    console.log('restaurant object = ', restaurant);
     return restaurant;
   }
 
