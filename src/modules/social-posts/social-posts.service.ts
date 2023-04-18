@@ -4,6 +4,7 @@ import {
   HttpStatus,
   Inject,
   Injectable,
+  Query,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -16,6 +17,7 @@ import { UpdateSocialPost } from '../../data/dtos/socialPost.dto';
 import { Constants } from '../../common/constants';
 import { FollowingService } from '../following/following.service';
 import { CommentsService } from './comments/comments.service';
+import { PaginationDto } from '../../common/auth/dto/pagination.dto';
 
 @Injectable()
 export class SocialPostsService {
@@ -104,8 +106,12 @@ export class SocialPostsService {
     return this.socialPostModel.findById(postId);
   }
 
-  async getAllPostsOfSingleUser(userId): Promise<any> {
-    return this.socialPostModel.find({ userId: userId });
+  async getAllPostsOfSingleUser(paginationDto, userId): Promise<any> {
+    const { limit, offset } = paginationDto;
+    return this.socialPostModel
+      .find({ userId: userId })
+      .skip(offset)
+      .limit(limit);
   }
 
   async updatePost(
@@ -182,9 +188,9 @@ export class SocialPostsService {
           { likesCount: c.likesCount - 1 },
         );
       }
-      throw new HttpException('like already removed', HttpStatus.NOT_FOUND);
+      throw new HttpException('like removed successfully', HttpStatus.OK);
     }
-    throw new HttpException('like removed', HttpStatus.OK);
+    throw new HttpException('like already removed', HttpStatus.BAD_REQUEST);
   }
 
   async removeUserLikes(userId): Promise<any> {
@@ -271,10 +277,25 @@ export class SocialPostsService {
           preserveNullAndEmptyArrays: true,
         },
       },
+      // {
+      //   $project: {
+      //     useId: '$userId',
+      //     uId: '$liked.userId',
+      //     eq: {
+      //       $cond: {
+      //         if: {
+      //           $eq: ['$userId', '$liked.userId'],
+      //         },
+      //         then: true,
+      //         else: false,
+      //       },
+      //     },
+      //   },
+      // },
       {
         $project: {
           username: '$user.username',
-          userId: 1,
+          uId: '$userId',
           profileImage: '$user.profileImage',
           caption: 1,
           postAudiencePreference: 1,
@@ -341,37 +362,37 @@ export class SocialPostsService {
           },
         },
       },
-      {
-        $match: {
-          v: {
-            $ne: null,
-          },
-        },
-      },
-      {
-        $project: {
-          v: 0,
-        },
-      },
-      {
-        $unset: [
-          'voucher.studentVoucherCount',
-          'voucher.nonStudentVoucherCount',
-        ],
-      },
-      {
-        $group: {
-          _id: '$_id',
-          doc: {
-            $first: '$$ROOT',
-          },
-        },
-      },
-      {
-        $replaceRoot: {
-          newRoot: '$doc',
-        },
-      },
+      // {
+      //   $match: {
+      //     v: {
+      //       $ne: null,
+      //     },
+      //   },
+      // },
+      // {
+      //   $project: {
+      //     v: 0,
+      //   },
+      // },
+      // {
+      //   $unset: [
+      //     'voucher.studentVoucherCount',
+      //     'voucher.nonStudentVoucherCount',
+      //   ],
+      // },
+      // {
+      //   $group: {
+      //     _id: '$_id',
+      //     doc: {
+      //       $first: '$$ROOT',
+      //     },
+      //   },
+      // },
+      // {
+      //   $replaceRoot: {
+      //     newRoot: '$doc',
+      //   },
+      // },
     ];
   }
 }

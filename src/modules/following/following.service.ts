@@ -42,7 +42,7 @@ export class FollowingService {
     }
     throw new HttpException('Followee Removed Successfully', HttpStatus.OK);
   }
-  async getAllFollowees(userId): Promise<any> {
+  async getAllFollowings(userId): Promise<any> {
     const oid = new mongoose.Types.ObjectId(userId);
     return this.followingModel.aggregate([
       {
@@ -63,8 +63,18 @@ export class FollowingService {
         },
       },
       {
-        $unset: ['_id', 'followings.password', 'followings.confirmationCode'],
+        $unwind: '$followings',
       },
+      {
+        $project: {
+          firstname: '$followings.firstname',
+          surname: '$followings.surname',
+          profileImage: '$followings.profileImage',
+        },
+      },
+      // {
+      //   $unset: ['_id', 'followings.password', 'followings.confirmationCode'],
+      // },
     ]);
   }
 

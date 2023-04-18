@@ -31,13 +31,12 @@ export class RestaurantService {
       uniqueCode: uniqueCode,
     });
     console.log(uniqueCode);
-    if (codeCheck) {
-      uniqueCode = Math.floor(Math.random() * 5596 + 1249);
-    }
+    if (codeCheck) uniqueCode = Math.floor(Math.random() * 5596 + 1249);
     const user = await this.profileService.createUser(restaurantDto);
     restaurantDto.userId = user._id;
     restaurantDto.uniqueCode = uniqueCode;
-    return this.restaurantModel.create(restaurantDto);
+    const restaurant = await this.restaurantModel.create(restaurantDto);
+    return restaurant;
   }
 
   async getAllRestaurants(paginationDto: PaginationDto): Promise<any> {

@@ -111,7 +111,7 @@ export class CommentsController {
   @ApiBadRequestResponse({ description: 'comment could not removed' })
   @UseGuards(JwtAuthGuard)
   async deleteSingleComment(@Request() request, @Body() data) {
-    data.userId = request.use.userId;
+    data.userId = request.user.userId;
     return this.commentService.deleteSingleComment(data);
   }
 

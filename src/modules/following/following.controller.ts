@@ -34,13 +34,13 @@ export class FollowingController {
     return this.followingService.removeFollowee(userId, followeeId);
   }
 
-  @Get('get-all-followees')
+  @Get('get-all')
   @ApiQuery({ name: 'userId', type: String })
   @ApiResponse({ description: 'Following fetched Successfully' })
   @ApiBadRequestResponse({
     description: 'could not fetch the Followings',
   })
-  getAllFollowees(@Query('userId') userId) {
-    return this.followingService.getAllFollowees(userId);
+  getAllFollowings(@Query('userId') userId) {
+    return this.followingService.getAllFollowings(userId);
   }
 }

@@ -71,8 +71,14 @@ export class SocialPostsController {
   @ApiCreatedResponse({ type: SocialPostDto })
   @ApiBadRequestResponse({ description: 'can not fetch posts' })
   @Get('all/:userId')
-  getAllPostsOfSingleUser(@Param('userId') userId) {
-    return this.socialPostService.getAllPostsOfSingleUser(userId);
+  getAllPostsOfSingleUser(
+    @Query() paginationDto: PaginationDto,
+    @Param('userId') userId,
+  ) {
+    return this.socialPostService.getAllPostsOfSingleUser(
+      paginationDto,
+      userId,
+    );
   }
 
   /***Retrieve Single Post Route***/
@@ -137,7 +143,6 @@ export class SocialPostsController {
   @ApiCreatedResponse({ description: 'post liked successfully' })
   @ApiQuery({
     name: 'postId',
-    description: 'post id is required in Query parameter',
   })
   @ApiBadRequestResponse({ description: 'could not like post' })
   @UseGuards(JwtAuthGuard)
@@ -156,6 +161,9 @@ export class SocialPostsController {
 
   @Patch('remove-like')
   @ApiBearerAuth('access-token')
+  @ApiQuery({
+    name: 'postId',
+  })
   @ApiCreatedResponse({ description: 'post unliked successfully' })
   @ApiBadRequestResponse({ description: 'could not unlike post' })
   @UseGuards(JwtAuthGuard)

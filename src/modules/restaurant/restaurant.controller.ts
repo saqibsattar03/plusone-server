@@ -30,9 +30,8 @@ export class RestaurantController {
     description: 'Created Restaurant object as response',
   })
   @ApiBadRequestResponse({ description: 'can not create Restaurant' })
-  // @UseGuards(JwtAuthGuard)
   createRestaurant(@Body() data) {
-    // data.userId = request.user.userId;
+    console.log('restaurant data = ', data);
     return this.restaurantService.createRestaurant(data);
   }
 
