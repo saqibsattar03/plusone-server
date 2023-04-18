@@ -9,7 +9,8 @@ export class Restaurant {
   @Prop({ type: mongoose.Types.ObjectId, ref: 'Profile', required: true })
   userId: Profile;
 
-  @Prop({ type: String, required: true })
+  // required: true
+  @Prop({ type: String })
   restaurantName: string;
 
   // , required: true
