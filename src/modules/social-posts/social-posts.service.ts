@@ -258,6 +258,12 @@ export class SocialPostsService {
         },
       },
       {
+        $unwind: {
+          path: '$followed',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
         $lookup: {
           from: 'likedposts',
           localField: '_id',
@@ -271,12 +277,12 @@ export class SocialPostsService {
           preserveNullAndEmptyArrays: true,
         },
       },
-      {
-        $unwind: {
-          path: '$liked.userId',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
+      // {
+      //   $unwind: {
+      //     path: '$liked.userId',
+      //     preserveNullAndEmptyArrays: true,
+      //   },
+      // },
       {
         $project: {
           username: '$user.username',
@@ -288,7 +294,7 @@ export class SocialPostsService {
           postLiked: {
             $cond: {
               if: {
-                $eq: ['$userId', '$liked.userId'],
+                $in: ['$userId', '$liked.userId'],
               },
               then: true,
               else: false,
