@@ -6,7 +6,8 @@ import { Profile } from './profile.schema';
 export type RestaurantDocument = HydratedDocument<Restaurant>;
 @Schema({ timestamps: true })
 export class Restaurant {
-  @Prop({ type: mongoose.Types.ObjectId, ref: 'Profile', required: true })
+  // required: true
+  @Prop({ type: mongoose.Types.ObjectId, ref: 'Profile' })
   userId: Profile;
 
   // required: true
