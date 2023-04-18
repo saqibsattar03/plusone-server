@@ -6,28 +6,24 @@ import { Profile } from './profile.schema';
 export type RestaurantDocument = HydratedDocument<Restaurant>;
 @Schema({ timestamps: true })
 export class Restaurant {
-  // required: true
-  @Prop({ type: mongoose.Types.ObjectId, ref: 'Profile' })
+  @Prop({ type: mongoose.Types.ObjectId, ref: 'Profile', required: true })
   userId: Profile;
 
-  // required: true
-  @Prop({ type: String })
+  @Prop({ type: String, required: true })
   restaurantName: string;
 
-  // , required: true
-  @Prop({ type: String })
+  @Prop({ type: String, required: true })
   phoneNumber: string;
 
   @Prop()
   menu: [string];
 
-  // required: [true, 'profile image is missing']
-  @Prop({ type: String })
+  @Prop({ type: String, required: [true, 'profile image is missing'] })
   profileImage: string;
 
   @Prop({
     type: String,
-    // required: true,
+    required: true,
   })
   description: string;
 
@@ -37,7 +33,7 @@ export class Restaurant {
   })
   media: string[];
 
-  @Prop({ type: PointSchema })
+  @Prop({ type: PointSchema, required: true })
   location: PointSchema;
 
   @Prop()
@@ -50,7 +46,7 @@ export class Restaurant {
 
   @Prop({
     type: Number,
-    // required: true,
+    required: true,
     index: { unique: true },
   })
   uniqueCode: number;
