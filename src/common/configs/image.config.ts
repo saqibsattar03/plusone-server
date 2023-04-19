@@ -6,7 +6,7 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import { join } from 'path';
 
 // Define the absolute path to the uploads directory
-const UPLOADS_DIR = join('/user/src', 'uploads')
+const UPLOADS_DIR = join('/usr/src', 'uploads')
 
 // Multer configuration
 export const multerConfig = {
