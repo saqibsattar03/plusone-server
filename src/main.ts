@@ -33,6 +33,10 @@ async function bootstrap() {
   });
   app.enableCors();
 
+  console.log(
+    'uploads folder route = ',
+    join(__dirname, '..', '..', 'uploads'),
+  );
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, document);
   const port = 3000;
