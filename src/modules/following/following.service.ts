@@ -66,10 +66,41 @@ export class FollowingService {
         $unwind: '$followings',
       },
       {
+        $lookup: {
+          from: 'followers',
+          let: { uId: oid },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$userId', '$$uId'],
+                },
+              },
+            },
+          ],
+          // localField: 'userId',
+          // foreignField: 'userId',
+          as: 'follower',
+        },
+      },
+      // {
+      //   $unwind: '$follower',
+      // },
+      {
         $project: {
+          follower: '$follower',
           firstname: '$followings.firstname',
           surname: '$followings.surname',
           profileImage: '$followings.profileImage',
+          // followed: {
+          //   $cond: {
+          //     if: {
+          //       $in: ['$userId', '$follower.followers'],
+          //     },
+          //     then: true,
+          //     else: false,
+          //   },
+          // },
         },
       },
     ]);

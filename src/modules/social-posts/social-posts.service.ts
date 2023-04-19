@@ -7,7 +7,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { Post, PostDocument } from 'src/data/schemas/post.schema';
 import {
   LikedPost,
@@ -51,7 +51,7 @@ export class SocialPostsService {
 
   async getAllPost(paginationDto, data): Promise<any> {
     const { limit, offset } = paginationDto;
-    const pipeLine = await this.getPostPipeline();
+    const pipeLine = await this.getPostPipeline(data.userId);
     const followings = await this.followingService.getFollowingIds(data.userId);
     const followingsArray = [];
     followings.forEach((obj) => {
@@ -214,7 +214,7 @@ export class SocialPostsService {
   async filterPostBasedOnCaption(keyword: string): Promise<any> {
     return this.socialPostModel.find({ $text: { $search: keyword } });
   }
-  async getPostPipeline() {
+  async getPostPipeline(userId) {
     return [
       {
         $lookup: {
@@ -252,8 +252,18 @@ export class SocialPostsService {
       {
         $lookup: {
           from: 'followings',
-          localField: 'userId',
-          foreignField: 'userId',
+          let: {
+            uId: new mongoose.Types.ObjectId(userId),
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$userId', '$$uId'],
+                },
+              },
+            },
+          ],
           as: 'followed',
         },
       },
@@ -261,6 +271,33 @@ export class SocialPostsService {
         $unwind: {
           path: '$followed',
           preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          userId: 1,
+          location: 1,
+          caption: 1,
+          postAudiencePreference: 1,
+          postType: 1,
+          voucherId: 1,
+          media: 1,
+          likesCount: 1,
+          commentCount: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          __v: 1,
+
+          followed: {
+            $cond: {
+              if: {
+                $not: '$followed',
+              },
+              then: [],
+              else: '$followed',
+            },
+          },
         },
       },
       {
@@ -279,6 +316,34 @@ export class SocialPostsService {
       },
       {
         $project: {
+          _id: 1,
+          userId: 1,
+          location: 1,
+          caption: 1,
+          postAudiencePreference: 1,
+          postType: 1,
+          voucherId: 1,
+          media: 1,
+          likesCount: 1,
+          commentCount: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          __v: 1,
+          user: 1,
+          followed: 1,
+          liked: {
+            $cond: {
+              if: {
+                $not: '$liked',
+              },
+              then: [],
+              else: '$liked',
+            },
+          },
+        },
+      },
+      {
+        $project: {
           username: '$user.username',
           userId: '$userId',
           profileImage: '$user.profileImage',
@@ -288,7 +353,7 @@ export class SocialPostsService {
           postLiked: {
             $cond: {
               if: {
-                $in: ['$userId', '$liked.userId'],
+                $in: [new mongoose.Types.ObjectId(userId), '$liked.userId'],
               },
               then: true,
               else: false,
@@ -297,7 +362,7 @@ export class SocialPostsService {
           userFollowed: {
             $cond: {
               if: {
-                $eq: ['$userId', '$followed.followings'],
+                $in: ['$userId', '$followed.followings'],
               },
               then: true,
               else: false,

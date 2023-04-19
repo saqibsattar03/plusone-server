@@ -71,7 +71,7 @@ export const imageValidation = {
     destination: function (req: any, file: any, callback: any) {
       // const uploadPath = multerConfig.dest;
       if (!existsSync('/uploads/')) {
-        mkdirSync(`'__dirname + \'/../uploads/\'`);
+        mkdirSync('/uploads/');
       }
       callback(null, '/uploads/');
     },

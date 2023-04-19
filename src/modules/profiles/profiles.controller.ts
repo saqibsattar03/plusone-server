@@ -1,8 +1,16 @@
-import { Controller, Delete, Param, Patch, Query } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Param,
+  Patch,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ProfilesService } from './profiles.service';
-import { Body, Get, Post } from '@nestjs/common/decorators';
+import { Body, Get, Post, Request } from '@nestjs/common/decorators';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
   ApiParam,
@@ -17,6 +25,7 @@ import {
 } from '../../data/dtos/profile.dto';
 import { PaginationDto } from '../../common/auth/dto/pagination.dto';
 import { RestaurantResponseDto } from '../../data/dtos/restaurant.dto';
+import { JwtAuthGuard } from '../../common/auth/guards/jwt-auth.guard';
 
 @ApiTags('Person')
 @Controller('persons')
@@ -100,11 +109,12 @@ export class ProfilesController {
     return this.profileService.restaurantFilters(data, paginationQuery);
   }
 
+  @Patch('update-password')
+  @ApiBearerAuth('access-token')
   @ApiBody({
     schema: {
       type: 'object',
       properties: {
-        email: { type: 'string' },
         oldPassword: { type: 'string' },
         newPassword: { type: 'string' },
       },
@@ -112,8 +122,9 @@ export class ProfilesController {
   })
   @ApiResponse({ description: 'password updated successfully' })
   @ApiBadRequestResponse({ description: 'could not update  password' })
-  @Patch('update-password')
-  changePassword(@Body() data) {
+  @UseGuards(JwtAuthGuard)
+  changePassword(@Request() request, @Body() data) {
+    data.userId = request.user.userId;
     return this.profileService.changePassword(data);
   }
 
@@ -124,6 +135,7 @@ export class ProfilesController {
     return this.profileService.changeUserStatus(userId);
   }
 
+  @Get('search-by-name')
   @ApiQuery({ name: 'username', type: String })
   @ApiCreatedResponse({
     schema: {
@@ -136,7 +148,6 @@ export class ProfilesController {
       },
     },
   })
-  @Get('search-by-name')
   filterUserByName(@Query('username') username) {
     return this.profileService.filterUserByName(username);
   }

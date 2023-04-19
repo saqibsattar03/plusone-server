@@ -247,7 +247,7 @@ export class ProfilesService {
   // }
 
   async changePassword(data): Promise<any> {
-    const user = await this.profileModel.findOne({ email: data.email });
+    const user = await this.profileModel.findOne({ _id: data.userId });
     if (!user) throw new HttpException('use not found', HttpStatus.NOT_FOUND);
     const isValidPassword = await bcrypt.compare(
       data.oldPassword,
@@ -256,21 +256,20 @@ export class ProfilesService {
     if (!isValidPassword)
       throw new HttpException(
         'Old Password is incorrect',
-        HttpStatus.FORBIDDEN,
+        HttpStatus.BAD_REQUEST,
       );
     const hashedPassword = await bcrypt.hash(data.newPassword, 10);
     const differentPassword = await bcrypt.compare(
       data.oldPassword,
       hashedPassword,
     );
-    console.log(differentPassword);
     if (!differentPassword) {
       user.password = hashedPassword;
-      return user.save();
+      throw new HttpException('Password Changed Successfully', HttpStatus.OK);
     } else
       throw new HttpException(
         'old password and new password can not be same',
-        HttpStatus.NOT_ACCEPTABLE,
+        HttpStatus.CONFLICT,
       );
   }
 
