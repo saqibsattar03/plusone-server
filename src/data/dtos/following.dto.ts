@@ -9,3 +9,17 @@ export class FollowingDto {
   @IsNotEmpty()
   followings: any;
 }
+
+export class FollowResponse {
+  @ApiProperty({ type: String })
+  _id: string;
+
+  @ApiProperty({ type: String })
+  firstname: string;
+
+  @ApiProperty({ type: String })
+  surname: string;
+
+  @ApiProperty({ type: String })
+  profileImage: string;
+}

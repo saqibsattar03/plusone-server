@@ -277,16 +277,10 @@ export class SocialPostsService {
           preserveNullAndEmptyArrays: true,
         },
       },
-      // {
-      //   $unwind: {
-      //     path: '$liked.userId',
-      //     preserveNullAndEmptyArrays: true,
-      //   },
-      // },
       {
         $project: {
           username: '$user.username',
-          uId: '$userId',
+          userId: '$userId',
           profileImage: '$user.profileImage',
           caption: 1,
           postAudiencePreference: 1,

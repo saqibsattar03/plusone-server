@@ -28,6 +28,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { createReadStream } from 'fs';
 import { parse } from 'csv-parse';
+import * as process from 'process';
 
 @ApiTags('Main')
 @Controller()
@@ -108,7 +109,11 @@ export class AppController {
   @ApiBadRequestResponse({ description: 'could not upload files' })
   async getFile(@Query('file') file: string): Promise<any> {
     console.log(file);
-    return 'http://192.168.18.56:3000/uploads/' + file;
+    if (process.env.NODE_ENVIRONMENT === 'production') {
+      return 'https://api.plusoneworldwide.com/uploads/' + file;
+    } else {
+      return 'http://192.168.18.56:3000/uploads/' + file;
+    }
   }
 
   @ApiQuery({ name: 'media', type: String })

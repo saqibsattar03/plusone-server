@@ -72,9 +72,6 @@ export class FollowingService {
           profileImage: '$followings.profileImage',
         },
       },
-      // {
-      //   $unset: ['_id', 'followings.password', 'followings.confirmationCode'],
-      // },
     ]);
   }
 

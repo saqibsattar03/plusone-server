@@ -41,6 +41,7 @@ export class FollowerService {
   }
   async getAllFollowers(userId): Promise<any> {
     const oid = new mongoose.Types.ObjectId(userId);
+    console.log(oid);
 
     return this.followerModel.aggregate([
       {
@@ -61,15 +62,14 @@ export class FollowerService {
         },
       },
       {
-        $project: {
-          'followers._id': 1,
-          'followers.firstName': 1,
-          'followers.surName': 1,
-          'followers.profileImage': 1,
-        },
+        $unwind: '$followers',
       },
       {
-        $unset: ['_id'],
+        $project: {
+          firstname: '$followers.firstname',
+          surname: '$followers.surname',
+          profileImage: '$followers.profileImage',
+        },
       },
     ]);
   }

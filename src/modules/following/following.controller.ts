@@ -7,6 +7,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { FollowResponse } from '../../data/dtos/following.dto';
 
 @ApiTags('Followings')
 @Controller('followee')
@@ -36,7 +37,10 @@ export class FollowingController {
 
   @Get('get-all')
   @ApiQuery({ name: 'userId', type: String })
-  @ApiResponse({ description: 'Following fetched Successfully' })
+  @ApiResponse({
+    type: [FollowResponse],
+    description: 'Following fetched Successfully',
+  })
   @ApiBadRequestResponse({
     description: 'could not fetch the Followings',
   })
