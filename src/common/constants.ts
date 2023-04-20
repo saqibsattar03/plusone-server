@@ -14,4 +14,5 @@ export enum Constants {
   PUBLIC = 'PUBLIC',
   FOLLOWING = 'FOLLOWING',
   FRIENDS = 'FRIENDS',
+  DELETED = 'DELETED',
 }

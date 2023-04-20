@@ -40,9 +40,5 @@ async function bootstrap() {
   app.use(urlencoded({ extended: true, limit: '50mb' }));
   await app.listen(port, '0.0.0.0');
   console.log(`App is running on ${port}`);
-  console.log(
-    'uploads folder route = ',
-    join(__dirname, '..', '..', 'uploads'),
-  );
 }
 bootstrap();

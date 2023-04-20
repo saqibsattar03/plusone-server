@@ -1,9 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { QuoteDocument, Quotes } from '../../data/schemas/quotes.schema';
 import { Model } from 'mongoose';
 import { QuoteDto } from '../../data/dtos/quote.dto';
-import { QuoteModule } from './quote.module';
 
 @Injectable()
 export class QuoteService {
@@ -12,8 +11,7 @@ export class QuoteService {
   ) {}
 
   async createQuote(quoteDto: QuoteDto): Promise<QuoteDocument> {
-    const quote = await this.quoteModel.create(quoteDto);
-    return quote;
+    return this.quoteModel.create(quoteDto);
   }
 
   async getAllQuotes(): Promise<QuoteDocument[]> {
@@ -24,14 +22,17 @@ export class QuoteService {
     return this.quoteModel.findById({ _id: quoteId });
   }
   async editQuote(quoteId, quoteDto: QuoteDto): Promise<QuoteDocument> {
-    const quote = await this.quoteModel.findByIdAndUpdate(
-      { _id: quoteId },
-      { quoteText: quoteDto.quoteText },
+    return this.quoteModel.findByIdAndUpdate(
+      quoteId,
+      {
+        quoteText: quoteDto.quoteText,
+      },
+      { returnDocument: 'after' },
     );
-    return quote;
   }
 
   async deleteQuote(quoteId): Promise<QuoteDocument> {
-    return this.quoteModel.findByIdAndDelete({ _id: quoteId });
+    await this.quoteModel.findByIdAndDelete({ _id: quoteId });
+    throw new HttpException('quote deleted successfully', HttpStatus.OK);
   }
 }

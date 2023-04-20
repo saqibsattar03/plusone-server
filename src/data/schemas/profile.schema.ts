@@ -20,7 +20,11 @@ export class Profile extends User {
   })
   email: string;
 
-  @Prop({ type: String, enum: ['PENDING', 'ACTIVE'], default: 'PENDING' })
+  @Prop({
+    type: String,
+    enum: ['PENDING', 'ACTIVE', 'DELETED'],
+    default: 'PENDING',
+  })
   status: string;
 
   @Prop({ type: String })

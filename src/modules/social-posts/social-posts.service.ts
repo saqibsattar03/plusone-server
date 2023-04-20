@@ -17,7 +17,6 @@ import { UpdateSocialPost } from '../../data/dtos/socialPost.dto';
 import { Constants } from '../../common/constants';
 import { FollowingService } from '../following/following.service';
 import { CommentsService } from './comments/comments.service';
-import { PaginationDto } from '../../common/auth/dto/pagination.dto';
 
 @Injectable()
 export class SocialPostsService {
@@ -32,6 +31,7 @@ export class SocialPostsService {
   ) {}
 
   async createPost(postDto: any): Promise<PostDocument> {
+    console.log(postDto);
     try {
       if (postDto.postType == Constants.FEED) {
         postDto.voucherId = null;
@@ -133,7 +133,7 @@ export class SocialPostsService {
       { returnDocument: 'after' },
     );
   }
-  async removePost(userId, postId): Promise<PostDocument> {
+  async deleteSinglePost(userId, postId): Promise<PostDocument> {
     const post = await this.socialPostModel.findOne({
       _id: postId,
       userId: userId,
@@ -147,6 +147,10 @@ export class SocialPostsService {
     await this.commentService.deleteAllComment(postId);
     await post.deleteOne();
     throw new HttpException('post deleted successfully', HttpStatus.OK);
+  }
+
+  async deleteAllPostsOfSingleUser(userId): Promise<any> {
+    await this.socialPostModel.deleteMany({ userId: userId });
   }
   async likePost(userId, postId): Promise<LikedPostDocument> {
     const res = await this.postLikedModel.findOne({ postId: postId });
@@ -277,6 +281,7 @@ export class SocialPostsService {
         $project: {
           _id: 1,
           userId: 1,
+          user: 1,
           location: 1,
           caption: 1,
           postAudiencePreference: 1,
@@ -444,5 +449,26 @@ export class SocialPostsService {
         },
       },
     ];
+  }
+
+  async searchPostByLocation(data): Promise<PostDocument[]> {
+    if (!data.longitude && !data.latitude)
+      throw new HttpException('no location selected', HttpStatus.BAD_REQUEST);
+    return this.socialPostModel.aggregate([
+      {
+        $geoNear: {
+          near: {
+            type: 'Point',
+            coordinates: [
+              parseFloat(data.longitude),
+              parseFloat(data.latitude),
+            ],
+          },
+          distanceField: 'distanceFromMe',
+          distanceMultiplier: 0.001,
+          spherical: true,
+        },
+      },
+    ]);
   }
 }

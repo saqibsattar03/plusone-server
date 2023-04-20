@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
-import { PointSchema } from './point.schema';
+import { LocationSchema } from './locationSchema';
 import { Profile } from './profile.schema';
 
 export type RestaurantDocument = HydratedDocument<Restaurant>;
@@ -33,8 +33,8 @@ export class Restaurant {
   })
   media: string[];
 
-  @Prop({ type: PointSchema, required: true })
-  location: PointSchema;
+  @Prop({ type: LocationSchema })
+  location: LocationSchema;
 
   @Prop()
   tags: [string];

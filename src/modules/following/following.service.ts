@@ -16,13 +16,20 @@ export class FollowingService {
   async addFollowee(userId, followeeId): Promise<any> {
     const res = await this.followingModel.findOne({ userId: userId });
     if (!res) {
+      console.log('inside if condition');
       const user = await this.followingModel.create({ userId: userId });
       await user.updateOne({ $push: { followings: followeeId } });
     } else if (res) {
+      console.log('inside else if condition = ', res);
+      console.log('followee id = ', followeeId);
       if (!res.followings.includes(followeeId)) {
-        await this.followingModel.updateOne({
-          $push: { followings: followeeId },
-        });
+        console.log('!res');
+        await this.followingModel.updateOne(
+          { userId: userId },
+          {
+            $push: { followings: followeeId },
+          },
+        );
       } else
         throw new HttpException('already following', HttpStatus.BAD_REQUEST);
     }

@@ -1,16 +1,18 @@
-import { extname } from 'path';
+import { extname, join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import { diskStorage } from 'multer';
 import { v4 as uuid } from 'uuid';
 import { HttpException, HttpStatus } from '@nestjs/common';
 
-// Multer configuration
-export const multerConfig = {
-  // dest: process.env.UPLOAD_LOCATION,
-  dest: function (req, file, callback) {
-    callback('/uploads/');
-  },
-};
+// Define the absolute path to the uploads directory
+/*** uncomment while uplaoding on live server ***/
+
+// const UPLOADS_DIR = join('/usr/src', 'uploads');
+// // Multer configuration
+// export const multerConfig = {
+//   dest: UPLOADS_DIR,
+// };
+/*** till here ***/
 
 // Multer upload options
 

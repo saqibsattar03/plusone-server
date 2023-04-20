@@ -1,8 +1,6 @@
 import {
-  forwardRef,
   HttpException,
   HttpStatus,
-  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -10,7 +8,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Profile, ProfileDocument } from '../../data/schemas/profile.schema';
 import mongoose, { Model } from 'mongoose';
 import { PaginationDto } from '../../common/auth/dto/pagination.dto';
-import { UpdateProfileDto } from '../../data/dtos/profile.dto';
 import { FollowingService } from '../following/following.service';
 import { FollowerService } from '../follower/follower.service';
 import { SocialPostsService } from '../social-posts/social-posts.service';
@@ -27,7 +24,7 @@ export class ProfilesService {
     private readonly followeeService: FollowingService,
     private readonly followerService: FollowerService,
     private readonly socialPostService: SocialPostsService,
-    private readonly resReviewService: RestaurantReviewService,
+    private readonly reviewService: RestaurantReviewService,
     private readonly restaurantService: RestaurantService,
   ) {}
 
@@ -116,9 +113,9 @@ export class ProfilesService {
       );
     return fetchedUser;
   }
-  async updateProfile(data, profileId): Promise<any> {
+  async updateProfile(data): Promise<any> {
     console.log('data = ', data);
-    const profile = await this.profileModel.findById({ _id: profileId });
+    const profile = await this.profileModel.findById({ _id: data.userId });
     if (!profile) throw new NotFoundException(' Profile does not exist');
 
     if (profile.role == Constants.USER && profile.status == Constants.PENDING)
@@ -128,11 +125,12 @@ export class ProfilesService {
       );
 
     return this.profileModel.findByIdAndUpdate(
-      { _id: profileId },
+      { _id: data.userId },
       {
         $set: {
           bio: data.bio,
           socialLinks: data.socialLinks,
+          profileImage: data.profileImage,
           favoriteRestaurants: data.favoriteRestaurants,
           favoriteCuisines: data.favoriteCuisines,
           favoriteChefs: data.favoriteChefs,
@@ -184,12 +182,14 @@ export class ProfilesService {
     const oid = new mongoose.Types.ObjectId(profileId);
     const profile = await this.profileModel.findById(profileId);
     if (!profile) throw new NotFoundException(' Profile does not exist');
-    // await this.socialPostService.removePost(oid);
-    await this.resReviewService.deleteAllReviewsOfUser(oid);
+    await this.socialPostService.deleteAllPostsOfSingleUser(oid);
+    await this.reviewService.deleteAllReviewsOfUser(oid);
     await this.socialPostService.removeUserLikes(oid);
     await this.followeeService.deleteAllFollwees(oid);
     await this.followerService.deleteAllFollowers(oid);
-    // await profile.remove();
+    await this.profileModel.findByIdAndUpdate(profileId, {
+      status: Constants.DELETED,
+    });
     throw new HttpException('profile deleted successfully', HttpStatus.OK);
   }
   async getAllPublicProfile(
@@ -256,7 +256,7 @@ export class ProfilesService {
     if (!isValidPassword)
       throw new HttpException(
         'Old Password is incorrect',
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.FORBIDDEN,
       );
     const hashedPassword = await bcrypt.hash(data.newPassword, 10);
     const differentPassword = await bcrypt.compare(
@@ -265,11 +265,12 @@ export class ProfilesService {
     );
     if (!differentPassword) {
       user.password = hashedPassword;
+      await user.save();
       throw new HttpException('Password Changed Successfully', HttpStatus.OK);
     } else
       throw new HttpException(
         'old password and new password can not be same',
-        HttpStatus.CONFLICT,
+        HttpStatus.FORBIDDEN,
       );
   }
 

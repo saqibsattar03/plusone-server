@@ -62,21 +62,22 @@ export class ProfilesController {
   })
   @ApiBadRequestResponse({ description: 'could not fetch the user' })
   // @UseGuards(JwtAuthGuard)
-  getSingleAdmin(@Param('profileId') id) {
+  getSingleProfile(@Param('profileId') id) {
     return this.profileService.getSingleProfile(id);
   }
 
-  @Patch('update/:profileId')
-  @ApiParam({ name: 'profileId', type: String })
+  @Patch('update')
+  @ApiBearerAuth('access-token')
   @ApiBody({ type: UpdateProfileDto })
   @ApiCreatedResponse({
     type: ProfileDto,
     description: 'Profile updated successfully',
   })
+  @UseGuards(JwtAuthGuard)
   @ApiBadRequestResponse({ description: 'could not update Profile' })
-  async updateProfile(@Param('profileId') profileId, @Body() data) {
-    console.log(profileId);
-    return this.profileService.updateProfile(data, profileId);
+  async updateProfile(@Request() request, @Body() data) {
+    data.userId = request.user.userId;
+    return this.profileService.updateProfile(data);
   }
 
   @Delete('')

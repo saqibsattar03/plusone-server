@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { Profile } from './profile.schema';
-import { PointSchema } from './point.schema';
+import { LocationSchema } from './locationSchema';
 import { Voucher } from './voucher.schema';
 
 export type PostDocument = HydratedDocument<Post>;
@@ -10,8 +10,8 @@ export class Post {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Profile' })
   userId: Profile;
 
-  @Prop({ type: PointSchema })
-  location: PointSchema;
+  @Prop({ type: LocationSchema })
+  location: LocationSchema;
 
   @Prop()
   caption: string;
@@ -41,3 +41,4 @@ export class Post {
 
 export const PostSchema = SchemaFactory.createForClass(Post);
 PostSchema.index({ caption: 'text' });
+PostSchema.index({ location: '2dsphere' });

@@ -132,8 +132,8 @@ export class SocialPostsController {
   @ApiCreatedResponse({ description: 'post deleted successfully' })
   @ApiBadRequestResponse({ description: 'could not delete post' })
   @UseGuards(JwtAuthGuard)
-  removePost(@Request() request, @Param('postId') postId) {
-    return this.socialPostService.removePost(request.user.userId, postId);
+  deleteSinglePost(@Request() request, @Param('postId') postId) {
+    return this.socialPostService.deleteSinglePost(request.user.userId, postId);
   }
 
   /***Like Post  Route ***/
@@ -183,5 +183,21 @@ export class SocialPostsController {
   @Post('search-by-caption')
   filterRestaurantBasedOnCaption(@Body() data) {
     return this.socialPostService.filterPostBasedOnCaption(data.keyword);
+  }
+
+  @Post('search-by-location')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        longitude: { type: 'number' },
+        latitude: { type: 'number' },
+      },
+    },
+  })
+  @ApiCreatedResponse({ type: SocialPostDto })
+  @ApiBadRequestResponse({ description: 'can not fetch posts' })
+  searchPostByLocation(@Body() data) {
+    return this.socialPostService.searchPostByLocation(data);
   }
 }

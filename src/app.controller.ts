@@ -26,8 +26,6 @@ import {
 } from '@nestjs/swagger';
 import * as fs from 'fs';
 import * as path from 'path';
-import { createReadStream } from 'fs';
-import { parse } from 'csv-parse';
 import * as process from 'process';
 
 @ApiTags('Main')
@@ -57,8 +55,8 @@ export class AppController {
   async uploadProfileImage(
     @UploadedFile() media: Express.Multer.File,
   ): Promise<any> {
-    console.log('hjksjkfhd ', media);
     if (media) {
+      console.log('media = ', media);
       return media.filename;
     }
     throw new HttpException('no image uploaded', HttpStatus.NOT_FOUND);
@@ -86,7 +84,6 @@ export class AppController {
   async uploadMultipleProfileImage(
     @UploadedFiles() media: Array<Express.Multer.File>,
   ): Promise<any> {
-    console.log('djkfkldfjkf', media.length);
     if (media.length > 0) {
       const names = [];
       for (let i = 0; i < media.length; i++) {

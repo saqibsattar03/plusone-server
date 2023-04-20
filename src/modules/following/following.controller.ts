@@ -1,6 +1,6 @@
-import { Controller, Post, Query } from '@nestjs/common';
+import { Controller, Post, Query, UseGuards } from '@nestjs/common';
 import { FollowingService } from './following.service';
-import { Get } from '@nestjs/common/decorators';
+import { Get, Request } from '@nestjs/common/decorators';
 import {
   ApiBadRequestResponse,
   ApiQuery,
@@ -8,19 +8,22 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { FollowResponse } from '../../data/dtos/following.dto';
+import { JwtAuthGuard } from '../../common/auth/guards/jwt-auth.guard';
 
 @ApiTags('Followings')
 @Controller('followee')
 export class FollowingController {
   constructor(private readonly followingService: FollowingService) {}
   @Post('add')
-  @ApiQuery({ name: 'userId', type: String })
+  // @ApiQuery({ name: 'userId', type: String })
   @ApiQuery({ name: 'followeeId', type: String })
   @ApiResponse({ description: 'Following added Successfully' })
   @ApiBadRequestResponse({
     description: 'could not follow the user',
   })
-  addFollowee(@Query('userId') userId, @Query('followeeId') followeeId) {
+  @UseGuards(JwtAuthGuard)
+  addFollowee(@Request() request, @Query('followeeId') followeeId) {
+    const userId = request.user.userId;
     return this.followingService.addFollowee(userId, followeeId);
   }
 

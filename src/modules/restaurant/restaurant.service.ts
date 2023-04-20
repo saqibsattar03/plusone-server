@@ -255,23 +255,15 @@ export class RestaurantService {
       .select('uniqueCode -_id');
   }
   async restaurantFilters(data, paginationQuery): Promise<any> {
-    console.log('longitude = ', data.longitude);
-    console.log('latitude = ', data.latitude);
-    console.log('popular = ', data.popular);
     const fieldName = 'reviewObject';
     const lookupAndProjectStage =
       this.generateLookupAndProjectStageForRestaurantFilter(fieldName);
     const { limit, offset } = paginationQuery;
-    const METERS_PER_MILE = 1609.34;
     const query = [];
-    let maxDistance;
     let sort = Math.random() < 0.5 ? -1 : 1;
     let pipeline = [];
-    // const nearest = true;
 
     if (data.longitude && data.latitude) {
-      console.log('here in nearest');
-      // maxDistance = 1609.34 * 2;
       sort = -1;
       pipeline.push({
         $geoNear: {
@@ -296,13 +288,6 @@ export class RestaurantService {
           isSponsored: true,
         },
       });
-      // const popular = {};
-      // popular['$match'] = {
-      //   isSponsored: true,
-      // };
-      // console.log('popular = ', popular);
-      // // return;
-      // query.push(popular);
     }
 
     if (data.cuisine) {
@@ -323,7 +308,6 @@ export class RestaurantService {
       };
       query.push(diet);
     }
-    console.log('query = ', query);
     if (
       !data.cuisine &&
       !data.popular &&
@@ -333,7 +317,6 @@ export class RestaurantService {
       !data.latitude &&
       !data.dietaryRestrictions
     ) {
-      console.log('no filter selected');
       return this.getAllRestaurants(paginationQuery);
     } else {
       if (query.length > 0) {

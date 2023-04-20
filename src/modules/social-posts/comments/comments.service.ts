@@ -144,6 +144,6 @@ export class CommentsService {
   }
 
   async deleteAllComment(postId): Promise<any> {
-    return this.commentModel.findOneAndDelete(postId);
+    await this.commentModel.deleteMany({ postId: postId });
   }
 }
