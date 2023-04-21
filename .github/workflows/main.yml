@@ -44,6 +44,6 @@ jobs:
             docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
             docker pull ${{ secrets.DOCKER_USERNAME }}/plus-one-api:main
             docker rm -f plus-one-container
-            docker run -d --name plus-one-container --net="host" -e "NODE_ENVIRONMENT=production" --restart always ${{ secrets.DOCKER_USERNAME }}/plus-one-api:main
+            docker run -d --name plus-one-container --net="host" -e "NODE_ENVIRONMENT=production" --restart always -v /root/uploads:/usr/src/uploads ${{ secrets.DOCKER_USERNAME }}/plus-one-api:main
             docker image prune -f
             exit
