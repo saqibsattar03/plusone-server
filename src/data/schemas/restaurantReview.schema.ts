@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { Profile } from './profile.schema';
-import any = jasmine.any;
 import { Restaurant } from './restaurant.schema';
 import { Voucher } from './voucher.schema';
 
@@ -20,10 +19,10 @@ export class ReviewStructure {
   @Prop()
   _id: mongoose.Schema.Types.ObjectId;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Profile' })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Profile', index: true })
   userId: Profile;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Voucher' })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Voucher', index: true })
   voucherId: Voucher;
 
   @Prop({ type: String })

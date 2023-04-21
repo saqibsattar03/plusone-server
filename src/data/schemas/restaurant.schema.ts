@@ -6,10 +6,15 @@ import { Profile } from './profile.schema';
 export type RestaurantDocument = HydratedDocument<Restaurant>;
 @Schema({ timestamps: true })
 export class Restaurant {
-  @Prop({ type: mongoose.Types.ObjectId, ref: 'Profile', required: true })
+  @Prop({
+    type: mongoose.Types.ObjectId,
+    ref: 'Profile',
+    required: true,
+    index: true,
+  })
   userId: Profile;
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: true, index: true })
   restaurantName: string;
 
   @Prop({ type: String, required: true })
@@ -33,15 +38,15 @@ export class Restaurant {
   })
   media: string[];
 
-  @Prop({ type: LocationSchema })
+  @Prop({ type: LocationSchema, index: true })
   location: LocationSchema;
 
-  @Prop()
+  @Prop({ index: true })
   tags: [string];
-  @Prop()
+  @Prop({ index: true })
   dietaryRestrictions: [string];
 
-  @Prop()
+  @Prop({ index: true })
   culinaryOptions: [string];
 
   @Prop({
@@ -61,7 +66,7 @@ export class Restaurant {
   })
   status: string;
 
-  @Prop({ type: Boolean, default: false })
+  @Prop({ type: Boolean, default: false, index: true })
   isSponsored: boolean;
 
   @Prop({ type: Number, default: 0 })

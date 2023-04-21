@@ -267,7 +267,6 @@ export class VoucherService {
     });
   }
   async verifyRestaurantCode(data): Promise<any> {
-    console.log('data = ', data);
     const res = await this.restaurantService.getRestaurantVerificationCode(
       data.restaurantId,
       data.restaurantCode,
@@ -282,7 +281,9 @@ export class VoucherService {
           verificationCode: verificationCode,
         });
         const oid = new mongoose.Types.ObjectId(data.voucherId);
-        const rPoints = await this.profileService.getSingleProfile(data.userId);
+        const rPoints = await this.profileService.getUserRewardPoints(
+          data.userId,
+        );
         await this.profileService.updateRewardPoints(
           data.userId,
           rPoints.rewardPoints + 1,
@@ -457,44 +458,46 @@ export class VoucherService {
         },
       ]);
     } else
-      return this.redeemVoucherModel.aggregate([
-        {
-          $lookup: {
-            from: 'vouchers',
-            localField: 'restaurantId',
-            foreignField: 'restaurantId',
-            as: 'voucher',
+      return this.redeemVoucherModel
+        .aggregate([
+          {
+            $lookup: {
+              from: 'vouchers',
+              localField: 'restaurantId',
+              foreignField: 'restaurantId',
+              as: 'voucher',
+            },
           },
-        },
-        {
-          $unwind: '$voucher',
-        },
-        {
-          $project: {
-            vouc: '$voucher.voucherObject',
+          {
+            $unwind: '$voucher',
           },
-        },
-        {
-          $unwind: '$vouc',
-        },
-        {
-          $lookup: {
-            from: 'redeemvouchers',
-            localField: 'vouc._id',
-            foreignField: 'voucherId',
-            as: 'voucher',
+          {
+            $project: {
+              vouc: '$voucher.voucherObject',
+            },
           },
-        },
-        {
-          $unwind: '$voucher',
-        },
-        {
-          $project: {
-            // _id: 1,
-            vouc: 1,
+          {
+            $unwind: '$vouc',
           },
-        },
-      ]);
+          {
+            $lookup: {
+              from: 'redeemvouchers',
+              localField: 'vouc._id',
+              foreignField: 'voucherId',
+              as: 'voucher',
+            },
+          },
+          {
+            $unwind: '$voucher',
+          },
+          {
+            $project: {
+              // _id: 1,
+              vouc: 1,
+            },
+          },
+        ])
+        .explain('executionStats');
   }
 
   async fourDigitCode(length) {

@@ -35,9 +35,7 @@ export class RestaurantService {
     const user = await this.profileService.createUser(restaurantDto);
     restaurantDto.userId = user._id;
     restaurantDto.uniqueCode = uniqueCode;
-    const restaurant = await this.restaurantModel.create(restaurantDto);
-    console.log('restaurant object = ', restaurant);
-    return restaurant;
+    return await this.restaurantModel.create(restaurantDto);
   }
 
   async getAllRestaurants(paginationDto: PaginationDto): Promise<any> {
@@ -48,7 +46,8 @@ export class RestaurantService {
     return this.restaurantModel
       .aggregate([...lookupAndProjectStage])
       .skip(offset)
-      .limit(limit);
+      .limit(limit)
+      .explain('executionStats');
   }
   async getSingleRestaurantDetails(restaurantId): Promise<any> {
     const oid = new mongoose.Types.ObjectId(restaurantId);
@@ -275,8 +274,15 @@ export class RestaurantService {
             ],
           },
           distanceField: 'distanceFromMe',
-          // maxDistance: 100 * METERS_PER_MILE, //!*** distance in meters ***!//
-          distanceMultiplier: 0.001,
+
+          /*** distance in kilometer ***/
+          // distanceMultiplier: 0.001,
+
+          /*** distance in miles ***/
+          distanceMultiplier: 0.000621371,
+
+          /*** maxdistance would set the range of 5 miles, 1609.34 = 1 mile ***/
+          // maxDistance: 1609.34 * 5,
           spherical: true,
         },
       });
@@ -323,7 +329,6 @@ export class RestaurantService {
         if (pipeline.length > 0) {
           const match = { $and: query };
           pipeline.push({ $match: match });
-          console.log(pipeline);
         } else {
           pipeline = [
             {
@@ -346,29 +351,29 @@ export class RestaurantService {
     }
   }
 
-  async dietFilter(dietaryRestrictions: [string]): Promise<any> {
-    return this.restaurantModel.aggregate([
-      {
-        $unwind: '$dietaryRestrictions',
-      },
-      {
-        $match: {
-          dietaryRestrictions: {
-            $in: dietaryRestrictions,
-          },
-        },
-      },
-    ]);
-  }
-  async filterPopularRestaurant(): Promise<any> {
-    return this.restaurantModel.aggregate([
-      {
-        $match: {
-          isSponsored: true,
-        },
-      },
-    ]);
-  }
+  // async dietFilter(dietaryRestrictions: [string]): Promise<any> {
+  //   return this.restaurantModel.aggregate([
+  //     {
+  //       $unwind: '$dietaryRestrictions',
+  //     },
+  //     {
+  //       $match: {
+  //         dietaryRestrictions: {
+  //           $in: dietaryRestrictions,
+  //         },
+  //       },
+  //     },
+  //   ]);
+  // }
+  // async filterPopularRestaurant(): Promise<any> {
+  //   return this.restaurantModel.aggregate([
+  //     {
+  //       $match: {
+  //         isSponsored: true,
+  //       },
+  //     },
+  //   ]);
+  // }
   async depositMoney(restaurantId, amount): Promise<any> {
     const res = await this.restaurantModel.findById({ _id: restaurantId });
     if (!res)
@@ -386,7 +391,6 @@ export class RestaurantService {
     });
     return res;
   }
-
   async addTotalSalesAndDeductions(
     estimatedCost: number,
     restaurantId,
@@ -433,6 +437,7 @@ export class RestaurantService {
           description: '$description',
           phoneNumber: '$phoneNumber',
           media: '$media',
+          menu: '$menu',
           isSponsored: '$isSponsored',
           location: '$location',
           distanceFromMe: '$distanceFromMe',

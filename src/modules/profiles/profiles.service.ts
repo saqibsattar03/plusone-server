@@ -88,18 +88,83 @@ export class ProfilesService {
       );
   }
 
-  async getSingleProfile(userId): Promise<ProfileDocument> {
-    return this.profileModel
-      .findById({ _id: userId })
-      .select('-password -confirmationCode -isSkip');
+  async getUserRewardPoints(userId): Promise<ProfileDocument> {
+    return this.profileModel.findById({ _id: userId }).select('rewardPoints');
   }
-
+  async getSingleProfile(userId): Promise<any> {
+    return this.profileModel.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(userId),
+        },
+      },
+      {
+        $lookup: {
+          from: 'followings',
+          localField: '_id',
+          foreignField: 'userId',
+          as: 'following',
+        },
+      },
+      {
+        $lookup: {
+          from: 'followers',
+          localField: '_id',
+          foreignField: 'userId',
+          as: 'follower',
+        },
+      },
+      {
+        $lookup: {
+          from: 'posts',
+          localField: '_id',
+          foreignField: 'userId',
+          as: 'socialPost',
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          username: 1,
+          firstname: 1,
+          surname: 1,
+          email: 1,
+          status: 1,
+          role: 1,
+          accountType: 1,
+          socialLinks: 1,
+          postAudiencePreference: 1,
+          dietRequirements: 1,
+          favoriteRestaurants: 1,
+          favoriteCuisines: 1,
+          favoriteChefs: 1,
+          rewardPoints: 1,
+          isPremium: 1,
+          accountHolderType: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          scopes: 1,
+          __v: 1,
+          bio: 1,
+          estimatedSavings: 1,
+          followingsCount: {
+            $size: '$following.followings',
+          },
+          followerCount: {
+            $size: '$follower.followers',
+          },
+          socialPostCount: {
+            $size: '$socialPost',
+          },
+        },
+      },
+    ]);
+  }
   async getUserByEmailOrUserName(user): Promise<ProfileDocument> {
     return this.profileModel.findOne({
       $or: [{ email: user.email }, { username: user.email }],
     });
   }
-
   async fetchProfileUsingToken(user): Promise<any> {
     const fetchedUser = await this.profileModel
       .findOne({
@@ -144,14 +209,12 @@ export class ProfilesService {
       },
     );
   }
-
   async updateRewardPoints(userId, rewardPoints): Promise<any> {
     await this.profileModel.findOneAndUpdate(
       { _id: userId },
       { rewardPoints: rewardPoints },
     );
   }
-
   async updatedEstimatedSavings(userId, estimatedSavings): Promise<any> {
     await this.profileModel.findByIdAndUpdate(
       {
@@ -206,11 +269,9 @@ export class ProfilesService {
         '-rewardPoints',
       ]);
   }
-
   async restaurantFilters(data, paginationQuery): Promise<any> {
     return this.restaurantService.restaurantFilters(data, paginationQuery);
   }
-
   async resetPassword(user, password) {
     const encryptedPassword = await bcrypt.hash(password, 10);
     await this.profileModel.updateOne(
@@ -218,7 +279,6 @@ export class ProfilesService {
       { password: encryptedPassword },
     );
   }
-
   async getUser(email: string) {
     return this.profileModel
       .findOne({
@@ -245,7 +305,6 @@ export class ProfilesService {
   // }
   // return null;
   // }
-
   async changePassword(data): Promise<any> {
     const user = await this.profileModel.findOne({ _id: data.userId });
     if (!user) throw new HttpException('use not found', HttpStatus.NOT_FOUND);
@@ -273,7 +332,6 @@ export class ProfilesService {
         HttpStatus.FORBIDDEN,
       );
   }
-
   /*** temporary route ***/
   async changeUserStatus(userId): Promise<any> {
     return this.profileModel.findOneAndUpdate(
@@ -282,7 +340,6 @@ export class ProfilesService {
       { returnDocument: 'after' },
     );
   }
-
   async filterUserByName(username): Promise<any> {
     const regex = new RegExp(username, 'i');
     return this.profileModel

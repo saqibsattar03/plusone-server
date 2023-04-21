@@ -5,6 +5,6 @@ export class LocationSchema {
   @Prop({ default: 'Point' })
   type: string;
 
-  @Prop({ type: [Number] })
+  @Prop({ type: [Number], index: true })
   coordinates: [number];
 }

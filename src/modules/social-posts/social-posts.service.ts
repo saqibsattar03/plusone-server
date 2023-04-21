@@ -4,7 +4,6 @@ import {
   HttpStatus,
   Inject,
   Injectable,
-  Query,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
@@ -74,7 +73,6 @@ export class SocialPostsService {
           .limit(limit);
       }
       case Constants.FOLLOWING: {
-        console.log(data.userId);
         try {
           return this.socialPostModel
             .aggregate([
@@ -287,6 +285,7 @@ export class SocialPostsService {
           postAudiencePreference: 1,
           postType: 1,
           voucherId: 1,
+          voucher: 1,
           media: 1,
           likesCount: 1,
           commentCount: 1,
@@ -328,6 +327,7 @@ export class SocialPostsService {
           postAudiencePreference: 1,
           postType: 1,
           voucherId: 1,
+          voucher: 1,
           media: 1,
           likesCount: 1,
           commentCount: 1,
@@ -404,15 +404,6 @@ export class SocialPostsService {
               },
               then: {},
               else: null,
-              // else: {
-              //   $cond: {
-              //     if: {
-              //       $eq: ['$voucherId', '$result.voucherObject._id'],
-              //     },
-              //     then: '$result.voucherObject',
-              //     else: null,
-              //   },
-              // },
             },
           },
         },

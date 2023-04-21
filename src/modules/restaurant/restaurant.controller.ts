@@ -98,15 +98,15 @@ export class RestaurantController {
   editRestaurant(@Query('restaurantId') restaurantId, @Body() data) {
     return this.restaurantService.editRestaurant(restaurantId, data);
   }
-  @Get('dietary-Restrictions')
-  dietFilter(@Query('dietaryRestrictions') dietaryRestrictions: [string]) {
-    return this.restaurantService.dietFilter(dietaryRestrictions);
-  }
+  // @Get('dietary-Restrictions')
+  // dietFilter(@Query('dietaryRestrictions') dietaryRestrictions: [string]) {
+  //   return this.restaurantService.dietFilter(dietaryRestrictions);
+  // }
 
-  @Get('popular')
-  filterPopularRestaurant() {
-    return this.restaurantService.filterPopularRestaurant();
-  }
+  // @Get('popular')
+  // filterPopularRestaurant() {
+  //   return this.restaurantService.filterPopularRestaurant();
+  // }
 
   @Get('admin-stats')
   adminStats() {

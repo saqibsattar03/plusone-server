@@ -5,10 +5,14 @@ import { Profile } from './profile.schema';
 export type FollowingDocument = HydratedDocument<Following>;
 @Schema({ timestamps: true })
 export class Following {
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Profile' })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Profile', index: true })
   userId: Profile;
 
-  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Profile' }] })
+  @Prop({
+    type: [
+      { type: mongoose.Schema.Types.ObjectId, ref: 'Profile', index: true },
+    ],
+  })
   followings: Profile[];
 }
 export const FollowingSchema = SchemaFactory.createForClass(Following);
