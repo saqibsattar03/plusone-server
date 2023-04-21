@@ -5,13 +5,15 @@ import { v4 as uuid } from 'uuid';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { join } from 'path';
 
-// Define the absolute path to the uploads directory
-const UPLOADS_DIR = join('/usr/src', 'uploads')
-
-// Multer configuration
-export const multerConfig = {
-  dest: UPLOADS_DIR,
-};
+/*** uncomment lines below before uploading to live server ***/
+//
+// // Define the absolute path to the uploads directory
+// const UPLOADS_DIR = join('/usr/src', 'uploads');
+//
+// // Multer configuration
+// export const multerConfig = {
+//   dest: UPLOADS_DIR,
+// };
 
 // Multer upload options
 export const imageValidation = {
@@ -25,10 +27,10 @@ export const imageValidation = {
     if (file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
       if (fileSize > 10000000) {
         cb(
-            new HttpException(
-                'Image size is too large',
-                HttpStatus.NOT_ACCEPTABLE,
-            ),
+          new HttpException(
+            'Image size is too large',
+            HttpStatus.NOT_ACCEPTABLE,
+          ),
         );
       }
       // Allow storage of file
@@ -36,31 +38,31 @@ export const imageValidation = {
     } else if (file.mimetype.match(/\/(mp4)$/)) {
       if (fileSize > 2000000) {
         cb(
-            new HttpException(
-                'video size is too large',
-                HttpStatus.NOT_ACCEPTABLE,
-            ),
+          new HttpException(
+            'video size is too large',
+            HttpStatus.NOT_ACCEPTABLE,
+          ),
         );
       }
       cb(null, true);
     } else if (file.mimetype.match(/\/(pdf)$/)) {
       if (fileSize > 2000000) {
         cb(
-            new HttpException(
-                'file size is too large',
-                HttpStatus.NOT_ACCEPTABLE,
-            ),
+          new HttpException(
+            'file size is too large',
+            HttpStatus.NOT_ACCEPTABLE,
+          ),
         );
       }
       cb(null, true);
     } else {
       // Reject file
       cb(
-          new HttpException(
-              `Unsupported file type ${extname(file.originalname)}`,
-              HttpStatus.BAD_REQUEST,
-          ),
-          false,
+        new HttpException(
+          `Unsupported file type ${extname(file.originalname)}`,
+          HttpStatus.BAD_REQUEST,
+        ),
+        false,
       );
     }
   },
@@ -68,10 +70,15 @@ export const imageValidation = {
   storage: diskStorage({
     // Destination storage path details
     destination: function (req: any, file: any, callback: any) {
-      if (!existsSync(UPLOADS_DIR)) {
-        mkdirSync(UPLOADS_DIR);
+      if (!existsSync('/uploads/')) {
+        mkdirSync('/uploads/');
       }
-      callback(null, UPLOADS_DIR);
+      callback(null, '/uploads/');
+      /*** uncomment lines below before uploading to live server ***/
+      // if (!existsSync(UPLOADS_DIR)) {
+      //   mkdirSync(UPLOADS_DIR);
+      // }
+      // callback(null, UPLOADS_DIR);
     },
     // File modification details
     filename: (req: any, file: any, cb: any) => {
