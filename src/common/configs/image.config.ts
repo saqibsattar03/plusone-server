@@ -7,11 +7,11 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 // Define the absolute path to the uploads directory
 /*** uncomment while uplaoding on live server ***/
 
-// const UPLOADS_DIR = join('/usr/src', 'uploads');
-// // Multer configuration
-// export const multerConfig = {
-//   dest: UPLOADS_DIR,
-// };
+const UPLOADS_DIR = join('/usr/src', 'uploads');
+// Multer configuration
+export const multerConfig = {
+  dest: UPLOADS_DIR,
+};
 /*** till here ***/
 
 // Multer upload options
@@ -72,10 +72,10 @@ export const imageValidation = {
     // Destination storage path details
     destination: function (req: any, file: any, callback: any) {
       // const uploadPath = multerConfig.dest;
-      if (!existsSync('/uploads/')) {
-        mkdirSync('/uploads/');
+      if (!existsSync(UPLOADS_DIR)) {
+        mkdirSync(UPLOADS_DIR);
       }
-      callback(null, '/uploads/');
+      callback(null, UPLOADS_DIR);
     },
     // File modification details
     filename: (req: any, file: any, cb: any) => {
