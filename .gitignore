@@ -1,6 +1,7 @@
 # compiled output
 /dist
 /node_modules
+/UPLOADS_DIR
 
 # Logs
 logs
