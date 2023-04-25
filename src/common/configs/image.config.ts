@@ -70,15 +70,15 @@ export const imageValidation = {
   storage: diskStorage({
     // Destination storage path details
     destination: function (req: any, file: any, callback: any) {
-      if (!existsSync('/uploads/')) {
-        mkdirSync('/uploads/');
-      }
-      callback(null, '/uploads/');
-      /*** uncomment lines below before uploading to live server ***/
-      // if (!existsSync('./UPLOADS_DIR')) {
-      //   mkdirSync('./UPLOADS_DIR');
+      // if (!existsSync('/uploads/')) {
+      //   mkdirSync('/uploads/');
       // }
-      // callback(null, './UPLOADS_DIR');
+      // callback(null, '/uploads/');
+      /*** uncomment lines below before uploading to live server ***/
+      if (!existsSync('./UPLOADS_DIR')) {
+        mkdirSync('./UPLOADS_DIR');
+      }
+      callback(null, './UPLOADS_DIR');
     },
     // File modification details
     filename: (req: any, file: any, cb: any) => {
