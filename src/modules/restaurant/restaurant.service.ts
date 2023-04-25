@@ -46,8 +46,7 @@ export class RestaurantService {
     return this.restaurantModel
       .aggregate([...lookupAndProjectStage])
       .skip(offset)
-      .limit(limit)
-      .explain('executionStats');
+      .limit(limit);
   }
   async getSingleRestaurantDetails(restaurantId): Promise<any> {
     const oid = new mongoose.Types.ObjectId(restaurantId);
@@ -228,20 +227,21 @@ export class RestaurantService {
       { returnDocument: 'after' },
     );
   }
+
+  /*** check if these methods are being used at the end of the project if not then remove the review count system completely ***/
   async getRestaurantReviewCount(restaurantId): Promise<any> {
     return this.restaurantModel
       .findOne({ _id: restaurantId })
       .lean()
       .select('reviewCount -_id');
   }
-
   async updateReviewCount(restaurantId, reviewCount): Promise<any> {
     return this.restaurantModel.findOneAndUpdate(
       { _id: restaurantId },
       { reviewCount: reviewCount },
     );
   }
-
+  /*** til  here ***/
   async getRestaurantVerificationCode(
     restaurantId,
     restaurantCode,
@@ -282,7 +282,7 @@ export class RestaurantService {
           distanceMultiplier: 0.000621371,
 
           /*** maxdistance would set the range of 5 miles, 1609.34 = 1 mile ***/
-          // maxDistance: 1609.34 * 5,
+          maxDistance: 1609.34 * 5,
           spherical: true,
         },
       });
@@ -350,30 +350,6 @@ export class RestaurantService {
       return this.restaurantModel.aggregate(pipeline);
     }
   }
-
-  // async dietFilter(dietaryRestrictions: [string]): Promise<any> {
-  //   return this.restaurantModel.aggregate([
-  //     {
-  //       $unwind: '$dietaryRestrictions',
-  //     },
-  //     {
-  //       $match: {
-  //         dietaryRestrictions: {
-  //           $in: dietaryRestrictions,
-  //         },
-  //       },
-  //     },
-  //   ]);
-  // }
-  // async filterPopularRestaurant(): Promise<any> {
-  //   return this.restaurantModel.aggregate([
-  //     {
-  //       $match: {
-  //         isSponsored: true,
-  //       },
-  //     },
-  //   ]);
-  // }
   async depositMoney(restaurantId, amount): Promise<any> {
     const res = await this.restaurantModel.findById({ _id: restaurantId });
     if (!res)
@@ -423,6 +399,20 @@ export class RestaurantService {
       },
       {
         $lookup: {
+          from: 'vouchers',
+          localField: '_id',
+          foreignField: 'restaurantId',
+          as: 'voucher',
+        },
+      },
+      {
+        $unwind: '$voucher',
+      },
+      {
+        $unwind: '$voucher.voucherObject',
+      },
+      {
+        $lookup: {
           from: 'restaurantreviews',
           localField: '_id',
           foreignField: 'restaurantId',
@@ -430,24 +420,117 @@ export class RestaurantService {
         },
       },
       {
-        $project: {
+        $group: {
           _id: '$_id',
-          restaurantName: '$restaurantName',
-          profileImage: '$profileImage',
-          description: '$description',
-          phoneNumber: '$phoneNumber',
-          media: '$media',
-          menu: '$menu',
-          isSponsored: '$isSponsored',
-          location: '$location',
-          distanceFromMe: '$distanceFromMe',
-          totalVoucherCount: '$totalVoucherCount',
-          reviewCount: '$reviewCount',
-          createdAt: '$createdAt',
-          updatedAt: '$updatedAt',
-          [`${fieldName}`]: '$restaurantReviews.reviewObject.rating',
+          profileImage: { $first: '$profileImage' },
+          description: { $first: '$description' },
+          phoneNumber: { $first: '$phoneNumber' },
+          restaurantName: { $first: '$restaurantName' },
+          media: { $first: '$media' },
+          menu: { $first: '$menu' },
+          isSponsored: { $first: '$isSponsored' },
+          location: { $first: '$location' },
+          distanceFromMe: { $first: '$distanceFromMe' },
+          totalVoucherCount: { $first: '$totalVoucherCount' },
+          studentVoucherCount: {
+            $sum: {
+              $cond: [
+                {
+                  $or: [
+                    {
+                      $eq: ['$voucher.voucherObject.voucherPreference', 'BOTH'],
+                    },
+                    {
+                      $eq: [
+                        '$voucher.voucherObject.voucherPreference',
+                        'STUDENT',
+                      ],
+                    },
+                  ],
+                },
+                1,
+                0,
+              ],
+            },
+          },
+          nonStudentVoucherCount: {
+            $sum: {
+              $cond: [
+                {
+                  $or: [
+                    {
+                      $eq: ['$voucher.voucherObject.voucherPreference', 'BOTH'],
+                    },
+                    {
+                      $eq: [
+                        '$voucher.voucherObject.voucherPreference',
+                        'NON-STUDENT',
+                      ],
+                    },
+                  ],
+                },
+                1,
+                0,
+              ],
+            },
+          },
+          // reviewCount: { $sum: { $cond: ['$restaurantReviews.rating', 1, 0] } },
+          createdAt: { $first: '$createdAt' },
+          updatedAt: { $first: '$updatedAt' },
+          [`${fieldName}`]: {
+            $first: '$restaurantReviews.reviewObject.rating',
+          },
         },
       },
+      {
+        $project: {
+          _id: 1,
+          restaurantName: '$restaurantName',
+          profileImage: 1,
+          description: 1,
+          phoneNumber: 1,
+          media: 1,
+          studentVoucherCount: 1,
+          nonStudentVoucherCount: 1,
+          menu: 1,
+          isSponsored: 1,
+          location: 1,
+          distanceFromMe: 1,
+          // reviewCount: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          reviewObject: 1,
+        },
+      },
+      // {
+      //   $project: {
+      //     _id: '$_id',
+      //     restaurantName: '$restaurantName',
+      //     profileImage: '$profileImage',
+      //     description: '$description',
+      //     phoneNumber: '$phoneNumber',
+      //     media: '$media',
+      //     voucher: '$voucher',
+      //     studentVoucherCount: {
+      //       $sum: {
+      //         $cond: [
+      //           { $eq: ['$voucher.voucherObject.voucherPreference', 'BOTH'] },
+      //           1,
+      //           0,
+      //         ],
+      //       },
+      //     },
+      //     menu: '$menu',
+      //     isSponsored: '$isSponsored',
+      //     location: '$location',
+      //     distanceFromMe: '$distanceFromMe',
+      //     totalVoucherCount: '$totalVoucherCount',
+      //     reviewCount: '$reviewCount',
+      //     createdAt: '$createdAt',
+      //     updatedAt: '$updatedAt',
+      //     [`${fieldName}`]: '$restaurantReviews.reviewObject.rating',
+      //   },
+      // },
     ];
   }
 

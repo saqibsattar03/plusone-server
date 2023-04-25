@@ -458,46 +458,48 @@ export class VoucherService {
         },
       ]);
     } else
-      return this.redeemVoucherModel
-        .aggregate([
-          {
-            $lookup: {
-              from: 'vouchers',
-              localField: 'restaurantId',
-              foreignField: 'restaurantId',
-              as: 'voucher',
-            },
+      return this.redeemVoucherModel.aggregate([
+        {
+          $lookup: {
+            from: 'vouchers',
+            localField: 'restaurantId',
+            foreignField: 'restaurantId',
+            as: 'voucher',
           },
-          {
-            $unwind: '$voucher',
+        },
+        {
+          $unwind: '$voucher',
+        },
+        {
+          $project: {
+            vouc: '$voucher.voucherObject',
           },
-          {
-            $project: {
-              vouc: '$voucher.voucherObject',
-            },
+        },
+        {
+          $unwind: '$vouc',
+        },
+        {
+          $lookup: {
+            from: 'redeemvouchers',
+            localField: 'vouc._id',
+            foreignField: 'voucherId',
+            as: 'v',
           },
-          {
-            $unwind: '$vouc',
+        },
+        {
+          $unwind: '$v',
+        },
+        // {
+        //   count: { $sum:  },
+        // },
+        //
+        {
+          $project: {
+            // _id: 1,
+            v: 1,
           },
-          {
-            $lookup: {
-              from: 'redeemvouchers',
-              localField: 'vouc._id',
-              foreignField: 'voucherId',
-              as: 'voucher',
-            },
-          },
-          {
-            $unwind: '$voucher',
-          },
-          {
-            $project: {
-              // _id: 1,
-              vouc: 1,
-            },
-          },
-        ])
-        .explain('executionStats');
+        },
+      ]);
   }
 
   async fourDigitCode(length) {

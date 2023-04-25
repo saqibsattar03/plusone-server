@@ -147,7 +147,7 @@ export class ProfilesService {
           __v: 1,
           bio: 1,
           estimatedSavings: 1,
-          followingsCount: {
+          followingCount: {
             $size: '$following.followings',
           },
           followerCount: {

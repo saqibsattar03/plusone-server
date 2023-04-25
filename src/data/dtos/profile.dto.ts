@@ -121,6 +121,15 @@ export class ProfileDto {
 
   @ApiProperty({ type: String })
   role: string;
+
+  @ApiProperty({ type: Number, default: 0 })
+  followingCount: number;
+
+  @ApiProperty({ type: Number, default: 0 })
+  followerCount: number;
+
+  @ApiProperty({ type: Number, default: 0 })
+  socialPostCount: number;
 }
 
 // export class UserDto {

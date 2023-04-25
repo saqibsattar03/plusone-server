@@ -169,9 +169,10 @@ export class VoucherController {
     return this.voucherService.disableVoucherForSpecificDays(data);
   }
 
-  @ApiQuery({ type: String, name: 'restaurantId', required: false })
   @Get('all-redeemed')
+  @ApiQuery({ type: String, name: 'restaurantId', required: false })
   getRedeemedVoucher(@Query('restaurantId') restaurantId) {
+    console.log('all redeemed route called');
     return this.voucherService.getAllRedeemedVouchers(restaurantId);
   }
 }

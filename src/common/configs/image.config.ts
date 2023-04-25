@@ -6,14 +6,14 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import { join } from 'path';
 
 /*** uncomment lines below before uploading to live server ***/
-//
-// // Define the absolute path to the uploads directory
-// const UPLOADS_DIR = join('/usr/src', 'uploads');
-//
-// // Multer configuration
-// export const multerConfig = {
-//   dest: UPLOADS_DIR,
-// };
+
+// Define the absolute path to the uploads directory
+const UPLOADS_DIR = join('/usr/src', 'uploads');
+
+// Multer configuration
+export const multerConfig = {
+  dest: UPLOADS_DIR,
+};
 
 // Multer upload options
 export const imageValidation = {
@@ -75,10 +75,10 @@ export const imageValidation = {
       }
       callback(null, '/uploads/');
       /*** uncomment lines below before uploading to live server ***/
-      // if (!existsSync(UPLOADS_DIR)) {
-      //   mkdirSync(UPLOADS_DIR);
+      // if (!existsSync('./UPLOADS_DIR')) {
+      //   mkdirSync('./UPLOADS_DIR');
       // }
-      // callback(null, UPLOADS_DIR);
+      // callback(null, './UPLOADS_DIR');
     },
     // File modification details
     filename: (req: any, file: any, cb: any) => {

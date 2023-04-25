@@ -54,16 +54,16 @@ export class ProfilesController {
   verifyUser(@Query('confirmationCode') confirmationCode) {
     return this.profileService.verifyUser(confirmationCode);
   }
-  @Get('single/:profileId')
-  @ApiParam({ name: 'profileId', type: String })
+  @Get('single')
+  // @ApiParam({ name: 'profileId', type: String })
   @ApiCreatedResponse({
     type: ProfileDto,
     description: 'user fetched successfully',
   })
   @ApiBadRequestResponse({ description: 'could not fetch the user' })
-  // @UseGuards(JwtAuthGuard)
-  getSingleProfile(@Param('profileId') id) {
-    return this.profileService.getSingleProfile(id);
+  @UseGuards(JwtAuthGuard)
+  getSingleProfile(@Request() request) {
+    return this.profileService.getSingleProfile(request.user.userId);
   }
 
   @Patch('update')
