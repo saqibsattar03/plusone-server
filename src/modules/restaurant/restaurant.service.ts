@@ -30,7 +30,6 @@ export class RestaurantService {
     const codeCheck = await this.restaurantModel.findOne({
       uniqueCode: uniqueCode,
     });
-    console.log(uniqueCode);
     if (codeCheck) uniqueCode = Math.floor(Math.random() * 5596 + 1249);
     const user = await this.profileService.createUser(restaurantDto);
     restaurantDto.userId = user._id;

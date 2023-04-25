@@ -39,7 +39,6 @@ export class ChatService {
           },
         },
       });
-      console.log('chat created');
       return r;
     } else if (res) {
       await res.updateOne({

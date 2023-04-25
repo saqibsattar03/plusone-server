@@ -179,7 +179,6 @@ export class ProfilesService {
     return fetchedUser;
   }
   async updateProfile(data): Promise<any> {
-    console.log('data = ', data);
     const profile = await this.profileModel.findById({ _id: data.userId });
     if (!profile) throw new NotFoundException(' Profile does not exist');
 

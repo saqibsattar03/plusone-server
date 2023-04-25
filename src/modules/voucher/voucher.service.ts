@@ -111,7 +111,6 @@ export class VoucherService {
           restaurantId: voucherDto.restaurantId,
         })
         .select('nonStudentVoucherCount -_id');
-      console.log(c);
       if (c.nonStudentVoucherCount < 3) {
         await res.updateOne(this.createVoucherUpdateOperation(oid, voucherDto));
         await this.voucherModel.findOneAndUpdate(
@@ -222,7 +221,6 @@ export class VoucherService {
       const formattedDate = new Date(data.voucherDisableDates[i]);
       dates.push(formattedDate);
     }
-    // const date = new Date(data.voucherDisableDates).to;
     const oid = new mongoose.Types.ObjectId(data.voucherId);
     try {
       await this.voucherModel.findOneAndUpdate(
@@ -238,33 +236,6 @@ export class VoucherService {
     } catch (e) {
       throw new HttpException(e.toString(), HttpStatus.BAD_REQUEST);
     }
-  }
-
-  //delete voucher route To be defined yet
-  async deleteSingleVoucher(voucherObjectId): Promise<VoucherDocument> {
-    const oid = new mongoose.Types.ObjectId(voucherObjectId);
-    const result = await this.voucherModel.aggregate([
-      { $unwind: '$voucherObject' },
-      { $match: { 'voucherObject._id': oid } },
-    ]);
-    if (result[0].voucherObject.voucherPreference == 'STUDENT') {
-      // this.studentVoucherCount--;
-    } else {
-      // this.nonStudentVoucherCount--;
-    }
-    await this.voucherModel.updateOne({
-      $pull: {
-        voucherObject: {
-          _id: oid,
-        },
-      },
-    });
-    throw new HttpException('voucher deleted successfully', HttpStatus.OK);
-  }
-  async deleteAllVoucher(restaurantId) {
-    return this.voucherModel.findOneAndDelete({
-      restaurantId: new mongoose.Types.ObjectId(restaurantId),
-    });
   }
   async verifyRestaurantCode(data): Promise<any> {
     const res = await this.restaurantService.getRestaurantVerificationCode(

@@ -58,7 +58,6 @@ export class RestaurantReviewController {
     description: 'can not edit the review',
   })
   editReview(@Body() data, @Query('restaurantId') restaurantId) {
-    console.log(restaurantId);
     return this.restaurantReviewService.editReview(data, restaurantId);
   }
 

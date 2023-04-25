@@ -89,24 +89,24 @@ export class VoucherController {
     return this.voucherService.editVoucher(voucherId, data);
   }
 
-  @Delete('remove-single')
-  @ApiQuery({ type: 'string', name: 'voucherObjectId' })
-  @ApiCreatedResponse({
-    description: 'single voucher object deleted successfully',
-  })
-  @ApiBadRequestResponse({ description: 'can not delete voucher' })
-  deleteSingleVoucher(@Query('voucherObjectId') voucherObjectId) {
-    return this.voucherService.deleteSingleVoucher(voucherObjectId);
-  }
-  @Delete('remove-all')
-  @ApiQuery({ type: 'string', name: 'restaurantId' })
-  @ApiCreatedResponse({
-    description: 'all vouchers of restaurant deleted successfully',
-  })
-  @ApiBadRequestResponse({ description: 'can not delete voucher' })
-  deleteAllVoucher(@Query('restaurantId') restaurantId) {
-    return this.voucherService.deleteAllVoucher(restaurantId);
-  }
+  // @Delete('remove-single')
+  // @ApiQuery({ type: 'string', name: 'voucherObjectId' })
+  // @ApiCreatedResponse({
+  //   description: 'single voucher object deleted successfully',
+  // })
+  // @ApiBadRequestResponse({ description: 'can not delete voucher' })
+  // deleteSingleVoucher(@Query('voucherObjectId') voucherObjectId) {
+  //   return this.voucherService.deleteSingleVoucher(voucherObjectId);
+  // }
+  // @Delete('remove-all')
+  // @ApiQuery({ type: 'string', name: 'restaurantId' })
+  // @ApiCreatedResponse({
+  //   description: 'all vouchers of restaurant deleted successfully',
+  // })
+  // @ApiBadRequestResponse({ description: 'can not delete voucher' })
+  // deleteAllVoucher(@Query('restaurantId') restaurantId) {
+  //   return this.voucherService.deleteAllVoucher(restaurantId);
+  // }
 
   @Post('verify-restaurant-code')
   @ApiBody({
@@ -135,7 +135,6 @@ export class VoucherController {
   getTotalVoucherRedeemedCount(@Query('restaurantId') restaurantId) {
     return this.voucherService.getTotalVoucherRedeemedCount(restaurantId);
   }
-
   @Get('redeemed-by-all-users')
   @ApiCreatedResponse({
     type: ProfileDto,
@@ -172,7 +171,6 @@ export class VoucherController {
   @Get('all-redeemed')
   @ApiQuery({ type: String, name: 'restaurantId', required: false })
   getRedeemedVoucher(@Query('restaurantId') restaurantId) {
-    console.log('all redeemed route called');
     return this.voucherService.getAllRedeemedVouchers(restaurantId);
   }
 }

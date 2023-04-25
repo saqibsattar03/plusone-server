@@ -1,4 +1,11 @@
-import { Controller, Delete, Patch, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Param,
+  Patch,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ProfilesService } from './profiles.service';
 import { Body, Get, Post, Request } from '@nestjs/common/decorators';
 import {
@@ -6,6 +13,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
+  ApiParam,
   ApiQuery,
   ApiResponse,
   ApiTags,
@@ -46,16 +54,16 @@ export class ProfilesController {
   verifyUser(@Query('confirmationCode') confirmationCode) {
     return this.profileService.verifyUser(confirmationCode);
   }
-  @Get('single')
-  // @ApiParam({ name: 'profileId', type: String })
+  @Get('single/:profileId')
+  @ApiParam({ name: 'profileId', type: String })
   @ApiCreatedResponse({
     type: ProfileDto,
     description: 'user fetched successfully',
   })
   @ApiBadRequestResponse({ description: 'could not fetch the user' })
-  @UseGuards(JwtAuthGuard)
-  getSingleProfile(@Request() request) {
-    return this.profileService.getSingleProfile(request.user.userId);
+  // @UseGuards(JwtAuthGuard)
+  getSingleProfile(@Param('profileId') id) {
+    return this.profileService.getSingleProfile(id);
   }
 
   @Patch('update')

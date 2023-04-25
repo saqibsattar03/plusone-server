@@ -31,7 +31,6 @@ export class RestaurantController {
   })
   @ApiBadRequestResponse({ description: 'can not create Restaurant' })
   createRestaurant(@Body() data) {
-    console.log('restaurant data = ', data);
     return this.restaurantService.createRestaurant(data);
   }
 

@@ -56,7 +56,6 @@ export class AppController {
     @UploadedFile() media: Express.Multer.File,
   ): Promise<any> {
     if (media) {
-      console.log('media = ', media);
       return media.filename;
     }
     throw new HttpException('no image uploaded', HttpStatus.NOT_FOUND);
@@ -93,26 +92,6 @@ export class AppController {
     }
     throw new HttpException('no image uploaded', HttpStatus.NOT_FOUND);
   }
-
-  @Get('singe-file')
-  @ApiQuery({ name: 'file', type: String })
-  @ApiResponse({
-    schema: {
-      type: 'string',
-      format: 'binary',
-    },
-    status: HttpStatus.OK,
-  })
-  @ApiBadRequestResponse({ description: 'could not upload files' })
-  async getFile(@Query('file') file: string): Promise<any> {
-    console.log(file);
-    if (process.env.NODE_ENVIRONMENT === 'production') {
-      return 'https://api.plusoneworldwide.com/uploads/' + file;
-    } else {
-      return 'http://192.168.18.56:3000/uploads/' + file;
-    }
-  }
-
   @ApiQuery({ name: 'media', type: String })
   @Delete('remove-file')
   async removeProfileImage(@Query('media') media, @Res() res): Promise<any> {

@@ -30,7 +30,6 @@ export class SocialPostsService {
   ) {}
 
   async createPost(postDto: any): Promise<PostDocument> {
-    console.log(postDto);
     try {
       if (postDto.postType == Constants.FEED) {
         postDto.voucherId = null;
@@ -59,7 +58,6 @@ export class SocialPostsService {
     const r = followingsArray.flat();
     switch (data.postAudiencePreference) {
       case Constants.PUBLIC: {
-        console.log('in public');
         return this.socialPostModel
           .aggregate([
             {
