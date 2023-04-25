@@ -28,7 +28,7 @@ async function bootstrap() {
       'access-token',
     )
     .build();
-  app.useStaticAssets(join(__dirname, '..', '..', 'uploads'), {
+  app.useStaticAssets(join(__dirname, '..', 'UPLOADS_DIR'), {
     prefix: '/uploads/',
   });
   app.enableCors();
