@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Delete,
-  Param,
-  Patch,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Delete, Patch, Query, UseGuards } from '@nestjs/common';
 import { ProfilesService } from './profiles.service';
 import { Body, Get, Post, Request } from '@nestjs/common/decorators';
 import {
@@ -13,7 +6,6 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
-  ApiParam,
   ApiQuery,
   ApiResponse,
   ApiTags,
