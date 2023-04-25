@@ -322,6 +322,7 @@ export class RestaurantService {
       !data.latitude &&
       !data.dietaryRestrictions
     ) {
+      console.log('here no filter found');
       return this.getAllRestaurants(paginationQuery);
     } else {
       if (query.length > 0) {
@@ -404,12 +405,12 @@ export class RestaurantService {
           as: 'voucher',
         },
       },
-      {
-        $unwind: '$voucher',
-      },
-      {
-        $unwind: '$voucher.voucherObject',
-      },
+      // {
+      //   $unwind: '$voucher',
+      // },
+      // {
+      //   $unwind: '$voucher.voucherObject',
+      // },
       {
         $lookup: {
           from: 'restaurantreviews',

@@ -61,7 +61,6 @@ export class ProfilesController {
     description: 'user fetched successfully',
   })
   @ApiBadRequestResponse({ description: 'could not fetch the user' })
-  // @UseGuards(JwtAuthGuard)
   getSingleProfile(@Param('profileId') id) {
     return this.profileService.getSingleProfile(id);
   }
@@ -88,7 +87,7 @@ export class ProfilesController {
     return this.profileService.removeProfile(profileId);
   }
 
-  @Get('/all')
+  @Get('all')
   @ApiQuery({ type: String, name: 'role' })
   @ApiResponse({ description: 'All Users  Fetched successfully' })
   @ApiBadRequestResponse({ description: 'could not Fetch  Users' })

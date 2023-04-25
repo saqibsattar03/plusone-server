@@ -269,6 +269,7 @@ export class ProfilesService {
       ]);
   }
   async restaurantFilters(data, paginationQuery): Promise<any> {
+    console.log('hjkdfhk');
     return this.restaurantService.restaurantFilters(data, paginationQuery);
   }
   async resetPassword(user, password) {
