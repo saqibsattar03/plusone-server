@@ -92,18 +92,10 @@ export class FollowingService {
       {
         $project: {
           follower: '$follower',
+          username: '$followings.username',
           firstname: '$followings.firstname',
           surname: '$followings.surname',
           profileImage: '$followings.profileImage',
-          // followed: {
-          //   $cond: {
-          //     if: {
-          //       $in: ['$userId', '$follower.followers'],
-          //     },
-          //     then: true,
-          //     else: false,
-          //   },
-          // },
         },
       },
     ]);

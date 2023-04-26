@@ -23,8 +23,7 @@ export class FollowingController {
   })
   @UseGuards(JwtAuthGuard)
   addFollowee(@Request() request, @Query('followeeId') followeeId) {
-    const userId = request.user.userId;
-    return this.followingService.addFollowee(userId, followeeId);
+    return this.followingService.addFollowee(request.user.userId, followeeId);
   }
 
   @Post('remove')
@@ -34,11 +33,14 @@ export class FollowingController {
   @ApiBadRequestResponse({
     description: 'could not unfollow the user',
   })
-  removeFollowee(@Query('userId') userId, @Query('followeeId') followeeId) {
-    return this.followingService.removeFollowee(userId, followeeId);
+  removeFollowee(@Request() request, @Query('followeeId') followeeId) {
+    return this.followingService.removeFollowee(
+      request.user.userId,
+      followeeId,
+    );
   }
 
-  @Get('get-all')
+  @Get('all')
   @ApiQuery({ name: 'userId', type: String })
   @ApiResponse({
     type: [FollowResponse],
@@ -47,7 +49,8 @@ export class FollowingController {
   @ApiBadRequestResponse({
     description: 'could not fetch the Followings',
   })
-  getAllFollowings(@Query('userId') userId) {
-    return this.followingService.getAllFollowings(userId);
+  @UseGuards(JwtAuthGuard)
+  getAllFollowings(@Request() request) {
+    return this.followingService.getAllFollowings(request.user.userId);
   }
 }

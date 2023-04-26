@@ -92,6 +92,8 @@ export class ProfilesService {
     return this.profileModel.findById({ _id: userId }).select('rewardPoints');
   }
   async getSingleProfile(userId): Promise<any> {
+    console.log(userId);
+
     return this.profileModel.aggregate([
       {
         $match: {
@@ -107,11 +109,57 @@ export class ProfilesService {
         },
       },
       {
+        $unwind: {
+          path: '$following',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      // {
+      //   $project: {
+      //     _id: 1,
+      //     username: 1,
+      //     firstname: 1,
+      //     surname: 1,
+      //     email: 1,
+      //     status: 1,
+      //     role: 1,
+      //     accountType: 1,
+      //     socialLinks: 1,
+      //     postAudiencePreference: 1,
+      //     dietRequirements: 1,
+      //     favoriteRestaurants: 1,
+      //     favoriteCuisines: 1,
+      //     favoriteChefs: 1,
+      //     rewardPoints: 1,
+      //     isPremium: 1,
+      //     accountHolderType: 1,
+      //     createdAt: 1,
+      //     updatedAt: 1,
+      //     scopes: 1,
+      //     __v: 1,
+      //     bio: 1,
+      //     estimatedSavings: 1,
+      //     following: {
+      //       $cond: {
+      //         if: { $eq: ['$following', []] },
+      //         then: null,
+      //         else: '$following',
+      //       },
+      //     },
+      //   },
+      // },
+      {
         $lookup: {
           from: 'followers',
           localField: '_id',
           foreignField: 'userId',
           as: 'follower',
+        },
+      },
+      {
+        $unwind: {
+          path: '$follower',
+          preserveNullAndEmptyArrays: true,
         },
       },
       {
@@ -148,14 +196,37 @@ export class ProfilesService {
           bio: 1,
           estimatedSavings: 1,
           followingCount: {
-            $size: '$following.followings',
+            $size: {
+              $ifNull: ['$following.followings', []],
+            },
           },
           followerCount: {
-            $size: '$follower.followers',
+            $size: {
+              $ifNull: ['$follower.followers', []],
+            },
           },
           socialPostCount: {
-            $size: '$socialPost',
+            $size: {
+              $ifNull: ['$socialPost', []],
+            },
           },
+          // followingCount: {
+          //   $size: '$following.followings',
+          // },
+          // followingCount: {
+          //   $ifNull: [
+          //     {
+          //       $size: '$following.followings',
+          //     },
+          //     0,
+          //   ],
+          // },
+          // followerCount: {
+          //   $size: '$follower.followers',
+          // },
+          // socialPostCount: {
+          //   $size: '$socialPost',
+          // },
         },
       },
     ]);
@@ -269,7 +340,6 @@ export class ProfilesService {
       ]);
   }
   async restaurantFilters(data, paginationQuery): Promise<any> {
-    console.log('hjkdfhk');
     return this.restaurantService.restaurantFilters(data, paginationQuery);
   }
   async resetPassword(user, password) {

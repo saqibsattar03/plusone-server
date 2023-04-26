@@ -1,4 +1,4 @@
-import { Controller, Post, Query } from '@nestjs/common';
+import { Controller, Post, Query, UseGuards, Request } from '@nestjs/common';
 import { FollowerService } from './follower.service';
 import { Get } from '@nestjs/common/decorators';
 import {
@@ -8,6 +8,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { FollowResponse } from '../../data/dtos/following.dto';
+import { JwtAuthGuard } from '../../common/auth/guards/jwt-auth.guard';
 
 @ApiTags('Followers')
 @Controller('follower')
@@ -21,8 +22,9 @@ export class FollowerController {
   @ApiBadRequestResponse({
     description: 'could not follow the user',
   })
-  addFollower(@Query('followerId') followerId, @Query('userId') userId) {
-    return this.followerService.addFollower(userId, followerId);
+  @UseGuards(JwtAuthGuard)
+  addFollower(@Query('followerId') followerId, @Request() request) {
+    return this.followerService.addFollower(request.user.userId, followerId);
   }
   @Post('remove')
   @ApiQuery({ name: 'userId', type: String })
@@ -31,8 +33,9 @@ export class FollowerController {
   @ApiBadRequestResponse({
     description: 'could not unfollow the user',
   })
-  removeFollower(@Query('followerId') followerId, @Query('userId') userId) {
-    return this.followerService.removeFollower(userId, followerId);
+  @UseGuards(JwtAuthGuard)
+  removeFollower(@Query('followerId') followerId, @Request() request) {
+    return this.followerService.removeFollower(request.user.userId, followerId);
   }
   @Get('all')
   @ApiQuery({ name: 'userId', type: String })
@@ -43,7 +46,8 @@ export class FollowerController {
   @ApiBadRequestResponse({
     description: 'could not fetch the Followers',
   })
-  getAllFollowers(@Query('userId') userId) {
-    return this.followerService.getAllFollowers(userId);
+  @UseGuards(JwtAuthGuard)
+  getAllFollowers(@Request() request) {
+    return this.followerService.getAllFollowers(request.user.userId);
   }
 }

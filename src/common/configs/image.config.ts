@@ -3,7 +3,15 @@ import { existsSync, mkdirSync } from 'fs';
 import { diskStorage } from 'multer';
 import { v4 as uuid } from 'uuid';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { join } from 'path';
 
+// Define the absolute path to the uploads directory
+const UPLOADS_DIR = join('/usr/src', 'uploads');
+
+// Multer configuration
+export const multerConfig = {
+  dest: UPLOADS_DIR,
+};
 // Multer upload options
 export const imageValidation = {
   // Enable file size limits
@@ -63,6 +71,10 @@ export const imageValidation = {
         mkdirSync('./UPLOADS_DIR');
       }
       callback(null, './UPLOADS_DIR');
+      // if (!existsSync(UPLOADS_DIR)) {
+      //   mkdirSync(UPLOADS_DIR);
+      // }
+      // callback(null, UPLOADS_DIR);
     },
     // File modification details
     filename: (req: any, file: any, cb: any) => {

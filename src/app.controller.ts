@@ -56,6 +56,7 @@ export class AppController {
     @UploadedFile() media: Express.Multer.File,
   ): Promise<any> {
     if (media) {
+      console.log('media', media);
       return media.filename;
     }
     throw new HttpException('no image uploaded', HttpStatus.NOT_FOUND);

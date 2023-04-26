@@ -9,10 +9,13 @@ export class RestaurantDto {
 
   @ApiProperty()
   username: string;
+
   @ApiProperty()
   email: string;
+
   @ApiProperty()
   password: string;
+
   @ApiProperty()
   role: string;
 
@@ -30,8 +33,9 @@ export class RestaurantDto {
   @ApiProperty({ type: () => String })
   @IsNotEmpty()
   phoneNumber: string;
-  @ApiProperty({ type: () => [String] })
-  menu: [string];
+  @ApiProperty({ type: () => String })
+  menu: string;
+
   @ApiProperty({ type: () => String })
   description: string;
 
@@ -40,6 +44,7 @@ export class RestaurantDto {
 
   @ApiProperty({ type: () => [String] })
   tags: [string];
+
   @ApiProperty({
     description: 'images/video address for the post',
     type: () => [String],
@@ -81,6 +86,7 @@ export class RestaurantDto {
 
   @ApiProperty({ type: () => Date })
   createdAt: Date;
+
   @ApiProperty({ type: () => Date })
   updatedAt: Date;
 }
@@ -130,8 +136,10 @@ export class RestaurantResponseDto {
 
   @ApiProperty({ type: [[Number]], example: '[[15,2]]' })
   reviewObject: [[number]];
+
   @ApiProperty()
   createdAt: Date;
+
   @ApiProperty()
   updatedAt: Date;
 }
@@ -159,6 +167,7 @@ export class SingleRestaurantResponseDto {
     },
   })
   reviews: object;
+
   @ApiProperty({
     type: Array,
     example: [
@@ -176,6 +185,7 @@ export class SingleRestaurantResponseDto {
     ],
   })
   vouchers: [object];
+
   @ApiProperty({ type: [String] })
   media: string[];
 
@@ -194,6 +204,7 @@ export class SingleRestaurantResponseDto {
     ],
   })
   redeemedVouchers: [object];
+
   @ApiProperty({
     type: [Object],
     example: [
@@ -211,20 +222,25 @@ export class SingleRestaurantResponseDto {
 export class UpdateRestaurantDto {
   @ApiProperty({ type: () => String })
   restaurantName: string;
+
   @ApiProperty({ type: () => Number })
   phoneNumber: number;
+
   @ApiProperty({ type: () => [String] })
   menu: [string];
+
   @ApiProperty({ type: () => String })
   description: string;
 
   @ApiProperty({ type: LocationDto })
   location: LocationDto;
+
   @ApiProperty({ type: String })
   profileImage: string;
 
   @ApiProperty({ type: () => [String] })
   tags: [string];
+
   @ApiProperty({
     description: 'images/video address for the post',
     type: () => [String],
@@ -242,6 +258,7 @@ export class RestaurantReviewDto {
   @ApiProperty({ type: String })
   @IsNotEmpty()
   restaurantId: any;
+
   @ApiProperty()
   reviewObject: {
     _id: any;
@@ -255,8 +272,10 @@ export class RestaurantReviewDto {
 export class UpdateReviewDto {
   @ApiProperty({ description: 'id of review object is needed' })
   _id: string;
+
   @ApiProperty()
   reviewText: string;
+
   @ApiProperty()
   rating: number;
 }

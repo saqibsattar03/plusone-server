@@ -40,8 +40,8 @@ export class FollowerService {
     throw new HttpException('follower removed successfully', HttpStatus.OK);
   }
   async getAllFollowers(userId): Promise<any> {
+    console.log('user id  = ', userId);
     const oid = new mongoose.Types.ObjectId(userId);
-
     return this.followerModel.aggregate([
       {
         $match: { userId: oid },
@@ -67,6 +67,7 @@ export class FollowerService {
         $project: {
           firstname: '$followers.firstname',
           surname: '$followers.surname',
+          username: '$followers.username',
           profileImage: '$followers.profileImage',
         },
       },

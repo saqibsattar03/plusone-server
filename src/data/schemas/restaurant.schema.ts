@@ -20,8 +20,8 @@ export class Restaurant {
   @Prop({ type: String, required: true })
   phoneNumber: string;
 
-  @Prop()
-  menu: [string];
+  @Prop({ type: String })
+  menu: string;
 
   @Prop({ type: String, required: [true, 'profile image is missing'] })
   profileImage: string;

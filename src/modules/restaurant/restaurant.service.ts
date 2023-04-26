@@ -405,81 +405,19 @@ export class RestaurantService {
           as: 'voucher',
         },
       },
-      // {
-      //   $unwind: '$voucher',
-      // },
-      // {
-      //   $unwind: '$voucher.voucherObject',
-      // },
+      {
+        $unwind: {
+          path: '$voucher',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
       {
         $lookup: {
           from: 'restaurantreviews',
           localField: '_id',
           foreignField: 'restaurantId',
           as: 'restaurantReviews',
-        },
-      },
-      {
-        $group: {
-          _id: '$_id',
-          profileImage: { $first: '$profileImage' },
-          description: { $first: '$description' },
-          phoneNumber: { $first: '$phoneNumber' },
-          restaurantName: { $first: '$restaurantName' },
-          media: { $first: '$media' },
-          menu: { $first: '$menu' },
-          isSponsored: { $first: '$isSponsored' },
-          location: { $first: '$location' },
-          distanceFromMe: { $first: '$distanceFromMe' },
-          totalVoucherCount: { $first: '$totalVoucherCount' },
-          studentVoucherCount: {
-            $sum: {
-              $cond: [
-                {
-                  $or: [
-                    {
-                      $eq: ['$voucher.voucherObject.voucherPreference', 'BOTH'],
-                    },
-                    {
-                      $eq: [
-                        '$voucher.voucherObject.voucherPreference',
-                        'STUDENT',
-                      ],
-                    },
-                  ],
-                },
-                1,
-                0,
-              ],
-            },
-          },
-          nonStudentVoucherCount: {
-            $sum: {
-              $cond: [
-                {
-                  $or: [
-                    {
-                      $eq: ['$voucher.voucherObject.voucherPreference', 'BOTH'],
-                    },
-                    {
-                      $eq: [
-                        '$voucher.voucherObject.voucherPreference',
-                        'NON-STUDENT',
-                      ],
-                    },
-                  ],
-                },
-                1,
-                0,
-              ],
-            },
-          },
-          // reviewCount: { $sum: { $cond: ['$restaurantReviews.rating', 1, 0] } },
-          createdAt: { $first: '$createdAt' },
-          updatedAt: { $first: '$updatedAt' },
-          [`${fieldName}`]: {
-            $first: '$restaurantReviews.reviewObject.rating',
-          },
         },
       },
       {
@@ -490,8 +428,10 @@ export class RestaurantService {
           description: 1,
           phoneNumber: 1,
           media: 1,
-          studentVoucherCount: 1,
-          nonStudentVoucherCount: 1,
+          studentVoucherCount: { $ifNull: ['$voucher.studentVoucherCount', 0] },
+          nonStudentVoucherCount: {
+            $ifNull: ['$voucher.nonStudentVoucherCount', 0],
+          },
           menu: 1,
           isSponsored: 1,
           location: 1,
@@ -500,6 +440,7 @@ export class RestaurantService {
           createdAt: 1,
           updatedAt: 1,
           reviewObject: 1,
+          [`${fieldName}`]: '$restaurantReviews.reviewObject.rating',
         },
       },
       // {
