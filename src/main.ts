@@ -6,6 +6,7 @@ import { AppModule } from './app.module';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { json, urlencoded } from 'express';
+import process from 'process';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -28,7 +29,7 @@ async function bootstrap() {
       'access-token',
     )
     .build();
-  app.useStaticAssets(join(__dirname, '..', 'UPLOADS_DIR'), {
+  app.useStaticAssets(join(process.cwd(), '..', 'uploads'), {
     prefix: '/uploads/',
   });
   app.enableCors();
@@ -41,4 +42,4 @@ async function bootstrap() {
   await app.listen(port, '0.0.0.0');
   console.log(`App is running on ${port}`);
 }
-bootstrap();
+bootstrap().then();

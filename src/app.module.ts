@@ -17,6 +17,7 @@ import { MulterModule } from '@nestjs/platform-express';
 import { DepositMoneyModule } from './modules/deposit-money/deposit-money.module';
 import { DbModule } from './common/db/db.module';
 import { ConfigModule } from '@nestjs/config';
+import { multerConfig } from './common/configs/image.config';
 
 @Module({
   imports: [
@@ -38,9 +39,7 @@ import { ConfigModule } from '@nestjs/config';
     QuoteModule,
     CustomerServiceModule,
     AuthModule,
-    MulterModule.register({
-      dest: '../uploads',
-    }),
+    MulterModule.register(multerConfig),
     DepositMoneyModule,
   ],
   controllers: [AppController],

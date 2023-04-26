@@ -14,19 +14,16 @@ import {
   UseInterceptors,
 } from '@nestjs/common/decorators';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { imageValidation } from './common/configs/image.config';
 import {
   ApiBadRequestResponse,
   ApiBody,
   ApiConsumes,
   ApiCreatedResponse,
   ApiQuery,
-  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as process from 'process';
 
 @ApiTags('Main')
 @Controller()
@@ -51,7 +48,7 @@ export class AppController {
   })
   @ApiCreatedResponse({ type: String, description: 'uploaded file name' })
   @ApiBadRequestResponse({ description: 'could not upload file' })
-  @UseInterceptors(FileInterceptor('media', imageValidation))
+  @UseInterceptors(FileInterceptor('media'))
   async uploadProfileImage(
     @UploadedFile() media: Express.Multer.File,
   ): Promise<any> {
@@ -80,7 +77,7 @@ export class AppController {
   })
   @ApiCreatedResponse({ type: String, description: 'uploaded file names' })
   @ApiBadRequestResponse({ description: 'could not upload files' })
-  @UseInterceptors(FilesInterceptor('media', 6, imageValidation))
+  @UseInterceptors(FilesInterceptor('media', 6))
   async uploadMultipleProfileImage(
     @UploadedFiles() media: Array<Express.Multer.File>,
   ): Promise<any> {
