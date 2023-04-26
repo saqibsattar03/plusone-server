@@ -382,6 +382,96 @@ export class VoucherService {
     };
   }
 
+  // async getAllRedeemedVouchers(restaurantId): Promise<any> {
+  //   const oid = new mongoose.Types.ObjectId(restaurantId);
+  //   if (restaurantId) {
+  //     return this.redeemVoucherModel.aggregate([
+  //       {
+  //         $match: {
+  //           restaurantId: oid,
+  //         },
+  //       },
+  //       {
+  //         $lookup: {
+  //           from: 'vouchers',
+  //           localField: 'restaurantId',
+  //           foreignField: 'restaurantId',
+  //           as: 'voucher',
+  //         },
+  //       },
+  //       {
+  //         $unwind: '$voucher',
+  //       },
+  //       {
+  //         $project: {
+  //           vouc: '$voucher.voucherObject',
+  //         },
+  //       },
+  //       {
+  //         $unwind: '$vouc',
+  //       },
+  //       {
+  //         $lookup: {
+  //           from: 'redeemvouchers',
+  //           localField: 'vouc._id',
+  //           foreignField: 'voucherId',
+  //           as: 'voucher',
+  //         },
+  //       },
+  //       {
+  //         $unwind: '$voucher',
+  //       },
+  //       {
+  //         $project: {
+  //           // _id: 1,
+  //           vouc: 1,
+  //         },
+  //       },
+  //     ]);
+  //   } else
+  //     return this.redeemVoucherModel.aggregate([
+  //       {
+  //         $lookup: {
+  //           from: 'vouchers',
+  //           localField: 'restaurantId',
+  //           foreignField: 'restaurantId',
+  //           as: 'voucher',
+  //         },
+  //       },
+  //       {
+  //         $unwind: '$voucher',
+  //       },
+  //       {
+  //         $project: {
+  //           vouc: '$voucher.voucherObject',
+  //         },
+  //       },
+  //       {
+  //         $unwind: '$vouc',
+  //       },
+  //       {
+  //         $lookup: {
+  //           from: 'redeemvouchers',
+  //           localField: 'vouc._id',
+  //           foreignField: 'voucherId',
+  //           as: 'v',
+  //         },
+  //       },
+  //       {
+  //         $unwind: '$v',
+  //       },
+  //       // {
+  //       //   count: { $sum:  },
+  //       // },
+  //       //
+  //       {
+  //         $project: {
+  //           // _id: 1,
+  //           v: 1,
+  //         },
+  //       },
+  //     ]);
+  // }
   async getAllRedeemedVouchers(restaurantId): Promise<any> {
     const oid = new mongoose.Types.ObjectId(restaurantId);
     if (restaurantId) {
@@ -454,25 +544,20 @@ export class VoucherService {
             from: 'redeemvouchers',
             localField: 'vouc._id',
             foreignField: 'voucherId',
-            as: 'v',
+            as: 'voucher',
           },
         },
         {
-          $unwind: '$v',
+          $unwind: '$voucher',
         },
-        // {
-        //   count: { $sum:  },
-        // },
-        //
         {
           $project: {
             // _id: 1,
-            v: 1,
+            vouc: 1,
           },
         },
       ]);
   }
-
   async fourDigitCode(length) {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 

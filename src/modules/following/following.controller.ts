@@ -3,6 +3,7 @@ import { FollowingService } from './following.service';
 import { Get, Request } from '@nestjs/common/decorators';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiQuery,
   ApiResponse,
   ApiTags,
@@ -27,7 +28,7 @@ export class FollowingController {
   }
 
   @Post('remove')
-  @ApiQuery({ name: 'userId', type: String })
+  @ApiBearerAuth('access-token')
   @ApiQuery({ name: 'followeeId', type: String })
   @ApiResponse({ description: 'Following removed Successfully' })
   @ApiBadRequestResponse({
