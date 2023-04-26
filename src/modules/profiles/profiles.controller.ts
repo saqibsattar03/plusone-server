@@ -62,7 +62,6 @@ export class ProfilesController {
   })
   @ApiBadRequestResponse({ description: 'could not fetch the user' })
   getSingleProfile(@Param('profileId') id) {
-    console.log('UserID => ', id);
     return this.profileService.getSingleProfile(id);
   }
 

@@ -250,9 +250,9 @@ export class ProfilesService {
     return fetchedUser;
   }
   async updateProfile(data): Promise<any> {
+    console.log('data = ', data);
     const profile = await this.profileModel.findById({ _id: data.userId });
     if (!profile) throw new NotFoundException(' Profile does not exist');
-
     if (profile.role == Constants.USER && profile.status == Constants.PENDING)
       throw new HttpException(
         'Account is still not verified yet',
@@ -263,6 +263,8 @@ export class ProfilesService {
       { _id: data.userId },
       {
         $set: {
+          firstname: data.firstname,
+          surname: data.surname,
           bio: data.bio,
           socialLinks: data.socialLinks,
           profileImage: data.profileImage,
