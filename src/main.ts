@@ -6,7 +6,7 @@ import { AppModule } from './app.module';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { json, urlencoded } from 'express';
-import process from 'process';
+import * as process from 'process';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);

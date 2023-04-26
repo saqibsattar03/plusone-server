@@ -65,6 +65,7 @@ export class FollowerService {
       },
       {
         $project: {
+          _id: '$followings._id',
           firstname: '$followers.firstname',
           surname: '$followers.surname',
           username: '$followers.username',

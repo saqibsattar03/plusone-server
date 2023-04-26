@@ -32,6 +32,7 @@ export class FollowingService {
     throw new HttpException('follwee added successfully', HttpStatus.OK);
   }
   async removeFollowee(userId, followeeId): Promise<any> {
+    console.log('followee id = ', followeeId);
     const res = await this.followingModel.findOne({ userId: userId });
     if (!res)
       throw new HttpException('no such user found', HttpStatus.NOT_FOUND);
@@ -92,6 +93,7 @@ export class FollowingService {
       {
         $project: {
           follower: '$follower',
+          _id: '$followings._id',
           username: '$followings.username',
           firstname: '$followings.firstname',
           surname: '$followings.surname',
