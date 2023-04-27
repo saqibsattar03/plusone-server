@@ -13,6 +13,7 @@ export enum Constants {
   REVIEW = 'REVIEW',
   PUBLIC = 'PUBLIC',
   FOLLOWING = 'FOLLOWING',
+  MYPOSTS = 'MYPOSTS',
   FRIENDS = 'FRIENDS',
   DELETED = 'DELETED',
 }

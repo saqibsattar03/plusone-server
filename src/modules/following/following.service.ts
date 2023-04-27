@@ -82,14 +82,9 @@ export class FollowingService {
               },
             },
           ],
-          // localField: 'userId',
-          // foreignField: 'userId',
           as: 'follower',
         },
       },
-      // {
-      //   $unwind: '$follower',
-      // },
       {
         $project: {
           follower: '$follower',
@@ -102,11 +97,9 @@ export class FollowingService {
       },
     ]);
   }
-
   async deleteAllFollwees(userId): Promise<any> {
     return this.followingModel.findOneAndDelete({ userId: userId });
   }
-
   async getFollowingIds(userId): Promise<any> {
     const oi = new mongoose.Types.ObjectId(userId);
     return this.followingModel.aggregate([

@@ -16,7 +16,6 @@ import { UpdateSocialPost } from '../../data/dtos/socialPost.dto';
 import { Constants } from '../../common/constants';
 import { FollowingService } from '../following/following.service';
 import { CommentsService } from './comments/comments.service';
-
 @Injectable()
 export class SocialPostsService {
   constructor(
@@ -28,7 +27,6 @@ export class SocialPostsService {
     @Inject(forwardRef(() => CommentsService))
     private readonly commentService: CommentsService,
   ) {}
-
   async createPost(postDto: any): Promise<PostDocument> {
     try {
       if (postDto.postType == Constants.FEED) {
@@ -46,7 +44,6 @@ export class SocialPostsService {
       throw new HttpException(e.toString(), HttpStatus.BAD_REQUEST);
     }
   }
-
   async getAllPost(paginationDto, data): Promise<any> {
     const { limit, offset } = paginationDto;
     const pipeLine = await this.getPostPipeline(data.userId);
@@ -58,17 +55,21 @@ export class SocialPostsService {
     const r = followingsArray.flat();
     switch (data.postAudiencePreference) {
       case Constants.PUBLIC: {
-        return this.socialPostModel
-          .aggregate([
-            {
-              $match: {
-                postAudiencePreference: 'PUBLIC',
+        try {
+          return this.socialPostModel
+            .aggregate([
+              {
+                $match: {
+                  postAudiencePreference: 'PUBLIC',
+                },
               },
-            },
-            ...pipeLine,
-          ])
-          .skip(offset)
-          .limit(limit);
+              ...pipeLine,
+            ])
+            .skip(offset)
+            .limit(limit);
+        } catch (e) {
+          throw new HttpException(e.toString(), HttpStatus.BAD_REQUEST);
+        }
       }
       case Constants.FOLLOWING: {
         try {
@@ -96,20 +97,33 @@ export class SocialPostsService {
           throw new HttpException(e.toString(), HttpStatus.BAD_REQUEST);
         }
       }
+
+      case Constants.MYPOSTS: {
+        try {
+          return this.socialPostModel.aggregate([
+            {
+              $match: {
+                userId: new mongoose.Types.ObjectId(data.userId),
+              },
+            },
+            ...pipeLine,
+          ]);
+        } catch (e) {
+          throw new HttpException(e.toString(), HttpStatus.BAD_REQUEST);
+        }
+      }
     }
   }
   async getSinglePost(postId): Promise<PostDocument> {
     return this.socialPostModel.findById(postId);
   }
-
   async getAllPostsOfSingleUser(paginationDto, userId): Promise<any> {
     const { limit, offset } = paginationDto;
-    return this.socialPostModel
-      .find({ userId: userId })
-      .skip(offset)
-      .limit(limit);
+    // return this.socialPostModel
+    //   .find({ userId: userId })
+    //   .skip(offset)
+    //   .limit(limit);
   }
-
   async updatePost(
     userId,
     updatePostDto: UpdateSocialPost,
@@ -144,11 +158,11 @@ export class SocialPostsService {
     await post.deleteOne();
     throw new HttpException('post deleted successfully', HttpStatus.OK);
   }
-
   async deleteAllPostsOfSingleUser(userId): Promise<any> {
     await this.socialPostModel.deleteMany({ userId: userId });
   }
   async likePost(userId, postId): Promise<LikedPostDocument> {
+    console.log('liked');
     const res = await this.postLikedModel.findOne({ postId: postId });
     if (!res) {
       const post = await this.postLikedModel.create({ postId: postId });
@@ -170,11 +184,12 @@ export class SocialPostsService {
           { _id: postId },
           { likesCount: c.likesCount + 1 },
         );
-      } else throw new HttpException('already liked', HttpStatus.BAD_REQUEST);
+      }
     }
     throw new HttpException('post liked successfully', HttpStatus.OK);
   }
   async removeLike(userId, postId): Promise<any> {
+    console.log('like removed');
     const res = await this.postLikedModel.findOne({ postId: postId });
     if (!res) throw new HttpException('no post found', HttpStatus.NOT_FOUND);
     if (res) {
@@ -192,14 +207,12 @@ export class SocialPostsService {
     }
     throw new HttpException('like already removed', HttpStatus.BAD_REQUEST);
   }
-
   async removeUserLikes(userId): Promise<any> {
     await this.postLikedModel.updateMany(
       { active: true },
       { $pull: { userId: userId } },
     );
   }
-
   async getCommentCount(postId): Promise<any> {
     return this.socialPostModel
       .findOne({ _id: postId })
@@ -439,7 +452,6 @@ export class SocialPostsService {
       },
     ];
   }
-
   async searchPostByLocation(data): Promise<PostDocument[]> {
     if (!data.longitude && !data.latitude)
       throw new HttpException('no location selected', HttpStatus.BAD_REQUEST);
