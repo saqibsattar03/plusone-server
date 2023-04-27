@@ -33,8 +33,8 @@ export class RestaurantDto {
   @ApiProperty({ type: () => String })
   @IsNotEmpty()
   phoneNumber: string;
-  @ApiProperty({ type: () => String })
-  menu: string;
+  @ApiProperty({ type: () => [String] })
+  menu: [string];
 
   @ApiProperty({ type: () => String })
   description: string;
