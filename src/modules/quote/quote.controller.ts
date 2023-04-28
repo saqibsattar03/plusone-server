@@ -35,7 +35,6 @@ export class QuoteController {
   getAllQuotes() {
     return this.quoteService.getAllQuotes();
   }
-
   @Get('')
   @ApiQuery({ type: String, name: 'quoteId' })
   @ApiCreatedResponse({ type: QuoteDto })
@@ -53,7 +52,6 @@ export class QuoteController {
   editQuote(@Query('quoteId') quoteId, @Body() data) {
     return this.quoteService.editQuote(quoteId, data);
   }
-
   @Delete('remove')
   @ApiQuery({ type: String, name: 'quoteId' })
   @ApiCreatedResponse({ type: QuoteDto })

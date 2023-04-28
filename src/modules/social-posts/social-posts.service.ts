@@ -53,51 +53,117 @@ export class SocialPostsService {
       followingsArray.push(obj.followings);
     });
     const r = followingsArray.flat();
+    const query = [];
+
+    if (data.keyword) {
+      query.push({
+        $match: {
+          $text: { $search: data.keyword },
+        },
+      });
+    }
+    if (data.longitude && data.latitude && !data.keyword) {
+      // sort = -1;
+      query.push({
+        $geoNear: {
+          near: {
+            type: 'Point',
+            coordinates: [
+              parseFloat(data.longitude),
+              parseFloat(data.latitude),
+            ],
+          },
+          distanceField: 'distanceFromMe',
+          /*** distance in miles ***/
+          distanceMultiplier: 0.000621371,
+
+          /*** maxdistance would set the range of 5 miles, 1609.34 = 1 mile ***/
+          maxDistance: 1609.34 * 5,
+          spherical: true,
+        },
+      });
+    }
     switch (data.postAudiencePreference) {
       case Constants.PUBLIC: {
         try {
-          return this.socialPostModel
-            .aggregate([
-              {
-                $match: {
-                  postAudiencePreference: 'PUBLIC',
-                },
-              },
-              ...pipeLine,
-            ])
-            .skip(offset)
-            .limit(limit);
+          const match = {
+            $match: {
+              postAudiencePreference: Constants.PUBLIC,
+            },
+          };
+          query.push(match);
+          const p = [
+            ...query,
+            ...pipeLine,
+            { $skip: offset },
+            { $limit: limit },
+          ];
+          console.log(p);
+          return this.socialPostModel.aggregate(p);
+          // return this.socialPostModel
+          //   .aggregate([
+          //     {
+          //       $match: {
+          //         postAudiencePreference: Constants.PUBLIC,
+          //       },
+          //     },
+          //     ...pipeLine,
+          //   ])
+          //   .skip(offset)
+          //   .limit(limit);
         } catch (e) {
           throw new HttpException(e.toString(), HttpStatus.BAD_REQUEST);
         }
       }
       case Constants.FOLLOWING: {
         try {
-          return this.socialPostModel
-            .aggregate([
-              {
-                $match: {
-                  userId: {
-                    $in: r,
-                  },
-                },
+          const match = {
+            $match: {
+              userId: {
+                $in: r,
               },
-              {
-                $match: {
-                  postAudiencePreference: {
-                    $ne: 'ONLY-ME',
-                  },
-                },
+            },
+          };
+          query.push(match);
+          const match1 = {
+            $match: {
+              postAudiencePreference: {
+                $ne: 'ONLY-ME',
               },
-              ...pipeLine,
-            ])
-            .skip(offset)
-            .limit(limit);
+            },
+          };
+          query.push(match1);
+          const p = [
+            ...query,
+            ...pipeLine,
+            { $skip: offset },
+            { $limit: limit },
+          ];
+          return this.socialPostModel.aggregate(p);
+          // return this.socialPostModel
+          //   .aggregate([
+          //     {
+          //       $match: {
+          //         userId: {
+          //           $in: r,
+          //         },
+          //       },
+          //     },
+          //     {
+          //       $match: {
+          //         postAudiencePreference: {
+          //           $ne: 'ONLY-ME',
+          //         },
+          //       },
+          //     },
+          //     ...pipeLine,
+          //   ])
+          //   .skip(offset)
+          //   .limit(limit);
         } catch (e) {
           throw new HttpException(e.toString(), HttpStatus.BAD_REQUEST);
         }
       }
-
       case Constants.MYPOSTS: {
         try {
           return this.socialPostModel.aggregate([
@@ -364,6 +430,7 @@ export class SocialPostsService {
           userId: '$userId',
           profileImage: '$user.profileImage',
           caption: 1,
+          location: 1,
           postAudiencePreference: 1,
           postType: 1,
           postLiked: {

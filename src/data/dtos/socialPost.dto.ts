@@ -33,6 +33,13 @@ export class SocialPostDto {
 }
 
 export class GetSocialPostDto {
+  @ApiProperty({ type: Number })
+  longitude: number;
+
+  @ApiProperty({ type: Number })
+  latitude: number;
+
+  @ApiProperty({ type: String })
   postAudiencePreference: string;
 
   @ApiProperty({ type: String, required: false })

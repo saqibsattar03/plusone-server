@@ -5,12 +5,14 @@ import {
   FollowingDocument,
 } from '../../data/schemas/following.schema';
 import mongoose, { Model } from 'mongoose';
+import { FollowerService } from '../follower/follower.service';
 
 @Injectable()
 export class FollowingService {
   constructor(
     @InjectModel(Following.name)
     private readonly followingModel: Model<FollowingDocument>,
+    private readonly followerService: FollowerService,
   ) {}
 
   async addFollowee(userId, followeeId): Promise<any> {
@@ -18,6 +20,7 @@ export class FollowingService {
     if (!res) {
       const user = await this.followingModel.create({ userId: userId });
       await user.updateOne({ $push: { followings: followeeId } });
+      await this.followerService.addFollower(followeeId, userId);
     } else if (res) {
       if (!res.followings.includes(followeeId)) {
         await this.followingModel.updateOne(
@@ -26,21 +29,29 @@ export class FollowingService {
             $push: { followings: followeeId },
           },
         );
+        await this.followerService.addFollower(followeeId, userId);
       } else
         throw new HttpException('already following', HttpStatus.BAD_REQUEST);
     }
     throw new HttpException('follwee added successfully', HttpStatus.OK);
   }
   async removeFollowee(userId, followeeId): Promise<any> {
-    console.log('followee id = ', followeeId);
+    console.log(' remove followee id = ', followeeId);
     const res = await this.followingModel.findOne({ userId: userId });
+    console.log(res);
     if (!res)
       throw new HttpException('no such user found', HttpStatus.NOT_FOUND);
     else if (res) {
+      const fId = new mongoose.Types.ObjectId(followeeId);
+      console.log('in else if condition');
       if (res.followings.includes(followeeId)) {
-        await this.followingModel.updateOne({
-          $pull: { followings: followeeId },
-        });
+        console.log('inside if following condition');
+        await this.followingModel.findOneAndUpdate(
+          { userId: userId },
+          {
+            $pull: { followings: fId },
+          },
+        );
       } else
         throw new HttpException('no such followee found', HttpStatus.NOT_FOUND);
     }

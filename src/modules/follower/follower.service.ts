@@ -11,6 +11,7 @@ export class FollowerService {
   ) {}
 
   async addFollower(userId, followerId): Promise<any> {
+    console.log('here in add follower');
     const res = await this.followerModel.findOne({ userId: userId });
     if (!res) {
       const user = await this.followerModel.create({
@@ -40,7 +41,7 @@ export class FollowerService {
     throw new HttpException('follower removed successfully', HttpStatus.OK);
   }
   async getAllFollowers(userId): Promise<any> {
-    console.log('user id  = ', userId);
+    console.log('user id dhjkhfdjkfhkdfhkdhfjd  = ', userId);
     const oid = new mongoose.Types.ObjectId(userId);
     return this.followerModel.aggregate([
       {
@@ -64,17 +65,58 @@ export class FollowerService {
         $unwind: '$followers',
       },
       {
+        $lookup: {
+          from: 'followings',
+          let: {
+            uId: new mongoose.Types.ObjectId(userId),
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$userId', '$$uId'],
+                },
+              },
+            },
+          ],
+          as: 'followed',
+        },
+      },
+      {
+        $unwind: {
+          path: '$followed',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
         $project: {
-          _id: '$followings._id',
+          _id: '$followers._id',
           firstname: '$followers.firstname',
           surname: '$followers.surname',
           username: '$followers.username',
           profileImage: '$followers.profileImage',
+          userFollowed: {
+            $cond: {
+              if: {
+                $in: ['$followers._id', '$followed.followings'],
+              },
+              then: true,
+              else: false,
+            },
+          },
+          // followed: {
+          //   $cond: {
+          //     if: {
+          //       $not: '$followed',
+          //     },
+          //     then: [],
+          //     else: '$followed',
+          //   },
+          // },
         },
       },
     ]);
   }
-
   async deleteAllFollowers(userId): Promise<any> {
     return this.followerModel.findOneAndDelete({ userId: userId });
   }

@@ -347,6 +347,7 @@ export class RestaurantService {
         { $limit: limit },
         { $sort: { location: sort ?? 1 } },
       ];
+      console.log('hjksdhskhdjkhdkj', pipeline);
       return this.restaurantModel.aggregate(pipeline);
     }
   }

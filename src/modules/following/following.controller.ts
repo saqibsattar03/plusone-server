@@ -1,4 +1,11 @@
-import { Controller, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  HttpException,
+  HttpStatus,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { FollowingService } from './following.service';
 import { Get, Request } from '@nestjs/common/decorators';
 import {
@@ -24,6 +31,11 @@ export class FollowingController {
   })
   @UseGuards(JwtAuthGuard)
   addFollowee(@Request() request, @Query('followeeId') followeeId) {
+    if (request.user.userId == followeeId)
+      throw new HttpException(
+        'you can not follow yourself',
+        HttpStatus.BAD_REQUEST,
+      );
     return this.followingService.addFollowee(request.user.userId, followeeId);
   }
 

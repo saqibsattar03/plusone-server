@@ -6,6 +6,7 @@ import {
   Following,
   FollowingSchema,
 } from '../../data/schemas/following.schema';
+import { FollowerModule } from '../follower/follower.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import {
         schema: FollowingSchema,
       },
     ]),
+    FollowerModule,
   ],
   controllers: [FollowingController],
   providers: [FollowingService],
