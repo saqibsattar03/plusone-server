@@ -36,16 +36,13 @@ export class FollowingService {
     throw new HttpException('follwee added successfully', HttpStatus.OK);
   }
   async removeFollowee(userId, followeeId): Promise<any> {
-    console.log(' remove followee id = ', followeeId);
     const res = await this.followingModel.findOne({ userId: userId });
-    console.log(res);
     if (!res)
       throw new HttpException('no such user found', HttpStatus.NOT_FOUND);
     else if (res) {
       const fId = new mongoose.Types.ObjectId(followeeId);
-      console.log('in else if condition');
+
       if (res.followings.includes(followeeId)) {
-        console.log('inside if following condition');
         await this.followingModel.findOneAndUpdate(
           { userId: userId },
           {

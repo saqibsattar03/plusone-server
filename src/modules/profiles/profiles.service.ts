@@ -92,8 +92,6 @@ export class ProfilesService {
     return this.profileModel.findById({ _id: userId }).select('rewardPoints');
   }
   async getSingleProfile(userId): Promise<any> {
-    console.log(userId);
-
     return this.profileModel.aggregate([
       {
         $match: {
@@ -114,40 +112,6 @@ export class ProfilesService {
           preserveNullAndEmptyArrays: true,
         },
       },
-      // {
-      //   $project: {
-      //     _id: 1,
-      //     username: 1,
-      //     firstname: 1,
-      //     surname: 1,
-      //     email: 1,
-      //     status: 1,
-      //     role: 1,
-      //     accountType: 1,
-      //     socialLinks: 1,
-      //     postAudiencePreference: 1,
-      //     dietRequirements: 1,
-      //     favoriteRestaurants: 1,
-      //     favoriteCuisines: 1,
-      //     favoriteChefs: 1,
-      //     rewardPoints: 1,
-      //     isPremium: 1,
-      //     accountHolderType: 1,
-      //     createdAt: 1,
-      //     updatedAt: 1,
-      //     scopes: 1,
-      //     __v: 1,
-      //     bio: 1,
-      //     estimatedSavings: 1,
-      //     following: {
-      //       $cond: {
-      //         if: { $eq: ['$following', []] },
-      //         then: null,
-      //         else: '$following',
-      //       },
-      //     },
-      //   },
-      // },
       {
         $lookup: {
           from: 'followers',
@@ -179,6 +143,7 @@ export class ProfilesService {
           email: 1,
           status: 1,
           role: 1,
+          profileImage: 1,
           accountType: 1,
           socialLinks: 1,
           postAudiencePreference: 1,
@@ -210,23 +175,6 @@ export class ProfilesService {
               $ifNull: ['$socialPost', []],
             },
           },
-          // followingCount: {
-          //   $size: '$following.followings',
-          // },
-          // followingCount: {
-          //   $ifNull: [
-          //     {
-          //       $size: '$following.followings',
-          //     },
-          //     0,
-          //   ],
-          // },
-          // followerCount: {
-          //   $size: '$follower.followers',
-          // },
-          // socialPostCount: {
-          //   $size: '$socialPost',
-          // },
         },
       },
     ]);
@@ -250,7 +198,6 @@ export class ProfilesService {
     return fetchedUser;
   }
   async updateProfile(data): Promise<any> {
-    console.log('data = ', data);
     const profile = await this.profileModel.findById({ _id: data.userId });
     if (!profile) throw new NotFoundException(' Profile does not exist');
     if (profile.role == Constants.USER && profile.status == Constants.PENDING)
@@ -266,7 +213,8 @@ export class ProfilesService {
           firstname: data.firstname,
           surname: data.surname,
           bio: data.bio,
-          socialLinks: data.socialLinks,
+          instagramLink: data.instagramLink,
+          tiktokLink: data.tiktokLink,
           profileImage: data.profileImage,
           favoriteRestaurants: data.favoriteRestaurants,
           favoriteCuisines: data.favoriteCuisines,
@@ -404,6 +352,7 @@ export class ProfilesService {
         HttpStatus.FORBIDDEN,
       );
   }
+
   /*** temporary route ***/
   async changeUserStatus(userId): Promise<any> {
     return this.profileModel.findOneAndUpdate(

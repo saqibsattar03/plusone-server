@@ -44,6 +44,9 @@ export class GetSocialPostDto {
 
   @ApiProperty({ type: String, required: false })
   userId: string;
+
+  @ApiProperty({ type: String })
+  keyword: string;
 }
 export class SocialPostResponseDto {
   @ApiProperty({ type: String })

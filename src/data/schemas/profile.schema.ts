@@ -44,7 +44,10 @@ export class Profile extends User {
   accountType: string;
 
   @Prop()
-  socialLinks: [string];
+  instagramLink: string;
+
+  @Prop()
+  tiktokLink: string;
 
   @Prop({
     type: String,
@@ -58,6 +61,7 @@ export class Profile extends User {
 
   @Prop()
   dietRequirements: [string];
+
   @Prop()
   favoriteRestaurants: [string];
 

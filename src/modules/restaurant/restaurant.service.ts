@@ -15,22 +15,35 @@ import { RestaurantDto } from '../../data/dtos/restaurant.dto';
 import { PaginationDto } from '../../common/auth/dto/pagination.dto';
 import { ProfilesService } from '../profiles/profiles.service';
 import * as moment from 'moment';
+import { Tag, TagDocument } from '../../data/schemas/tags.schema';
 
 @Injectable()
 export class RestaurantService {
   constructor(
     @InjectModel(Restaurant.name)
     private readonly restaurantModel: Model<RestaurantDocument>,
+    @InjectModel(Tag.name)
+    private readonly tagModel: Model<TagDocument>,
     @Inject(forwardRef(() => ProfilesService))
     private readonly profileService: ProfilesService,
   ) {}
 
-  async createRestaurant(restaurantDto: RestaurantDto): Promise<any> {
+  async createRestaurant(restaurantDto: any): Promise<any> {
+    const tags = await this.tagModel.find();
+    const tagsArray = [];
+    for (let i = 0; i < tags.length; i++) {
+      tagsArray.push(tags[i].tag);
+    }
+    for (let i = 0; i < restaurantDto.tags.length; i++) {
+      if (!tagsArray.includes(restaurantDto.tags[i])) {
+        await this.tagModel.create({ tag: restaurantDto.tags[i] });
+      }
+    }
     let uniqueCode = Math.floor(Math.random() * 5596 + 1249);
     const codeCheck = await this.restaurantModel.findOne({
       uniqueCode: uniqueCode,
     });
-    if (codeCheck) uniqueCode = Math.floor(Math.random() * 5596 + 1249);
+    if (codeCheck) uniqueCode = Math.floor(Math.random() * 8496 + 1949);
     const user = await this.profileService.createUser(restaurantDto);
     restaurantDto.userId = user._id;
     restaurantDto.uniqueCode = uniqueCode;
@@ -47,6 +60,7 @@ export class RestaurantService {
       .skip(offset)
       .limit(limit);
   }
+
   async getSingleRestaurantDetails(restaurantId): Promise<any> {
     const oid = new mongoose.Types.ObjectId(restaurantId);
     const pipeline = [
@@ -203,6 +217,7 @@ export class RestaurantService {
     const oid = new mongoose.Types.ObjectId(restaurantId);
     return this.restaurantModel.findById(oid);
   }
+
   async editRestaurant(restaurantId, data): Promise<RestaurantDocument> {
     return this.restaurantModel.findByIdAndUpdate(
       { _id: restaurantId },
@@ -234,12 +249,14 @@ export class RestaurantService {
       .lean()
       .select('reviewCount -_id');
   }
+
   async updateReviewCount(restaurantId, reviewCount): Promise<any> {
     return this.restaurantModel.findOneAndUpdate(
       { _id: restaurantId },
       { reviewCount: reviewCount },
     );
   }
+
   /*** til  here ***/
   async getRestaurantVerificationCode(
     restaurantId,
@@ -252,6 +269,7 @@ export class RestaurantService {
       })
       .select('uniqueCode -_id');
   }
+
   async restaurantFilters(data, paginationQuery): Promise<any> {
     const fieldName = 'reviewObject';
     const lookupAndProjectStage =
@@ -322,7 +340,6 @@ export class RestaurantService {
       !data.latitude &&
       !data.dietaryRestrictions
     ) {
-      console.log('here no filter found');
       return this.getAllRestaurants(paginationQuery);
     } else {
       if (query.length > 0) {
@@ -347,10 +364,10 @@ export class RestaurantService {
         { $limit: limit },
         { $sort: { location: sort ?? 1 } },
       ];
-      console.log('hjksdhskhdjkhdkj', pipeline);
       return this.restaurantModel.aggregate(pipeline);
     }
   }
+
   async depositMoney(restaurantId, amount): Promise<any> {
     const res = await this.restaurantModel.findById({ _id: restaurantId });
     if (!res)
@@ -367,28 +384,6 @@ export class RestaurantService {
       },
     });
     return res;
-  }
-  async addTotalSalesAndDeductions(
-    estimatedCost: number,
-    restaurantId,
-  ): Promise<any> {
-    const res = await this.restaurantModel.findById({ _id: restaurantId });
-    if (!res)
-      throw new HttpException(
-        'No Such Restaurant Found',
-        HttpStatus.BAD_REQUEST,
-      );
-    const totalSales = res.totalSales + estimatedCost;
-    const percent = 0.1 * estimatedCost;
-    const totalDeductions = res.totalDeductions + percent;
-    const availableDeposit = res.availableDeposit - percent;
-    return res.update({
-      $set: {
-        totalSales: totalSales,
-        totalDeductions: totalDeductions,
-        availableDeposit: availableDeposit,
-      },
-    });
   }
 
   generateLookupAndProjectStageForRestaurantFilter(fieldName) {
@@ -476,6 +471,15 @@ export class RestaurantService {
     ];
   }
 
+  async filterByRestaurantName(restaurantName: string): Promise<any> {
+    const regex = new RegExp(restaurantName, 'i');
+    return this.restaurantModel
+      .find({ restaurantName: regex })
+      .select('_id restaurantName description profileImage');
+  }
+
+  /*** accounts module routes below ***/
+
   async adminStats(): Promise<any> {
     return this.restaurantModel.aggregate([
       {
@@ -490,10 +494,32 @@ export class RestaurantService {
     ]);
   }
 
-  async filterByRestaurantName(restaurantName: string): Promise<any> {
-    const regex = new RegExp(restaurantName, 'i');
+  async addTotalSalesAndDeductions(
+    estimatedCost: number,
+    restaurantId,
+  ): Promise<any> {
+    const res = await this.restaurantModel.findById({ _id: restaurantId });
+    if (!res)
+      throw new HttpException(
+        'No Such Restaurant Found',
+        HttpStatus.BAD_REQUEST,
+      );
+    const totalSales = res.totalSales + estimatedCost;
+    const percent = 0.1 * estimatedCost;
+    const totalDeductions = res.totalDeductions + percent;
+    const availableDeposit = res.availableDeposit - percent;
+    return res.update({
+      $set: {
+        totalSales: totalSales,
+        totalDeductions: totalDeductions,
+        availableDeposit: availableDeposit,
+      },
+    });
+  }
+
+  async getAvailableRestaurantBalance(restaurantId): Promise<any> {
     return this.restaurantModel
-      .find({ restaurantName: regex })
-      .select('_id restaurantName description profileImage');
+      .findById(restaurantId)
+      .select('availableDeposit');
   }
 }

@@ -59,8 +59,8 @@ export class FollowerController {
   @ApiBadRequestResponse({
     description: 'could not fetch the Followers',
   })
-  @UseGuards(JwtAuthGuard)
-  getAllFollowers(@Request() request) {
-    return this.followerService.getAllFollowers(request.user.userId);
+  // @UseGuards(JwtAuthGuard)
+  getAllFollowers(@Query('userId') userId) {
+    return this.followerService.getAllFollowers(userId);
   }
 }

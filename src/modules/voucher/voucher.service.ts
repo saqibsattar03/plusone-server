@@ -277,6 +277,13 @@ export class VoucherService {
           data.userId,
           voucher[0].voucherObject.estimatedSavings,
         );
+        const availableBalance =
+          await this.restaurantService.getAvailableRestaurantBalance(
+            data.restaurantId,
+          );
+        if (availableBalance < 50) {
+          // todo: send email to recharge //
+        }
         return res.verificationCode;
       } else
         throw new HttpException(

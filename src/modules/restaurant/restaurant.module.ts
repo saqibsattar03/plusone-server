@@ -7,6 +7,7 @@ import {
   RestaurantSchema,
 } from '../../data/schemas/restaurant.schema';
 import { ProfilesModule } from '../profiles/profiles.module';
+import { Tag, TagSchema } from '../../data/schemas/tags.schema';
 
 @Module({
   imports: [
@@ -14,6 +15,10 @@ import { ProfilesModule } from '../profiles/profiles.module';
       {
         name: Restaurant.name,
         schema: RestaurantSchema,
+      },
+      {
+        name: Tag.name,
+        schema: TagSchema,
       },
     ]),
     forwardRef(() => ProfilesModule),

@@ -65,11 +65,18 @@ export class ProfileDto {
   };
 
   @ApiProperty({
-    type: () => [String],
-    description: 'Links of other social media account',
-    example: '["www.tiktok.com"]',
+    type: () => String,
+    description: 'Link of Instagram account',
+    example: 'www.instagram.com',
   })
-  socialLinks: string[];
+  instagramLink: string;
+
+  @ApiProperty({
+    type: () => String,
+    description: 'Link of tiktok account',
+    example: 'www.tiktok.com',
+  })
+  tiktokLink: string;
 
   @ApiProperty({
     type: () => [String],
@@ -116,6 +123,7 @@ export class ProfileDto {
 
   @ApiProperty()
   createdAt: Date;
+
   @ApiProperty()
   updatedAt: Date;
 
@@ -131,39 +139,6 @@ export class ProfileDto {
   @ApiProperty({ type: Number, default: 0 })
   socialPostCount: number;
 }
-
-// export class UserDto {
-//   @ApiProperty({ description: 'First Name' })
-//   @IsNotEmpty()
-//   firstName: string;
-//
-//   @ApiProperty({ description: 'Sur Name' })
-//   @IsNotEmpty()
-//   surName: string;
-//
-//   @ApiProperty({ description: 'user Name' })
-//   @IsNotEmpty()
-//   userName: string;
-//
-//   @ApiProperty({ description: 'email' })
-//   @IsNotEmpty()
-//   email: string;
-//
-//   @ApiProperty({ description: 'Password' })
-//   @IsNotEmpty()
-//   password: string;
-//
-//   @ApiProperty()
-//   accountHolderType: string;
-//
-//   @ApiProperty({
-//     type: String,
-//     enum: ['USER', 'ADMIN', 'MERCHANT'],
-//     default: 'USER',
-//   })
-//   role: string;
-// }
-
 export class UpdateProfileDto {
   @ApiProperty({ description: 'Bio', type: String })
   bio: { type: 'string' };
@@ -176,10 +151,19 @@ export class UpdateProfileDto {
   accountType: string;
 
   @ApiProperty({
-    description: 'Other Social media account links',
-    type: [String],
+    type: () => String,
+    description: 'Link of Instagram account',
+    example: 'www.instagram.com',
   })
-  socialLinks: [string];
+  instagramLink: string;
+
+  @ApiProperty({
+    type: () => String,
+    description: 'Link of tiktok account',
+    example: 'www.tiktok.com',
+  })
+  tiktokLink: string;
+
   @ApiProperty({
     description: 'Favorite Restaurants',
     type: [String],

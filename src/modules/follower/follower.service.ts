@@ -11,7 +11,6 @@ export class FollowerService {
   ) {}
 
   async addFollower(userId, followerId): Promise<any> {
-    console.log('here in add follower');
     const res = await this.followerModel.findOne({ userId: userId });
     if (!res) {
       const user = await this.followerModel.create({
@@ -41,7 +40,6 @@ export class FollowerService {
     throw new HttpException('follower removed successfully', HttpStatus.OK);
   }
   async getAllFollowers(userId): Promise<any> {
-    console.log('user id dhjkhfdjkfhkdfhkdhfjd  = ', userId);
     const oid = new mongoose.Types.ObjectId(userId);
     return this.followerModel.aggregate([
       {

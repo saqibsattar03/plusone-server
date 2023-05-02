@@ -55,14 +55,17 @@ export class SocialPostsService {
     const r = followingsArray.flat();
     const query = [];
 
-    if (data.keyword) {
+    if (data.caption) {
       query.push({
         $match: {
-          $text: { $search: data.keyword },
+          caption: {
+            $regex: data.caption.toString(),
+            $options: 'i', // case-insensitive search
+          },
         },
       });
     }
-    if (data.longitude && data.latitude && !data.keyword) {
+    if (data.longitude && data.latitude && !data.caption) {
       // sort = -1;
       query.push({
         $geoNear: {
@@ -98,7 +101,6 @@ export class SocialPostsService {
             { $skip: offset },
             { $limit: limit },
           ];
-          console.log(p);
           return this.socialPostModel.aggregate(p);
           // return this.socialPostModel
           //   .aggregate([
@@ -183,13 +185,13 @@ export class SocialPostsService {
   async getSinglePost(postId): Promise<PostDocument> {
     return this.socialPostModel.findById(postId);
   }
-  async getAllPostsOfSingleUser(paginationDto, userId): Promise<any> {
-    const { limit, offset } = paginationDto;
-    // return this.socialPostModel
-    //   .find({ userId: userId })
-    //   .skip(offset)
-    //   .limit(limit);
-  }
+  // async getAllPostsOfSingleUser(paginationDto, userId): Promise<any> {
+  //   const { limit, offset } = paginationDto;
+  //   // return this.socialPostModel
+  //   //   .find({ userId: userId })
+  //   //   .skip(offset)
+  //   //   .limit(limit);
+  // }
   async updatePost(
     userId,
     updatePostDto: UpdateSocialPost,
@@ -228,7 +230,6 @@ export class SocialPostsService {
     await this.socialPostModel.deleteMany({ userId: userId });
   }
   async likePost(userId, postId): Promise<LikedPostDocument> {
-    console.log('liked');
     const res = await this.postLikedModel.findOne({ postId: postId });
     if (!res) {
       const post = await this.postLikedModel.create({ postId: postId });
@@ -255,7 +256,6 @@ export class SocialPostsService {
     throw new HttpException('post liked successfully', HttpStatus.OK);
   }
   async removeLike(userId, postId): Promise<any> {
-    console.log('like removed');
     const res = await this.postLikedModel.findOne({ postId: postId });
     if (!res) throw new HttpException('no post found', HttpStatus.NOT_FOUND);
     if (res) {
@@ -427,6 +427,8 @@ export class SocialPostsService {
       {
         $project: {
           username: '$user.username',
+          firstname: '$user.firstname',
+          surname: '$user.surname',
           userId: '$userId',
           profileImage: '$user.profileImage',
           caption: 1,

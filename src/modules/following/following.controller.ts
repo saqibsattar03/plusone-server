@@ -17,6 +17,7 @@ import {
 } from '@nestjs/swagger';
 import { FollowResponse } from '../../data/dtos/following.dto';
 import { JwtAuthGuard } from '../../common/auth/guards/jwt-auth.guard';
+import { query } from 'express';
 
 @ApiTags('Followings')
 @Controller('followee')
@@ -48,7 +49,6 @@ export class FollowingController {
   })
   @UseGuards(JwtAuthGuard)
   removeFollowee(@Request() request, @Query('followeeId') followeeId) {
-    console.log('user Id = ', request.user.userId);
     return this.followingService.removeFollowee(
       request.user.userId,
       followeeId,
@@ -64,8 +64,8 @@ export class FollowingController {
   @ApiBadRequestResponse({
     description: 'could not fetch the Followings',
   })
-  @UseGuards(JwtAuthGuard)
-  getAllFollowings(@Request() request) {
-    return this.followingService.getAllFollowings(request.user.userId);
+  // @UseGuards(JwtAuthGuard)
+  getAllFollowings(@Query('userId') userId) {
+    return this.followingService.getAllFollowings(userId);
   }
 }

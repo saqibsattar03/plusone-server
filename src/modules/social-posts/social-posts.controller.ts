@@ -67,19 +67,19 @@ export class SocialPostsController {
     return this.socialPostService.getAllPost(paginationDto, data);
   }
 
-  @ApiParam({ type: String, name: 'userId' })
-  @ApiCreatedResponse({ type: SocialPostDto })
-  @ApiBadRequestResponse({ description: 'can not fetch posts' })
-  @Get('all/:userId')
-  getAllPostsOfSingleUser(
-    @Query() paginationDto: PaginationDto,
-    @Param('userId') userId,
-  ) {
-    return this.socialPostService.getAllPostsOfSingleUser(
-      paginationDto,
-      userId,
-    );
-  }
+  // @ApiParam({ type: String, name: 'userId' })
+  // @ApiCreatedResponse({ type: SocialPostDto })
+  // @ApiBadRequestResponse({ description: 'can not fetch posts' })
+  // @Get('all/:userId')
+  // getAllPostsOfSingleUser(
+  //   @Query() paginationDto: PaginationDto,
+  //   @Param('userId') userId,
+  // ) {
+  //   return this.socialPostService.getAllPostsOfSingleUser(
+  //     paginationDto,
+  //     userId,
+  //   );
+  // }
 
   /***Retrieve Single Post Route***/
 

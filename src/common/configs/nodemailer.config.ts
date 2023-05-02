@@ -13,7 +13,7 @@ const pass = authConfig.pass;
 // });
 
 // export const sendConfirmationEmail = (email, confirmationCode) => {
-//   console.log('check');
+//
 //   transport
 //     .sendMail({
 //       from: user,

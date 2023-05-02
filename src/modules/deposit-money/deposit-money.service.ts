@@ -62,7 +62,7 @@ export class DepositMoneyService {
     }
   }
 
-  async sumOfDepositedAmountOfSingleRestaurant(restaurantId): Promise<any> {
+  async sumOfDepositedAmountBySingleRestaurant(restaurantId): Promise<any> {
     const oid = new mongoose.Types.ObjectId(restaurantId);
     return this.depositMoneyModel.aggregate([
       {
@@ -84,7 +84,7 @@ export class DepositMoneyService {
     ]);
   }
 
-  async sumOfDepositedAmountOfAllRestaurant(): Promise<any> {
+  async sumOfDepositedAmountByAllRestaurant(): Promise<any> {
     return this.depositMoneyModel.aggregate([
       {
         $unwind: '$depositObject',
@@ -98,5 +98,9 @@ export class DepositMoneyService {
         },
       },
     ]);
+  }
+
+  async depositHistory(restaurantId): Promise<any> {
+    return this.depositMoneyModel.findOne({ restaurantId });
   }
 }
