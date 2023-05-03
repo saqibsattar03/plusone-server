@@ -208,7 +208,7 @@ export class SocialPostsService {
     return this.socialPostModel.findByIdAndUpdate(
       updatePostDto.postId,
       updatePostDto,
-      { returnDocument: 'after' },
+      { new: true },
     );
   }
   async deleteSinglePost(userId, postId): Promise<PostDocument> {

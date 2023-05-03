@@ -36,19 +36,21 @@ export class FollowingService {
     throw new HttpException('follwee added successfully', HttpStatus.OK);
   }
   async removeFollowee(userId, followeeId): Promise<any> {
+    console.log('here remove followee');
     const res = await this.followingModel.findOne({ userId: userId });
     if (!res)
       throw new HttpException('no such user found', HttpStatus.NOT_FOUND);
     else if (res) {
       const fId = new mongoose.Types.ObjectId(followeeId);
-
       if (res.followings.includes(followeeId)) {
+        console.log('here res found');
         await this.followingModel.findOneAndUpdate(
           { userId: userId },
           {
             $pull: { followings: fId },
           },
         );
+        await this.followerService.removeFollower(followeeId, userId);
       } else
         throw new HttpException('no such followee found', HttpStatus.NOT_FOUND);
     }

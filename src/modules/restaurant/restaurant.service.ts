@@ -16,6 +16,7 @@ import { PaginationDto } from '../../common/auth/dto/pagination.dto';
 import { ProfilesService } from '../profiles/profiles.service';
 import * as moment from 'moment';
 import { Tag, TagDocument } from '../../data/schemas/tags.schema';
+import { Constants } from '../../common/constants';
 
 @Injectable()
 export class RestaurantService {
@@ -238,7 +239,7 @@ export class RestaurantService {
           locationName: data.locationName,
         },
       },
-      { returnDocument: 'after' },
+      { new: true },
     );
   }
 
@@ -475,6 +476,7 @@ export class RestaurantService {
     const regex = new RegExp(restaurantName, 'i');
     return this.restaurantModel
       .find({ restaurantName: regex })
+      .where({ status: Constants.ACTIVE })
       .select('_id restaurantName description profileImage');
   }
 

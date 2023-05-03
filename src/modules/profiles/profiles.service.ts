@@ -15,6 +15,7 @@ import { RestaurantReviewService } from '../restaurant-review/restaurant-review.
 import { RestaurantService } from '../restaurant/restaurant.service';
 import * as bcrypt from 'bcrypt';
 import { Constants } from '../../common/constants';
+import { generateToken } from '../../common/utils/generateToken';
 
 @Injectable()
 export class ProfilesService {
@@ -46,12 +47,6 @@ export class ProfilesService {
     });
     if (user)
       throw new HttpException('Email already exist', HttpStatus.UNAUTHORIZED);
-    const characters =
-      '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    let token = '';
-    for (let i = 0; i < 25; i++) {
-      token += characters[Math.floor(Math.random() * characters.length)];
-    }
     const newUser = new this.profileModel({
       firstname: userDto.firstname,
       surname: userDto.surname,
@@ -62,7 +57,7 @@ export class ProfilesService {
       role: userDto.role,
       scopes: userDto.scopes,
       status: userDto.status,
-      confirmationCode: token,
+      confirmationCode: await generateToken(),
     });
     await newUser.save();
     if (newUser.role == Constants.MERCHANT) return newUser;
@@ -146,6 +141,8 @@ export class ProfilesService {
           profileImage: 1,
           accountType: 1,
           socialLinks: 1,
+          tiktokLink: 1,
+          instagramLink: 1,
           postAudiencePreference: 1,
           dietRequirements: 1,
           favoriteRestaurants: 1,
@@ -225,7 +222,7 @@ export class ProfilesService {
         },
       },
       {
-        returnDocument: 'after',
+        new: true,
       },
     );
   }
@@ -358,13 +355,14 @@ export class ProfilesService {
     return this.profileModel.findOneAndUpdate(
       { _id: userId },
       { status: 'ACTIVE' },
-      { returnDocument: 'after' },
+      { new: true },
     );
   }
   async filterUserByName(username): Promise<any> {
     const regex = new RegExp(username, 'i');
     return this.profileModel
       .find({ username: regex })
+      .where({ role: Constants.USER })
       .select('_id username firstname surname profileImage');
   }
 }

@@ -47,12 +47,9 @@ export class FollowingController {
   @ApiBadRequestResponse({
     description: 'could not unfollow the user',
   })
-  @UseGuards(JwtAuthGuard)
-  removeFollowee(@Request() request, @Query('followeeId') followeeId) {
-    return this.followingService.removeFollowee(
-      request.user.userId,
-      followeeId,
-    );
+  // @UseGuards(JwtAuthGuard)
+  removeFollowee(@Query('userId') userId, @Query('followeeId') followeeId) {
+    return this.followingService.removeFollowee(userId, followeeId);
   }
 
   @Get('all')

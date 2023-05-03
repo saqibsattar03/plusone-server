@@ -212,7 +212,7 @@ export class VoucherService {
           'voucherObject.$.voucherImage': data.voucherObject.voucherImage,
         },
       },
-      { returnDocument: 'after' },
+      { new: true },
     );
   }
   async disableVoucherForSpecificDays(data): Promise<any> {
@@ -230,7 +230,7 @@ export class VoucherService {
             'voucherObject.$.voucherDisableDates': dates,
           },
         },
-        { returnDocument: 'after' },
+        { new: true },
       );
       return 'voucher disabled';
     } catch (e) {

@@ -27,7 +27,7 @@ export class QuoteService {
       {
         quoteText: quoteDto.quoteText,
       },
-      { returnDocument: 'after' },
+      { new: true },
     );
   }
 

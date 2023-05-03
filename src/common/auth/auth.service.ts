@@ -14,6 +14,7 @@ import {
   ForgotPasswordDocument,
 } from '../../data/schemas/forgotPassword.schema';
 import { Model } from 'mongoose';
+import { generateToken } from '../utils/generateToken';
 
 @Injectable()
 export class AuthService {
@@ -69,17 +70,10 @@ export class AuthService {
     const user = await this.profileService.getUser(email);
     if (!user) throw new HttpException('user Not Found', HttpStatus.NOT_FOUND);
     let token = await this.forgotModel.findOne({ userId: user._id });
-    const characters =
-      '0123456789abcdefghijklmnopqrstuvwxyz*-+/+!@#$%^&*}{)(|~ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    let generateToken = '';
-    for (let i = 0; i < 25; i++) {
-      generateToken +=
-        characters[Math.floor(Math.random() * characters.length)];
-    }
     if (!token) {
       token = await new this.forgotModel({
         userId: user._id,
-        token: generateToken,
+        token: generateToken(),
       }).save();
     }
     // *** send this link to email service ***//
