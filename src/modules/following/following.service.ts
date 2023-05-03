@@ -14,7 +14,6 @@ export class FollowingService {
     private readonly followingModel: Model<FollowingDocument>,
     private readonly followerService: FollowerService,
   ) {}
-
   async addFollowee(userId, followeeId): Promise<any> {
     const res = await this.followingModel.findOne({ userId: userId });
     if (!res) {
