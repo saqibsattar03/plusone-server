@@ -30,7 +30,6 @@ export class FollowerService {
     throw new HttpException('Follower Added Successfully', HttpStatus.OK);
   }
   async removeFollower(userId, followerId): Promise<any> {
-    console.log('userId = ', userId);
     const res = await this.followerModel.findOne({ userId: userId });
     if (!res) throw new HttpException('no user found', HttpStatus.NOT_FOUND);
     else if (res) {
@@ -41,16 +40,12 @@ export class FollowerService {
             $pull: { followers: new mongoose.Types.ObjectId(followerId) },
           },
         );
-        // await this.followerModel.updateOne({
-        //   $pull: { followers: new mongoose.Types.ObjectId(followerId) },
-        // });
       } else
         throw new HttpException('no such follower found', HttpStatus.NOT_FOUND);
     }
     throw new HttpException('follower removed successfully', HttpStatus.OK);
   }
   async getAllFollowers(userId): Promise<any> {
-    console.log('here followers route called');
     const oid = new mongoose.Types.ObjectId(userId);
     return this.followerModel.aggregate([
       {
@@ -121,15 +116,6 @@ export class FollowerService {
               },
             },
           },
-          // userFollowed: {
-          //   $cond: {
-          //     if: {
-          //       $in: ['$followers._id', '$followed.followings'],
-          //     },
-          //     then: true,
-          //     else: false,
-          //   },
-          // },
         },
       },
     ]);
