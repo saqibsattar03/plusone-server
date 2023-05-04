@@ -73,7 +73,7 @@ export class AuthService {
     if (!token) {
       token = await new this.forgotModel({
         userId: user._id,
-        token: generateToken(),
+        token: await generateToken(),
       }).save();
     }
     // *** send this link to email service ***//
