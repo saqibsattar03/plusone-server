@@ -34,6 +34,18 @@ export class FollowingService {
     }
     throw new HttpException('follwee added successfully', HttpStatus.OK);
   }
+
+  async SingleUserFollowCheck(currentUser, searchedUser): Promise<any> {
+    const res = await this.followingModel.findOne({ userId: currentUser });
+    if (!res) throw new HttpException('invalid user', HttpStatus.BAD_REQUEST);
+    const arr = res.followings.map((id) => id.toString());
+    console.log('arr = ', arr);
+    console.log('userId2 = ', new mongoose.Types.ObjectId(searchedUser));
+
+    const followed = arr.some((id) => id === searchedUser);
+
+    return followed ? { followed: true } : { followed: false };
+  }
   async removeFollowee(userId, followeeId): Promise<any> {
     console.log('here remove followee');
     const res = await this.followingModel.findOne({ userId: userId });

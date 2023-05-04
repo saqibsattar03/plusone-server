@@ -51,6 +51,9 @@ export class RestaurantService {
     return await this.restaurantModel.create(restaurantDto);
   }
 
+  async getAllTags(): Promise<any> {
+    return this.tagModel.find().select('tag');
+  }
   async getAllRestaurants(paginationDto: PaginationDto): Promise<any> {
     const fieldName = 'reviewObject';
     const lookupAndProjectStage =
@@ -114,6 +117,8 @@ export class RestaurantService {
       {
         $project: {
           restaurantName: '$restaurantName',
+          description: '$description',
+          location: '$location',
           profileImage: '$profileImage',
           reviews: {
             $ifNull: ['$review', null],
@@ -155,6 +160,8 @@ export class RestaurantService {
         $project: {
           restaurantName: 1,
           profileImage: 1,
+          description: 1,
+          location: 1,
           reviews: 1,
           vouchers: {
             $cond: {
@@ -192,6 +199,12 @@ export class RestaurantService {
           },
           profileImage: {
             $first: '$profileImage',
+          },
+          description: {
+            $first: '$description',
+          },
+          location: {
+            $first: '$location',
           },
           reviews: {
             $first: '$reviews',
@@ -376,8 +389,8 @@ export class RestaurantService {
         'No Such Restaurant Found',
         HttpStatus.BAD_REQUEST,
       );
-    const totalDeposit = res.totalDeposit + amount;
-    const availableDeposit = res.availableDeposit + amount;
+    const totalDeposit = res.totalDeposit + parseInt(amount);
+    const availableDeposit = res.availableDeposit + parseInt(amount);
     await res.update({
       $set: {
         totalDeposit: totalDeposit,

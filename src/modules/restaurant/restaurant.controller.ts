@@ -15,6 +15,8 @@ import {
 } from '../../data/dtos/restaurant.dto';
 import { ProfileDto } from '../../data/dtos/profile.dto';
 import { PaginationDto } from '../../common/auth/dto/pagination.dto';
+import { Types } from 'mongoose';
+
 @ApiTags('Restaurants')
 @Controller('restaurant')
 export class RestaurantController {
@@ -32,6 +34,20 @@ export class RestaurantController {
   @ApiBadRequestResponse({ description: 'can not create Restaurant' })
   createRestaurant(@Body() data) {
     return this.restaurantService.createRestaurant(data);
+  }
+
+  @Get('all-tags')
+  @ApiCreatedResponse({
+    schema: {
+      type: 'object',
+      properties: {
+        _id: { type: 'string' },
+        tag: { type: 'string' },
+      },
+    },
+  })
+  getAllTags() {
+    return this.restaurantService.getAllTags();
   }
 
   @Get('get-all')

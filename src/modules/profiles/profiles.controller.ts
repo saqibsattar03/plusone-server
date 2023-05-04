@@ -125,6 +125,7 @@ export class ProfilesController {
   @UseGuards(JwtAuthGuard)
   changePassword(@Request() request, @Body() data) {
     data.userId = request.user.userId;
+    console.log('data = ', data);
     return this.profileService.changePassword(data);
   }
 

@@ -40,6 +40,22 @@ export class FollowingController {
     return this.followingService.addFollowee(request.user.userId, followeeId);
   }
 
+  @Get('get-single')
+  @ApiQuery({ type: String, name: 'currentUser' })
+  @ApiQuery({ type: String, name: 'searchedUser' })
+  @ApiResponse({
+    description:
+      'it will return if user followed otherwise it will return false',
+  })
+  SingleUserFollowCheck(
+    @Query('currentUser') currentUser,
+    @Query('searchedUser') searchedUser,
+  ) {
+    return this.followingService.SingleUserFollowCheck(
+      currentUser,
+      searchedUser,
+    );
+  }
   @Post('remove')
   @ApiBearerAuth('access-token')
   @ApiQuery({ name: 'followeeId', type: String })
@@ -51,7 +67,6 @@ export class FollowingController {
   removeFollowee(@Query('userId') userId, @Query('followeeId') followeeId) {
     return this.followingService.removeFollowee(userId, followeeId);
   }
-
   @Get('all')
   @ApiQuery({ name: 'userId', type: String })
   @ApiResponse({

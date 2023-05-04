@@ -67,7 +67,6 @@ export class ProfilesService {
       HttpStatus.OK,
     );
   }
-
   async verifyUser(confirmationCode: string): Promise<any> {
     const verified = await this.profileModel.findOne({
       confirmationCode: confirmationCode,
@@ -82,7 +81,6 @@ export class ProfilesService {
         HttpStatus.BAD_REQUEST,
       );
   }
-
   async getUserRewardPoints(userId): Promise<ProfileDocument> {
     return this.profileModel.findById({ _id: userId }).select('rewardPoints');
   }
@@ -323,7 +321,10 @@ export class ProfilesService {
   // return null;
   // }
   async changePassword(data): Promise<any> {
-    const user = await this.profileModel.findOne({ _id: data.userId });
+    const user = await this.profileModel
+      .findOne({ _id: data.userId })
+      .select('password');
+    console.log('user = ', user);
     if (!user) throw new HttpException('use not found', HttpStatus.NOT_FOUND);
     const isValidPassword = await bcrypt.compare(
       data.oldPassword,
