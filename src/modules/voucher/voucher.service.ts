@@ -7,7 +7,6 @@ import {
   RedeemVoucher,
   RedeemVoucherDocument,
 } from '../../data/schemas/redeemVoucher.schema';
-
 import { RestaurantService } from '../restaurant/restaurant.service';
 import { ProfilesService } from '../profiles/profiles.service';
 import { Constants } from '../../common/constants';
@@ -126,7 +125,6 @@ export class VoucherService {
     }
     throw new HttpException('voucher created Successfully', HttpStatus.OK);
   }
-
   async createVoucherForBoth(voucherDto: VoucherDto): Promise<any> {
     const oid = new mongoose.Types.ObjectId(voucherDto.voucherObject._id);
     // let voucherCode = Math.floor(Math.random() * 5596 + 1249);
@@ -181,7 +179,6 @@ export class VoucherService {
     }
     throw new HttpException('voucher created Successfully', HttpStatus.OK);
   }
-
   async getSingleVoucher(voucherId): Promise<any> {
     const oid = new mongoose.Types.ObjectId(voucherId);
     return this.voucherModel.aggregate([
@@ -252,13 +249,10 @@ export class VoucherService {
           verificationCode: verificationCode,
         });
         const oid = new mongoose.Types.ObjectId(data.voucherId);
-        const rPoints = await this.profileService.getUserRewardPoints(
-          data.userId,
-        );
-        await this.profileService.updateRewardPoints(
-          data.userId,
-          rPoints.rewardPoints + 1,
-        );
+        const rPoints =
+          await this.profileService.getUserRewardPointsOrEstimatedSavings(
+            data.userId,
+          );
         const voucher = await this.voucherModel.aggregate([
           {
             $unwind: '$voucherObject',
@@ -273,9 +267,11 @@ export class VoucherService {
           voucher[0].voucherObject.estimatedCost,
           data.restaurantId,
         );
-        await this.profileService.updatedEstimatedSavings(
-          data.userId,
-          voucher[0].voucherObject.estimatedSavings,
+        await this.profileService.updateProfile(
+          data,
+          rPoints.estimatedSavings +
+            parseInt(voucher[0].voucherObject.estimatedSavings),
+          rPoints.rewardPoints + 1,
         );
         const availableBalance =
           await this.restaurantService.getAvailableRestaurantBalance(
@@ -369,7 +365,6 @@ export class VoucherService {
     const oid = new mongoose.Types.ObjectId(voucherId);
     return this.redeemVoucherModel.find({ voucherId: oid });
   }
-
   createVoucherUpdateOperation(oid, voucherDto) {
     return {
       $push: {
@@ -388,7 +383,6 @@ export class VoucherService {
       },
     };
   }
-
   // async getAllRedeemedVouchers(restaurantId): Promise<any> {
   //   const oid = new mongoose.Types.ObjectId(restaurantId);
   //   if (restaurantId) {

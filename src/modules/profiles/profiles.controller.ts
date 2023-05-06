@@ -41,16 +41,8 @@ export class ProfilesController {
   async createUser(@Body() data) {
     return this.profileService.createUser(data);
   }
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        email: { type: 'string' },
-        password: { type: 'string' },
-      },
-    },
-  })
-  @Get('verify-account')
+
+  @Patch('verify-account')
   verifyUser(@Query('confirmationCode') confirmationCode) {
     return this.profileService.verifyUser(confirmationCode);
   }

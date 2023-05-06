@@ -13,9 +13,12 @@ import { FollowerService } from '../follower/follower.service';
 import { SocialPostsService } from '../social-posts/social-posts.service';
 import { RestaurantReviewService } from '../restaurant-review/restaurant-review.service';
 import { RestaurantService } from '../restaurant/restaurant.service';
-import * as bcrypt from 'bcrypt';
 import { Constants } from '../../common/constants';
 import { generateToken } from '../../common/utils/generateToken';
+import {
+  comparePassword,
+  hashPassword,
+} from '../../common/utils/passwordHashing';
 
 @Injectable()
 export class ProfilesService {
@@ -30,23 +33,24 @@ export class ProfilesService {
   ) {}
 
   async createUser(userDto: any) {
-    const saltOrRounds = 10;
-    userDto.password = await bcrypt.hash(userDto.password, saltOrRounds);
+    userDto.password = await hashPassword(userDto.password);
     if (userDto.role == Constants.ADMIN || userDto.role == Constants.MERCHANT)
       userDto.accountHolderType = null;
-    const userName = await this.profileModel.findOne({
-      username: userDto.username,
+    const existingUser = await this.profileModel.findOne({
+      $or: [{ username: userDto.username }, { email: userDto.email }],
     });
-    if (userName)
-      throw new HttpException(
-        'A user with this email already exists.',
-        HttpStatus.UNAUTHORIZED,
-      );
-    const user = await this.profileModel.findOne({
-      email: userDto.email,
-    });
-    if (user)
-      throw new HttpException('Email already exist', HttpStatus.UNAUTHORIZED);
+    if (existingUser) {
+      if (existingUser.username === userDto.username)
+        throw new HttpException(
+          'A user with this Username already exists',
+          HttpStatus.UNAUTHORIZED,
+        );
+      else
+        throw new HttpException(
+          'A user with this Email already exists',
+          HttpStatus.UNAUTHORIZED,
+        );
+    }
     const newUser = new this.profileModel({
       firstname: userDto.firstname,
       surname: userDto.surname,
@@ -72,8 +76,16 @@ export class ProfilesService {
       confirmationCode: confirmationCode,
     });
     if (verified) {
-      await verified.updateOne({ status: Constants.ACTIVE });
-      await verified.updateOne({ confirmationCode: null });
+      await this.profileModel.updateOne(
+        { confirmationCode: confirmationCode },
+        {
+          $set: {
+            status: Constants.ACTIVE,
+            confirmationCode: null,
+          },
+        },
+      );
+      // await verified.updateOne({ confirmationCode: null });
       throw new HttpException('Account Activated Successfully', HttpStatus.OK);
     } else
       throw new HttpException(
@@ -81,8 +93,12 @@ export class ProfilesService {
         HttpStatus.BAD_REQUEST,
       );
   }
-  async getUserRewardPoints(userId): Promise<ProfileDocument> {
-    return this.profileModel.findById({ _id: userId }).select('rewardPoints');
+  async getUserRewardPointsOrEstimatedSavings(
+    userId,
+  ): Promise<ProfileDocument> {
+    return this.profileModel
+      .findById({ _id: userId })
+      .select('rewardPoints estimatedSavings');
   }
   async getSingleProfile(userId): Promise<any> {
     return this.profileModel.aggregate([
@@ -179,6 +195,15 @@ export class ProfilesService {
       $or: [{ email: user.email }, { username: user.email }],
     });
   }
+
+  async getUser(email) {
+    console.log(email);
+    return this.profileModel
+      .findOne({
+        $or: [{ email: email }, { username: email }],
+      })
+      .select('email password accountHolderType status role');
+  }
   async fetchProfileUsingToken(user): Promise<any> {
     const fetchedUser = await this.profileModel
       .findOne({
@@ -192,7 +217,14 @@ export class ProfilesService {
       );
     return fetchedUser;
   }
-  async updateProfile(data): Promise<any> {
+  async updateProfile(
+    data,
+    estimatedSavings = null,
+    rewardPoints = null,
+  ): Promise<any> {
+    console.log(data);
+    console.log('estimated savings = ', estimatedSavings);
+    console.log('reward points = ', rewardPoints);
     const profile = await this.profileModel.findById({ _id: data.userId });
     if (!profile) throw new NotFoundException(' Profile does not exist');
     if (profile.role == Constants.USER && profile.status == Constants.PENDING)
@@ -216,6 +248,8 @@ export class ProfilesService {
           favoriteChefs: data.favoriteChefs,
           dietRequirements: data.dietRequirements,
           scopes: data.scopes,
+          rewardPoints: rewardPoints,
+          estimatedSavings: estimatedSavings,
           isSkip: data.isSkip,
         },
       },
@@ -287,20 +321,14 @@ export class ProfilesService {
   async restaurantFilters(data, paginationQuery): Promise<any> {
     return this.restaurantService.restaurantFilters(data, paginationQuery);
   }
-  async resetPassword(user, password) {
-    const encryptedPassword = await bcrypt.hash(password, 10);
+  async resetPassword(user, enteredPassword) {
+    const encryptedPassword = await hashPassword(enteredPassword);
     await this.profileModel.updateOne(
       { _id: user._id },
       { password: encryptedPassword },
     );
   }
-  async getUser(email: string) {
-    return this.profileModel
-      .findOne({
-        $or: [{ email: email }, { username: email }],
-      })
-      .select('email password');
-  }
+
   // async getUserByEmailAndPassword(email, password): Promise<any> {
   //   const user = this.profileModel
   //     .findOne({
@@ -326,7 +354,7 @@ export class ProfilesService {
       .select('password');
     console.log('user = ', user);
     if (!user) throw new HttpException('use not found', HttpStatus.NOT_FOUND);
-    const isValidPassword = await bcrypt.compare(
+    const isValidPassword = await comparePassword(
       data.oldPassword,
       user.password,
     );
@@ -335,8 +363,8 @@ export class ProfilesService {
         'Old Password is incorrect',
         HttpStatus.FORBIDDEN,
       );
-    const hashedPassword = await bcrypt.hash(data.newPassword, 10);
-    const differentPassword = await bcrypt.compare(
+    const hashedPassword = await hashPassword(data.newPassword);
+    const differentPassword = await comparePassword(
       data.oldPassword,
       hashedPassword,
     );

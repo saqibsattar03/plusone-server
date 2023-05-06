@@ -15,6 +15,8 @@ import {
 } from '../../data/schemas/forgotPassword.schema';
 import { Model } from 'mongoose';
 import { generateToken } from '../utils/generateToken';
+import { Constants } from '../constants';
+import { comparePassword } from '../utils/passwordHashing';
 
 @Injectable()
 export class AuthService {
@@ -25,7 +27,8 @@ export class AuthService {
     private readonly forgotModel: Model<ForgotPasswordDocument>,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<any> {
+  async validateUser(email: string, enteredPassword: string): Promise<any> {
+    console.log('validate user = ', email);
     const user = await this.profileService.getUser(email);
     // await this.profileService.getUserByEmailAndPassword(email, password);
     if (!user) {
@@ -33,8 +36,11 @@ export class AuthService {
         'An account with these credentials does not exist, Please create your account first.',
       );
     }
-    const passwordValid = await bcrypt.compare(password, user.password);
-    if (user && passwordValid) {
+    const isValidPassword = await comparePassword(
+      enteredPassword,
+      user.password,
+    );
+    if (user && isValidPassword) {
       const { password, ...result } = user;
       return result;
     }
@@ -42,16 +48,19 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const fetchedUser = await this.profileService.getUserByEmailOrUserName(
-      user,
-    );
+    console.log(user);
+    const fetchedUser = await this.profileService.getUser(user.email);
+    console.log('fetcheduser = ', fetchedUser);
     if (fetchedUser.accountHolderType != user.accountHolderType) {
       throw new HttpException(
         'user Account Type Does Not Match',
         HttpStatus.UNAUTHORIZED,
       );
     }
-    if (fetchedUser.role != 'ADMIN' && fetchedUser.status != 'ACTIVE') {
+    if (
+      fetchedUser.role != Constants.ADMIN &&
+      fetchedUser.status != Constants.ACTIVE
+    ) {
       throw new UnauthorizedException('Account is in pending state');
     }
     return {
@@ -63,6 +72,7 @@ export class AuthService {
     };
   }
   async profile(user: any) {
+    // return this.profileService.getUser(user);
     return this.profileService.fetchProfileUsingToken(user);
   }
 
@@ -83,7 +93,6 @@ export class AuthService {
   }
 
   async resetPassword(data) {
-    // const user = await this.profileService.getSingleProfile(userId);
     const user = await this.profileService.getUser(data.email);
     if (!user) throw new HttpException('user Not Found', HttpStatus.NOT_FOUND);
     const res = await this.forgotModel.findOne({

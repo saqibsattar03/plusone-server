@@ -33,7 +33,7 @@ export class CustomerServiceService {
       { _id: queryId },
       {
         $set: {
-          customerQuery: data.customerQuery,
+          message: data.message,
         },
       },
     );
