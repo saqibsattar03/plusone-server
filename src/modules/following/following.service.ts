@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   Following,
@@ -6,12 +12,14 @@ import {
 } from '../../data/schemas/following.schema';
 import mongoose, { Model } from 'mongoose';
 import { FollowerService } from '../follower/follower.service';
+import { FollowerModule } from '../follower/follower.module';
 
 @Injectable()
 export class FollowingService {
   constructor(
     @InjectModel(Following.name)
     private readonly followingModel: Model<FollowingDocument>,
+    @Inject(forwardRef(() => FollowerService))
     private readonly followerService: FollowerService,
   ) {}
   async addFollowee(userId, followeeId): Promise<any> {
@@ -34,16 +42,11 @@ export class FollowingService {
     }
     throw new HttpException('follwee added successfully', HttpStatus.OK);
   }
-
   async SingleUserFollowCheck(currentUser, searchedUser): Promise<any> {
     const res = await this.followingModel.findOne({ userId: currentUser });
     if (!res) throw new HttpException('invalid user', HttpStatus.BAD_REQUEST);
     const arr = res.followings.map((id) => id.toString());
-    console.log('arr = ', arr);
-    console.log('userId2 = ', new mongoose.Types.ObjectId(searchedUser));
-
     const followed = arr.some((id) => id === searchedUser);
-
     return followed ? { followed: true } : { followed: false };
   }
   async removeFollowee(userId, followeeId): Promise<any> {
@@ -138,5 +141,9 @@ export class FollowingService {
       //   },
       // },
     ]);
+  }
+
+  async getSingleFollowings(userId): Promise<any> {
+    return this.followingModel.findOne({ userId }).select('followings');
   }
 }

@@ -7,16 +7,18 @@ import { Restaurant } from './restaurant.schema';
 export type RedeemVoucherDocument = HydratedDocument<RedeemVoucher>;
 @Schema({ timestamps: true })
 export class RedeemVoucher {
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Profile' })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Profile.name })
   userId: Profile;
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Restaurant' })
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Restaurant.name })
   restaurantId: Restaurant;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Voucher' })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Voucher.name })
   voucherId: Voucher;
 
   @Prop({ type: String })
   verificationCode: string;
+
   @Prop({ type: Date, description: 'Created At' })
   createdAt?: Date;
 

@@ -17,6 +17,7 @@ import { ProfilesService } from '../profiles/profiles.service';
 import * as moment from 'moment';
 import { Tag, TagDocument } from '../../data/schemas/tags.schema';
 import { Constants } from '../../common/constants';
+import { AuthService } from '../../common/auth/auth.service';
 
 @Injectable()
 export class RestaurantService {
@@ -25,8 +26,8 @@ export class RestaurantService {
     private readonly restaurantModel: Model<RestaurantDocument>,
     @InjectModel(Tag.name)
     private readonly tagModel: Model<TagDocument>,
-    @Inject(forwardRef(() => ProfilesService))
-    private readonly profileService: ProfilesService,
+    @Inject(forwardRef(() => AuthService))
+    private readonly authService: AuthService,
   ) {}
 
   async createRestaurant(restaurantDto: any): Promise<any> {
@@ -45,12 +46,18 @@ export class RestaurantService {
       uniqueCode: uniqueCode,
     });
     if (codeCheck) uniqueCode = Math.floor(Math.random() * 8496 + 1949);
-    const user = await this.profileService.createUser(restaurantDto);
+    const user = await this.authService.createUser(restaurantDto);
     restaurantDto.userId = user._id;
     restaurantDto.uniqueCode = uniqueCode;
     return await this.restaurantModel.create(restaurantDto);
   }
 
+  async getAllUsers(role: string): Promise<any> {
+    return this.restaurantModel.find().populate({
+      path: 'userId',
+      // match: { role: role },
+    });
+  }
   async getAllTags(): Promise<any> {
     return this.tagModel.find().select('tag');
   }
@@ -64,7 +71,6 @@ export class RestaurantService {
       .skip(offset)
       .limit(limit);
   }
-
   async getSingleRestaurantDetails(restaurantId): Promise<any> {
     const oid = new mongoose.Types.ObjectId(restaurantId);
     const pipeline = [
@@ -226,7 +232,6 @@ export class RestaurantService {
     ];
     return this.restaurantModel.aggregate(pipeline);
   }
-
   async getRestaurantProfile(restaurantId): Promise<any> {
     const oid = new mongoose.Types.ObjectId(restaurantId);
     return this.restaurantModel.findById(oid);
@@ -255,7 +260,6 @@ export class RestaurantService {
       { new: true },
     );
   }
-
   /*** check if these methods are being used at the end of the project if not then remove the review count system completely ***/
   async getRestaurantReviewCount(restaurantId): Promise<any> {
     return this.restaurantModel
@@ -263,7 +267,6 @@ export class RestaurantService {
       .lean()
       .select('reviewCount -_id');
   }
-
   async updateReviewCount(restaurantId, reviewCount): Promise<any> {
     return this.restaurantModel.findOneAndUpdate(
       { _id: restaurantId },
@@ -271,7 +274,7 @@ export class RestaurantService {
     );
   }
 
-  /*** til  here ***/
+  /*** till  here ***/
   async getRestaurantVerificationCode(
     restaurantId,
     restaurantCode,
@@ -495,6 +498,7 @@ export class RestaurantService {
 
   /*** accounts module routes below ***/
 
+  /*** according to ChatGPT below query is more optimized then mongoose ***/
   async adminStats(): Promise<any> {
     return this.restaurantModel.aggregate([
       {

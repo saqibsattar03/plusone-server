@@ -1,13 +1,23 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Follower, FollowerDocument } from '../../data/schemas/follower.schema';
 import mongoose, { Model } from 'mongoose';
+import { FollowingService } from '../following/following.service';
+import { FollowingModule } from '../following/following.module';
 
 @Injectable()
 export class FollowerService {
   constructor(
     @InjectModel(Follower.name)
     private readonly followerModel: Model<FollowerDocument>,
+    @Inject(forwardRef(() => FollowingService))
+    private readonly followingService: FollowingService,
   ) {}
 
   async addFollower(userId, followerId): Promise<any> {
@@ -45,6 +55,7 @@ export class FollowerService {
     }
     throw new HttpException('follower removed successfully', HttpStatus.OK);
   }
+
   async getAllFollowers(userId): Promise<any> {
     const oid = new mongoose.Types.ObjectId(userId);
     return this.followerModel.aggregate([

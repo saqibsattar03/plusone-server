@@ -13,7 +13,7 @@ import { CommentsModule } from './comments/comments.module';
       { name: Post.name, schema: PostSchema },
       { name: LikedPost.name, schema: LikedPostSchema },
     ]),
-    FollowingModule,
+    forwardRef(() => FollowingModule),
     forwardRef(() => CommentsModule),
   ],
   controllers: [SocialPostsController],

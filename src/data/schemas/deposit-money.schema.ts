@@ -5,7 +5,7 @@ import { Restaurant } from './restaurant.schema';
 export type DepositMoneyDocument = HydratedDocument<DepositMoney>;
 @Schema()
 export class DepositMoney {
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Restaurant' })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Restaurant.name })
   restaurantId: Restaurant;
 
   @Prop()
@@ -16,6 +16,7 @@ export class DepositMoney {
 class DepositStructure {
   @Prop()
   _id: mongoose.Schema.Types.ObjectId;
+
   @Prop({ type: Number, default: 0 })
   amount: number;
 

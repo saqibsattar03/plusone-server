@@ -32,45 +32,6 @@ export class ProfilesService {
     private readonly restaurantService: RestaurantService,
   ) {}
 
-  async createUser(userDto: any) {
-    userDto.password = await hashPassword(userDto.password);
-    if (userDto.role == Constants.ADMIN || userDto.role == Constants.MERCHANT)
-      userDto.accountHolderType = null;
-    const existingUser = await this.profileModel.findOne({
-      $or: [{ username: userDto.username }, { email: userDto.email }],
-    });
-    if (existingUser) {
-      if (existingUser.username === userDto.username)
-        throw new HttpException(
-          'A user with this Username already exists',
-          HttpStatus.UNAUTHORIZED,
-        );
-      else
-        throw new HttpException(
-          'A user with this Email already exists',
-          HttpStatus.UNAUTHORIZED,
-        );
-    }
-    const newUser = new this.profileModel({
-      firstname: userDto.firstname,
-      surname: userDto.surname,
-      username: userDto.username,
-      email: userDto.email,
-      password: userDto.password,
-      accountHolderType: userDto.accountHolderType,
-      role: userDto.role,
-      scopes: userDto.scopes,
-      status: userDto.status,
-      confirmationCode: await generateToken(),
-    });
-    await newUser.save();
-    if (newUser.role == Constants.MERCHANT) return newUser;
-    // sendConfirmationEmail(newUser.email, newUser.confirmationCode);
-    throw new HttpException(
-      'Account Created Successfully. Please Confirm Your Email to Active Your Account. Check Your Email for Confirmation',
-      HttpStatus.OK,
-    );
-  }
   async verifyUser(confirmationCode: string): Promise<any> {
     const verified = await this.profileModel.findOne({
       confirmationCode: confirmationCode,
@@ -222,9 +183,6 @@ export class ProfilesService {
     estimatedSavings = null,
     rewardPoints = null,
   ): Promise<any> {
-    console.log(data);
-    console.log('estimated savings = ', estimatedSavings);
-    console.log('reward points = ', rewardPoints);
     const profile = await this.profileModel.findById({ _id: data.userId });
     if (!profile) throw new NotFoundException(' Profile does not exist');
     if (profile.role == Constants.USER && profile.status == Constants.PENDING)
@@ -258,39 +216,44 @@ export class ProfilesService {
       },
     );
   }
-  async updateRewardPoints(userId, rewardPoints): Promise<any> {
-    await this.profileModel.findOneAndUpdate(
-      { _id: userId },
-      { rewardPoints: rewardPoints },
-    );
-  }
-  async updatedEstimatedSavings(userId, estimatedSavings): Promise<any> {
-    await this.profileModel.findByIdAndUpdate(
-      {
-        _id: userId,
-      },
-      { estimatedSavings: estimatedSavings },
-    );
-  }
+
+  // async updateRewardPoints(userId, rewardPoints): Promise<any> {
+  //   await this.profileModel.findOneAndUpdate(
+  //     { _id: userId },
+  //     { rewardPoints: rewardPoints },
+  //   );
+  // }
+  // async updatedEstimatedSavings(userId, estimatedSavings): Promise<any> {
+  //   await this.profileModel.findByIdAndUpdate(
+  //     {
+  //       _id: userId,
+  //     },
+  //     { estimatedSavings: estimatedSavings },
+  //   );
+  // }
   async getAllUsers(role: string): Promise<any> {
-    return this.profileModel.aggregate([
-      {
-        $match: { role: role },
-      },
-      {
-        $lookup: {
-          from: 'restaurants',
-          localField: '_id',
-          foreignField: 'userId',
-          as: 'restaurantData',
-        },
-      },
-      {
-        $unset: ['password', 'confirmationCode'],
-      },
-    ]);
+    if (role == Constants.USER || role == Constants.ADMIN)
+      return this.profileModel.find({ role });
+    return this.restaurantService.getAllUsers(role);
+    // return this.profileModel.find({ role }).populate('userId');
+    // return this.profileModel.aggregate([
+    //   {
+    //     $match: { role: role },
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: 'restaurants',
+    //       localField: '_id',
+    //       foreignField: 'userId',
+    //       as: 'restaurantData',
+    //     },
+    //   },
+    //   {
+    //     $unset: ['password', 'confirmationCode'],
+    //   },
+    // ]);
   }
-  async removeProfile(profileId): Promise<ProfileDocument> {
+  async deleteProfile(profileId): Promise<ProfileDocument> {
     const oid = new mongoose.Types.ObjectId(profileId);
     const profile = await this.profileModel.findById(profileId);
     if (!profile) throw new NotFoundException(' Profile does not exist');
@@ -309,14 +272,12 @@ export class ProfilesService {
   ): Promise<ProfileDocument[]> {
     const { limit, offset } = paginationDto;
     return this.profileModel
-      .find({ accountType: 'PUBLIC' }, {}, { skip: offset, take: limit })
-      .select([
-        '-password',
-        '-confirmationCode',
-        '-createdAt',
-        '-updatedAt',
-        '-rewardPoints',
-      ]);
+      .find(
+        { accountType: Constants.PUBLIC },
+        {},
+        { skip: offset, take: limit },
+      )
+      .select(['-createdAt', '-updatedAt', '-rewardPoints']);
   }
   async restaurantFilters(data, paginationQuery): Promise<any> {
     return this.restaurantService.restaurantFilters(data, paginationQuery);
@@ -352,7 +313,6 @@ export class ProfilesService {
     const user = await this.profileModel
       .findOne({ _id: data.userId })
       .select('password');
-    console.log('user = ', user);
     if (!user) throw new HttpException('use not found', HttpStatus.NOT_FOUND);
     const isValidPassword = await comparePassword(
       data.oldPassword,

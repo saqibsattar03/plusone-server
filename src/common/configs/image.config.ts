@@ -27,12 +27,12 @@ export const multerConfig: MulterOptions = {
     },
   }),
   limits: {
-    fileSize: 10000000, // 5 Mb,
+    fileSize: 60 * 1024 * 1024, // 60MB,
   },
   fileFilter: (req: any, file: any, cb: any) => {
     const fileSize = parseInt(req.headers['content-length']);
     if (file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
-      if (fileSize > 10000000) {
+      if (fileSize > 5 * 1024 * 1024) {
         cb(
           new HttpException(
             'Image size is too large',
@@ -43,7 +43,8 @@ export const multerConfig: MulterOptions = {
       // Allow storage of file
       cb(null, true);
     } else if (file.mimetype.match(/\/(mp4)$/)) {
-      if (fileSize > 2000000) {
+      console.log(fileSize);
+      if (fileSize > 60 * 1024 * 1024) {
         cb(
           new HttpException(
             'video size is too large',
@@ -53,7 +54,7 @@ export const multerConfig: MulterOptions = {
       }
       cb(null, true);
     } else if (file.mimetype.match(/\/(pdf)$/)) {
-      if (fileSize > 2000000) {
+      if (fileSize > 5 * 1024 * 1024) {
         cb(
           new HttpException(
             'file size is too large',

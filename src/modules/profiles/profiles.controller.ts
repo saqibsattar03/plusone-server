@@ -32,16 +32,6 @@ import { JwtAuthGuard } from '../../common/auth/guards/jwt-auth.guard';
 export class ProfilesController {
   constructor(private readonly profileService: ProfilesService) {}
 
-  @Post('sign-up')
-  @ApiBody({
-    type: ProfileDto,
-    description: 'Users Created as response',
-  })
-  @ApiBadRequestResponse({ description: 'can not create user' })
-  async createUser(@Body() data) {
-    return this.profileService.createUser(data);
-  }
-
   @Patch('verify-account')
   verifyUser(@Query('confirmationCode') confirmationCode) {
     return this.profileService.verifyUser(confirmationCode);
@@ -75,8 +65,8 @@ export class ProfilesController {
   @ApiResponse({ description: 'Profile deleted successfully' })
   @ApiBadRequestResponse({ description: 'could not delete Profile' })
   // @UseGuards(JwtAuthGuard)
-  async removeProfile(@Query('profileId') profileId) {
-    return this.profileService.removeProfile(profileId);
+  async deleteProfile(@Query('profileId') profileId) {
+    return this.profileService.deleteProfile(profileId);
   }
 
   @Get('all')

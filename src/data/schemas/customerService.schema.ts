@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
-import { Profile } from 'passport';
+import { Profile } from './profile.schema';
 
 export type CustomerServiceDocument = HydratedDocument<CustomerService>;
 @Schema({ timestamps: true })
@@ -11,7 +11,11 @@ export class CustomerService {
   // @Prop({ type: Number, default: 923082025173 })
   // astPhoneNumber: number;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Profile', index: true })
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: Profile.name,
+    index: true,
+  })
   userId: Profile;
 
   @Prop({ type: String, required: true })

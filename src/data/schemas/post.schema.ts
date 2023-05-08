@@ -7,7 +7,11 @@ import { Voucher } from './voucher.schema';
 export type PostDocument = HydratedDocument<Post>;
 @Schema({ timestamps: true })
 export class Post {
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Profile', index: true })
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: Profile.name,
+    index: true,
+  })
   userId: Profile;
 
   @Prop({ type: LocationSchema, index: true })
@@ -26,7 +30,11 @@ export class Post {
   @Prop({ type: String, enum: ['FEED', 'REVIEW'], index: true })
   postType: string;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Voucher', index: true })
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: Voucher.name,
+    index: true,
+  })
   voucherId: Voucher;
 
   @Prop({ type: [String] })

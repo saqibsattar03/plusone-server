@@ -7,7 +7,7 @@ import { Voucher } from './voucher.schema';
 export type RestaurantReviewDocument = HydratedDocument<RestaurantReview>;
 @Schema({ versionKey: false })
 export class RestaurantReview {
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Restaurant' })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Restaurant.name })
   restaurantId: Restaurant;
 
   @Prop()
