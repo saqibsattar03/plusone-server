@@ -50,7 +50,7 @@ export class RestaurantService {
     return await this.restaurantModel.create(restaurantDto);
   }
 
-  async getAllUsers(role: string): Promise<any> {
+  async getAllUsers(): Promise<any> {
     return this.restaurantModel.find().populate({
       path: 'userId',
       // match: { role: role },

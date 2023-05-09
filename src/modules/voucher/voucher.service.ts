@@ -22,7 +22,6 @@ export class VoucherService {
     private readonly redeemVoucherModel: Model<RedeemVoucherDocument>,
     private readonly restaurantService: RestaurantService,
     private readonly profileService: ProfilesService,
-    private readonly depositMoneyService: DepositMoneyService,
   ) {}
   async getRestaurantTotalVoucherCount(
     restaurantId,
