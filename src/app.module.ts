@@ -7,7 +7,6 @@ import { ProfilesModule } from './modules/profiles/profiles.module';
 import { FollowerModule } from './modules/follower/follower.module';
 import { FollowingModule } from './modules/following/following.module';
 import { RestaurantReviewModule } from './modules/restaurant-review/restaurant-review.module';
-import { ChatModule } from './modules/chat/chat.module';
 import { RestaurantModule } from './modules/restaurant/restaurant.module';
 import { VoucherModule } from './modules/voucher/voucher.module';
 import { QuoteModule } from './modules/quote/quote.module';
@@ -34,7 +33,6 @@ import { InvitationModule } from './modules/invitation/invitation.module';
     FollowerModule,
     FollowingModule,
     RestaurantReviewModule,
-    ChatModule,
     RestaurantModule,
     VoucherModule,
     QuoteModule,

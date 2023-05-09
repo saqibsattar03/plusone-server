@@ -290,7 +290,8 @@ export class VoucherService {
         );
         await this.profileService.updateProfile(
           data,
-          rPoints.estimatedSavings + voucher.voucherObject[0].estimatedSavings,
+          rPoints.estimatedSavings +
+            parseInt(voucher.voucherObject[0].estimatedSavings),
           rPoints.rewardPoints + 1,
         );
         const availableBalance =

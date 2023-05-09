@@ -182,7 +182,6 @@ export class ProfilesService {
     estimatedSavings = null,
     rewardPoints = null,
   ): Promise<any> {
-    console.log(data.userId);
     const profile = await this.profileModel.findById({ _id: data.userId });
     if (!profile) throw new NotFoundException(' Profile does not exist');
     if (profile.role == Constants.USER && profile.status == Constants.PENDING)

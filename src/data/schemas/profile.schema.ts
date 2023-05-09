@@ -90,7 +90,7 @@ export class Profile extends User {
   @Prop({ type: [String] })
   scopes: [string];
 
-  @Prop({ type: String })
+  @Prop({ type: String, default: '' })
   estimatedSavings: string;
 }
 
