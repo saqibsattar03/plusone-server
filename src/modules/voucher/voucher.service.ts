@@ -10,7 +10,6 @@ import {
 import { RestaurantService } from '../restaurant/restaurant.service';
 import { ProfilesService } from '../profiles/profiles.service';
 import { Constants } from '../../common/constants';
-import { DepositMoneyService } from '../deposit-money/deposit-money.service';
 import { uniqueCode } from '../../common/utils/uniqueCode';
 
 @Injectable()
