@@ -290,8 +290,7 @@ export class VoucherService {
         );
         await this.profileService.updateProfile(
           data,
-          rPoints.estimatedSavings +
-            parseInt(voucher.voucherObject[0].estimatedSavings),
+          rPoints.estimatedSavings + voucher.voucherObject[0].estimatedSavings,
           rPoints.rewardPoints + 1,
         );
         const availableBalance =
@@ -371,7 +370,7 @@ export class VoucherService {
   }
   async getTotalVoucherRedeemedCount(restaurantId): Promise<any> {
     const oid = new mongoose.Types.ObjectId(restaurantId);
-    return this.redeemVoucherModel.find().count();
+    return this.redeemVoucherModel.find({ restaurantId: oid }).count();
     // return this.redeemVoucherModel.aggregate([
     //   // {
     //   //   $match: {

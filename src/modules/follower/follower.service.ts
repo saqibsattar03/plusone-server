@@ -9,7 +9,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Follower, FollowerDocument } from '../../data/schemas/follower.schema';
 import mongoose, { Model } from 'mongoose';
 import { FollowingService } from '../following/following.service';
-import { FollowingModule } from '../following/following.module';
 
 @Injectable()
 export class FollowerService {

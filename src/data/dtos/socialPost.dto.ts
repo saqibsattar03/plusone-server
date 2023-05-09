@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
 import { LocationDto } from './location.dto';
-import { VoucherDto } from './voucher.dto';
 
 export class SocialPostDto {
   @ApiProperty({ type: String, name: 'userId' })

@@ -12,7 +12,6 @@ import {
 } from '../../data/schemas/following.schema';
 import mongoose, { Model } from 'mongoose';
 import { FollowerService } from '../follower/follower.service';
-import { FollowerModule } from '../follower/follower.module';
 
 @Injectable()
 export class FollowingService {

@@ -6,7 +6,6 @@ import {
   Restaurant,
   RestaurantSchema,
 } from '../../data/schemas/restaurant.schema';
-import { ProfilesModule } from '../profiles/profiles.module';
 import { Tag, TagSchema } from '../../data/schemas/tags.schema';
 import { AuthModule } from '../../common/auth/auth.module';
 

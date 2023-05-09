@@ -18,6 +18,7 @@ import { DepositMoneyModule } from './modules/deposit-money/deposit-money.module
 import { DbModule } from './common/db/db.module';
 import { ConfigModule } from '@nestjs/config';
 import { multerConfig } from './common/configs/image.config';
+import { InvitationModule } from './modules/invitation/invitation.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { multerConfig } from './common/configs/image.config';
     AuthModule,
     MulterModule.register(multerConfig),
     DepositMoneyModule,
+    InvitationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

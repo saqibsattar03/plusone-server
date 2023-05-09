@@ -11,9 +11,7 @@ import {
   RestaurantDocument,
 } from '../../data/schemas/restaurant.schema';
 import mongoose, { Model } from 'mongoose';
-import { RestaurantDto } from '../../data/dtos/restaurant.dto';
 import { PaginationDto } from '../../common/auth/dto/pagination.dto';
-import { ProfilesService } from '../profiles/profiles.service';
 import * as moment from 'moment';
 import { Tag, TagDocument } from '../../data/schemas/tags.schema';
 import { Constants } from '../../common/constants';

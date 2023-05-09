@@ -17,12 +17,6 @@ export class VoucherDto {
     // voucherDisable: [VoucherDisableDates];
   };
 }
-class VoucherPreference {
-  preference: string;
-}
-class VoucherDisableDates {
-  dates: Date;
-}
 
 export class UpdateVoucherDto {
   @ApiProperty()

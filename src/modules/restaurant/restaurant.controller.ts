@@ -1,6 +1,6 @@
-import { Controller, Patch, Query, UseGuards } from '@nestjs/common';
+import { Controller, Patch, Query } from '@nestjs/common';
 import { RestaurantService } from './restaurant.service';
-import { Body, Get, Post, Request } from '@nestjs/common/decorators';
+import { Body, Get, Post } from '@nestjs/common/decorators';
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -15,7 +15,6 @@ import {
 } from '../../data/dtos/restaurant.dto';
 import { ProfileDto } from '../../data/dtos/profile.dto';
 import { PaginationDto } from '../../common/auth/dto/pagination.dto';
-import { Types } from 'mongoose';
 
 @ApiTags('Restaurants')
 @Controller('restaurant')

@@ -1,8 +1,7 @@
-import mongoose, { HydratedDocument } from 'mongoose';
+import { HydratedDocument } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { User } from './user.schema';
 import validator from 'validator';
-import { Restaurant } from './restaurant.schema';
 
 export type ProfileDocument = HydratedDocument<Profile>;
 @Schema({ timestamps: true })
@@ -91,8 +90,8 @@ export class Profile extends User {
   @Prop({ type: [String] })
   scopes: [string];
 
-  @Prop({ type: Number })
-  estimatedSavings: number;
+  @Prop({ type: String })
+  estimatedSavings: string;
 }
 
 export const ProfileSchema = SchemaFactory.createForClass(Profile);

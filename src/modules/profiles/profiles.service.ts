@@ -14,7 +14,6 @@ import { SocialPostsService } from '../social-posts/social-posts.service';
 import { RestaurantReviewService } from '../restaurant-review/restaurant-review.service';
 import { RestaurantService } from '../restaurant/restaurant.service';
 import { Constants } from '../../common/constants';
-import { generateToken } from '../../common/utils/generateToken';
 import {
   comparePassword,
   hashPassword,
@@ -183,6 +182,7 @@ export class ProfilesService {
     estimatedSavings = null,
     rewardPoints = null,
   ): Promise<any> {
+    console.log(data.userId);
     const profile = await this.profileModel.findById({ _id: data.userId });
     if (!profile) throw new NotFoundException(' Profile does not exist');
     if (profile.role == Constants.USER && profile.status == Constants.PENDING)
