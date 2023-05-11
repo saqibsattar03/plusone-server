@@ -33,6 +33,7 @@ export class AuthService {
   ) {}
 
   async createUser(userDto: any) {
+    console.log('here sign up route');
     userDto.password = await hashPassword(userDto.password);
     if (userDto.role == Constants.ADMIN || userDto.role == Constants.MERCHANT)
       userDto.accountHolderType = null;
@@ -61,6 +62,7 @@ export class AuthService {
       role: userDto.role,
       scopes: userDto.scopes,
       status: userDto.status,
+      rewardPoints: 0,
       confirmationCode: await generateToken(),
     });
     await newUser.save();
@@ -72,7 +74,6 @@ export class AuthService {
     );
   }
   async validateUser(email: string, enteredPassword: string): Promise<any> {
-    console.log('validate user = ', email);
     const user = await this.profileService.getUser(email);
     // await this.profileService.getUserByEmailAndPassword(email, password);
     if (!user) {
@@ -92,8 +93,11 @@ export class AuthService {
     return null;
   }
   async login(user: any) {
+    console.log('user = ', user);
     const fetchedUser = await this.profileService.getUser(user.email);
+    console.log('f user = ', fetchedUser);
     if (fetchedUser.accountHolderType != user.accountHolderType) {
+      console.log('fetched user = ', fetchedUser);
       throw new HttpException(
         'user Account Type Does Not Match',
         HttpStatus.UNAUTHORIZED,

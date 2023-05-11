@@ -18,6 +18,7 @@ import { DbModule } from './common/db/db.module';
 import { ConfigModule } from '@nestjs/config';
 import { multerConfig } from './common/configs/image.config';
 import { InvitationModule } from './modules/invitation/invitation.module';
+import { FcmModule } from './modules/fcm/fcm.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { InvitationModule } from './modules/invitation/invitation.module';
     MulterModule.register(multerConfig),
     DepositMoneyModule,
     InvitationModule,
+    FcmModule,
   ],
   controllers: [AppController],
   providers: [AppService],

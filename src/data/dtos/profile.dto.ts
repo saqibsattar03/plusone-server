@@ -151,6 +151,14 @@ export class UpdateProfileDto {
   accountType: string;
 
   @ApiProperty({
+    description: 'Post Audience Preference Setting',
+    type: String,
+    enum: ['PUBLIC', 'FRIENDS', 'ONLY-ME'],
+    default: 'PUBLIC',
+  })
+  postAudiencePreference: string;
+
+  @ApiProperty({
     type: () => String,
     description: 'Link of Instagram account',
     example: 'www.instagram.com',
@@ -189,6 +197,9 @@ export class UpdateProfileDto {
 
   @ApiProperty({ type: [String] })
   scopes: [string];
+
+  @ApiProperty({ type: String })
+  fcmToken: string;
 }
 
 export class RestaurantFilter {

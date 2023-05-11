@@ -11,6 +11,7 @@ import { RestaurantService } from '../restaurant/restaurant.service';
 import { ProfilesService } from '../profiles/profiles.service';
 import { Constants } from '../../common/constants';
 import { uniqueCode } from '../../common/utils/uniqueCode';
+import { FcmService } from '../fcm/fcm.service';
 
 @Injectable()
 export class VoucherService {
@@ -20,7 +21,7 @@ export class VoucherService {
     @InjectModel(RedeemVoucher.name)
     private readonly redeemVoucherModel: Model<RedeemVoucherDocument>,
     private readonly restaurantService: RestaurantService,
-    private readonly profileService: ProfilesService,
+    private readonly profileService: ProfilesService, // private readonly fcmService: FcmService,
   ) {}
   async getRestaurantTotalVoucherCount(
     restaurantId,
@@ -189,17 +190,6 @@ export class VoucherService {
         },
       },
     );
-
-    // return this.voucherModel.aggregate([
-    //   {
-    //     $unwind: '$voucherObject',
-    //   },
-    //   {
-    //     $match: {
-    //       'voucherObject._id': oid,
-    //     },
-    //   },
-    // ]);
   }
   async getAllVouchersByRestaurant(restaurantId): Promise<any> {
     return this.voucherModel.findOne({ restaurantId: restaurantId });
@@ -259,10 +249,7 @@ export class VoucherService {
           verificationCode: verificationCode,
         });
         const oid = new mongoose.Types.ObjectId(data.voucherId);
-        const rPoints =
-          await this.profileService.getUserRewardPointsOrEstimatedSavings(
-            data.userId,
-          );
+        const rPoints = await this.profileService.getUserEarnings(data.userId);
         const voucher = await this.voucherModel.findOne(
           { 'voucherObject._id': oid },
           {
@@ -271,17 +258,6 @@ export class VoucherService {
             },
           },
         );
-        // return voucher.voucherObject[0];
-        // const voucher = await this.voucherModel.aggregate([
-        //   {
-        //     $unwind: '$voucherObject',
-        //   },
-        //   {
-        //     $match: {
-        //       'voucherObject._id': oid,
-        //     },
-        //   },
-        // ]);
         await this.restaurantService.addTotalSalesAndDeductions(
           voucher.voucherObject[0].estimatedCost,
           data.restaurantId,
@@ -299,6 +275,15 @@ export class VoucherService {
         if (availableBalance < 50) {
           // todo: send email to recharge //
         }
+
+        //*** sending voucher redemption notification to user ***//
+        // await this.fcmService.sendSingleNotification()
+        const notification = {
+          email: rPoints.email,
+          title: 'Score! Your Voucher Has Been Redeemed 🎉🛍️💰',
+          body: '🎁 Surprise! Voucher redeemed, and the savings are all yours to enjoy 🎉🛍️💰',
+        };
+        // await this.fcmService.sendSingleNotification(notification);
         return res.verificationCode;
       } else
         throw new HttpException(

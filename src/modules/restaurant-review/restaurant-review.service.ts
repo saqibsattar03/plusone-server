@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   RestaurantReview,
@@ -14,7 +20,9 @@ export class RestaurantReviewService {
   constructor(
     @InjectModel(RestaurantReview.name)
     private readonly restaurantReviewModel: Model<RestaurantReviewDocument>,
+    @Inject(forwardRef(() => RestaurantService))
     private readonly restaurantService: RestaurantService,
+    @Inject(forwardRef(() => SocialPostsService))
     private readonly socialPostService: SocialPostsService,
   ) {}
 

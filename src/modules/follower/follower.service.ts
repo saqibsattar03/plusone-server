@@ -36,7 +36,8 @@ export class FollowerService {
         );
       }
     }
-    throw new HttpException('Follower Added Successfully', HttpStatus.OK);
+    return;
+    //  throw new HttpException('Follower Added Successfully', HttpStatus.OK);
   }
   async removeFollower(userId, followerId): Promise<any> {
     const res = await this.followerModel.findOne({ userId: userId });

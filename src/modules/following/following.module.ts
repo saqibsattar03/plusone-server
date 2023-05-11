@@ -7,6 +7,8 @@ import {
   FollowingSchema,
 } from '../../data/schemas/following.schema';
 import { FollowerModule } from '../follower/follower.module';
+import { FcmModule } from '../fcm/fcm.module';
+import { ProfilesModule } from '../profiles/profiles.module';
 
 @Module({
   imports: [
@@ -17,6 +19,8 @@ import { FollowerModule } from '../follower/follower.module';
       },
     ]),
     forwardRef(() => FollowerModule),
+    forwardRef(() => FcmModule),
+    forwardRef(() => ProfilesModule),
   ],
   controllers: [FollowingController],
   providers: [FollowingService],

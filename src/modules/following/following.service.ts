@@ -12,6 +12,8 @@ import {
 } from '../../data/schemas/following.schema';
 import mongoose, { Model } from 'mongoose';
 import { FollowerService } from '../follower/follower.service';
+import { FcmService } from '../fcm/fcm.service';
+import { ProfilesService } from '../profiles/profiles.service';
 
 @Injectable()
 export class FollowingService {
@@ -20,6 +22,10 @@ export class FollowingService {
     private readonly followingModel: Model<FollowingDocument>,
     @Inject(forwardRef(() => FollowerService))
     private readonly followerService: FollowerService,
+    @Inject(forwardRef(() => FcmService))
+    protected readonly fcmService: FcmService,
+    @Inject(forwardRef(() => ProfilesService))
+    protected readonly profileService: ProfilesService,
   ) {}
   async addFollowee(userId, followeeId): Promise<any> {
     const res = await this.followingModel.findOne({ userId: userId });
@@ -39,6 +45,19 @@ export class FollowingService {
       } else
         throw new HttpException('already following', HttpStatus.BAD_REQUEST);
     }
+
+    //*** sending follow added notification ***//
+
+    const id = await this.profileService.getUserEarnings(userId);
+    const userData = await this.profileService.getUserEarnings(followeeId);
+    const notification = {
+      email: userData.email,
+      title: 'New Follow Request! 👋',
+      body: `🎉 Alert! ${id.firstname} ${id.surname} is Now Following You 👀`,
+      // imageUrl: userData.profileImage,
+    };
+
+    await this.fcmService.sendSingleNotification(notification);
     throw new HttpException('follwee added successfully', HttpStatus.OK);
   }
   async SingleUserFollowCheck(currentUser, searchedUser): Promise<any> {

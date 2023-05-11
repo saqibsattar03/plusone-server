@@ -4,6 +4,8 @@ import { CommentsController } from './comments.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Comment, CommentSchema } from 'src/data/schemas/comment.schema';
 import { SocialPostsModule } from '../social-posts.module';
+import { ProfilesModule } from '../../profiles/profiles.module';
+import { FcmModule } from '../../fcm/fcm.module';
 
 @Module({
   imports: [
@@ -14,6 +16,8 @@ import { SocialPostsModule } from '../social-posts.module';
       },
     ]),
     forwardRef(() => SocialPostsModule),
+    ProfilesModule,
+    FcmModule,
   ],
   providers: [CommentsService],
   controllers: [CommentsController],

@@ -8,7 +8,6 @@ import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer
 
 // Define the absolute path to the uploads directory
 const UPLOADS_DIR = path.join(process.cwd(), '..', 'uploads');
-
 // Multer configuration
 export const multerConfig: MulterOptions = {
   dest: UPLOADS_DIR,

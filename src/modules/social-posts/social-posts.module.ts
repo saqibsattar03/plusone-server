@@ -6,6 +6,8 @@ import { SocialPostsController } from './social-posts.controller';
 import { SocialPostsService } from './social-posts.service';
 import { FollowingModule } from '../following/following.module';
 import { CommentsModule } from './comments/comments.module';
+import { FcmModule } from '../fcm/fcm.module';
+import { ProfilesModule } from '../profiles/profiles.module';
 
 @Module({
   imports: [
@@ -15,6 +17,8 @@ import { CommentsModule } from './comments/comments.module';
     ]),
     forwardRef(() => FollowingModule),
     forwardRef(() => CommentsModule),
+    forwardRef(() => FcmModule),
+    forwardRef(() => ProfilesModule),
   ],
   controllers: [SocialPostsController],
   providers: [SocialPostsService],

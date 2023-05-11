@@ -11,6 +11,8 @@ import { Comment } from 'src/data/schemas/comment.schema';
 import * as moment from 'moment';
 import { CommentDto } from '../../../data/dtos/socialPost.dto';
 import { SocialPostsService } from '../social-posts.service';
+import { ProfilesService } from '../../profiles/profiles.service';
+import { FcmService } from '../../fcm/fcm.service';
 
 @Injectable()
 export class CommentsService {
@@ -18,8 +20,9 @@ export class CommentsService {
     @InjectModel(Comment.name) private readonly commentModel: Model<Comment>,
     @Inject(forwardRef(() => SocialPostsService))
     private readonly socialPostService: SocialPostsService,
+    protected readonly profileService: ProfilesService,
+    protected readonly fcmService: FcmService,
   ) {}
-
   async postComment(commentDto: CommentDto): Promise<Comment> {
     commentDto.commentObject._id = new mongoose.Types.ObjectId(
       commentDto.commentObject._id,
@@ -60,9 +63,19 @@ export class CommentsService {
       c = c.commentCount + 1;
       await this.socialPostService.updateCommentCount(commentDto.postId, c);
     }
+    const id = await this.socialPostService.getPostUserId(commentDto.postId);
+    const userData = await this.profileService.getUserEarnings(
+      commentDto.commentObject.userId,
+    );
+    const notification = {
+      email: id.email,
+      title: 'New Comment ! 💬',
+      body: `${userData.firstname} ${userData.surname} Commented On Your Post 💬`,
+    };
+    //*** sending comment notification ***/
+    await this.fcmService.sendSingleNotification(notification);
     throw new HttpException('comment posted successfully ', HttpStatus.OK);
   }
-
   async editComment(postId, data): Promise<any> {
     const res = await this.commentModel.findOne({
       postId: postId,
@@ -88,7 +101,6 @@ export class CommentsService {
     }
     throw new HttpException('no such comment found', HttpStatus.NOT_FOUND);
   }
-
   async getPostComment(postId): Promise<any> {
     const oid = new mongoose.Types.ObjectId(postId);
     return this.commentModel.aggregate([
@@ -120,7 +132,6 @@ export class CommentsService {
       },
     ]);
   }
-
   async deleteSingleComment(data): Promise<any> {
     const res = await this.commentModel.findOne({
       postId: data.postId,
@@ -142,7 +153,6 @@ export class CommentsService {
     }
     throw new HttpException('no such comment found', HttpStatus.NOT_FOUND);
   }
-
   async deleteAllComment(postId): Promise<any> {
     await this.commentModel.deleteMany({ postId: postId });
   }

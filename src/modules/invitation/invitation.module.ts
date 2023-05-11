@@ -7,6 +7,7 @@ import {
   InvitationSchema,
 } from '../../data/schemas/invitation.schema';
 import { ProfilesModule } from '../profiles/profiles.module';
+import { FcmModule } from '../fcm/fcm.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ProfilesModule } from '../profiles/profiles.module';
       },
     ]),
     ProfilesModule,
+    FcmModule,
   ],
   controllers: [InvitationController],
   providers: [InvitationService],

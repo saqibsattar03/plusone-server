@@ -92,6 +92,9 @@ export class Profile extends User {
 
   @Prop({ type: String, default: '' })
   estimatedSavings: string;
+
+  @Prop({ type: String, default: '' })
+  fcmToken: string;
 }
 
 export const ProfileSchema = SchemaFactory.createForClass(Profile);
