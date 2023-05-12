@@ -48,16 +48,16 @@ export class FollowingService {
 
     //*** sending follow added notification ***//
 
-    const id = await this.profileService.getUserEarnings(userId);
-    const userData = await this.profileService.getUserEarnings(followeeId);
-    const notification = {
-      email: userData.email,
-      title: 'New Follow Request! 👋',
-      body: `🎉 Alert! ${id.firstname} ${id.surname} is Now Following You 👀`,
-      // imageUrl: userData.profileImage,
-    };
-
-    await this.fcmService.sendSingleNotification(notification);
+    // const id = await this.profileService.getUserEarnings(userId);
+    // const userData = await this.profileService.getUserEarnings(followeeId);
+    // const notification = {
+    //   email: userData.email,
+    //   title: 'New Follow Request! 👋',
+    //   body: `🎉 Alert! ${id.firstname} ${id.surname} is Now Following You 👀`,
+    //   // imageUrl: userData.profileImage,
+    // };
+    //
+    // await this.fcmService.sendSingleNotification(notification);
     throw new HttpException('follwee added successfully', HttpStatus.OK);
   }
   async SingleUserFollowCheck(currentUser, searchedUser): Promise<any> {

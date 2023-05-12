@@ -25,14 +25,16 @@ export class InvitationService {
       const data = {
         userId: link.sharedBy,
       };
-      const userData = await this.profileService.getUserEarnings(data.userId);
-      console.log(userData);
-      const notification = {
-        email: userData.email,
-        title: '🎉 Your Invitation Has Been Accepted!',
-        body: '🌟 Congratulations! You Have Been Awarded 1 Reward Point 💰',
-      };
-      await this.fcmService.sendSingleNotification(notification);
+
+      //*** send invitation notification ***//
+      // const userData = await this.profileService.getUserEarnings(data.userId);
+      // console.log(userData);
+      // const notification = {
+      //   email: userData.email,
+      //   title: '🎉 Your Invitation Has Been Accepted!',
+      //   body: '🌟 Congratulations! You Have Been Awarded 1 Reward Point 💰',
+      // };
+      // await this.fcmService.sendSingleNotification(notification);
       await this.profileService.updateProfile(
         data,
         rPoints.estimatedSavings,

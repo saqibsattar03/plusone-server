@@ -36,7 +36,7 @@ export class DepositMoneyService {
         $push: {
           depositObject: {
             amount: depositDto.depositObject.amount,
-            createdAt: moment().format('YYYY-MM-DD'),
+            createdAt: moment().format('YYYY-MM-DD hh:mm:ss'),
           },
         },
       });
@@ -50,7 +50,7 @@ export class DepositMoneyService {
         $push: {
           depositObject: {
             amount: depositDto.depositObject.amount,
-            createdAt: moment().format('YYYY-MM-DD'),
+            createdAt: moment().format('YYYY-MM-DD hh:mm:ss'),
           },
         },
       });

@@ -269,16 +269,16 @@ export class SocialPostsService {
     }
     //*** send like post notification ***//
 
-    const id = await this.getPostUserId(res.postId);
-    const userData = await this.profileService.getUserEarnings(userId);
-    const notification = {
-      email: id.email,
-      title: 'New Like! 👍',
-      body: `Your post just got a like from ${userData.firstname} ${userData.surname}! 👍`,
-    };
-    //*** like post notification ***//
-    if (id._id.toString() != userData._id.toString())
-      await this.fcmService.sendSingleNotification(notification);
+    // const id = await this.getPostUserId(res.postId);
+    // const userData = await this.profileService.getUserEarnings(userId);
+    // const notification = {
+    //   email: id.email,
+    //   title: 'New Like! 👍',
+    //   body: `Your post just got a like from ${userData.firstname} ${userData.surname}! 👍`,
+    // };
+    // //*** like post notification ***//
+    // if (id._id.toString() != userData._id.toString())
+    //   await this.fcmService.sendSingleNotification(notification);
     throw new HttpException('post liked successfully', HttpStatus.OK);
   }
   async removeLike(userId, postId): Promise<any> {

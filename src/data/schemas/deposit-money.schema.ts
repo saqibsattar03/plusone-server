@@ -3,7 +3,7 @@ import mongoose, { HydratedDocument } from 'mongoose';
 import { Restaurant } from './restaurant.schema';
 
 export type DepositMoneyDocument = HydratedDocument<DepositMoney>;
-@Schema()
+@Schema({ timestamps: true })
 export class DepositMoney {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Restaurant.name })
   restaurantId: Restaurant;
@@ -19,9 +19,9 @@ class DepositStructure {
 
   @Prop({ type: Number, default: 0 })
   amount: number;
-
-  @Prop({ type: Date, default: Date.now })
-  createdAt?: Date;
+  //
+  // @Prop({ type: Date, default: Date.now })
+  // createdAt?: Date;
 }
 
 export const DepositMoneySchema = SchemaFactory.createForClass(DepositMoney);

@@ -63,17 +63,19 @@ export class CommentsService {
       c = c.commentCount + 1;
       await this.socialPostService.updateCommentCount(commentDto.postId, c);
     }
-    const id = await this.socialPostService.getPostUserId(commentDto.postId);
-    const userData = await this.profileService.getUserEarnings(
-      commentDto.commentObject.userId,
-    );
-    const notification = {
-      email: id.email,
-      title: 'New Comment ! 💬',
-      body: `${userData.firstname} ${userData.surname} Commented On Your Post 💬`,
-    };
-    //*** sending comment notification ***/
-    await this.fcmService.sendSingleNotification(notification);
+
+    //*** send comment notification ***/
+    // const id = await this.socialPostService.getPostUserId(commentDto.postId);
+    // const userData = await this.profileService.getUserEarnings(
+    //   commentDto.commentObject.userId,
+    // );
+    // const notification = {
+    //   email: id.email,
+    //   title: 'New Comment ! 💬',
+    //   body: `${userData.firstname} ${userData.surname} Commented On Your Post 💬`,
+    // };
+    // //*** sending comment notification ***/
+    // await this.fcmService.sendSingleNotification(notification);
     throw new HttpException('comment posted successfully ', HttpStatus.OK);
   }
   async editComment(postId, data): Promise<any> {
