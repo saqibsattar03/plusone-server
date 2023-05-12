@@ -7,7 +7,12 @@ import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { json, urlencoded } from 'express';
 import * as process from 'process';
-
+import * as admin from 'firebase-admin';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const serviceAccount = require('../src/fcm-config.json');
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.useGlobalPipes(
@@ -20,6 +25,11 @@ async function bootstrap() {
       },
     }),
   );
+
+  /*** firebase fcm config ***/
+  // admin.initializeApp({
+  //   // credential: admin.credential.cert(serviceAccount),
+  // });
 
   const config = new DocumentBuilder()
     .setTitle('Plus-One')
@@ -42,4 +52,5 @@ async function bootstrap() {
   await app.listen(port, '0.0.0.0');
   console.log(`App is running on ${port}`);
 }
+export const messaging = admin.messaging();
 bootstrap().then();

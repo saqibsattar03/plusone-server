@@ -7,10 +7,10 @@ export type LikedPostDocument = HydratedDocument<LikedPost>;
 
 @Schema({ timestamps: true })
 export class LikedPost {
-  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Profile' }] })
+  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: Profile.name }] })
   userId: Profile[];
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Post' })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Post.name })
   postId: Post;
 }
 

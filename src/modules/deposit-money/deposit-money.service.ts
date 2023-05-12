@@ -36,7 +36,7 @@ export class DepositMoneyService {
         $push: {
           depositObject: {
             amount: depositDto.depositObject.amount,
-            createdAt: moment().format('YYYY-MM-DD'),
+            createdAt: moment().format('YYYY-MM-DD hh:mm:ss'),
           },
         },
       });
@@ -50,7 +50,7 @@ export class DepositMoneyService {
         $push: {
           depositObject: {
             amount: depositDto.depositObject.amount,
-            createdAt: moment().format('YYYY-MM-DD'),
+            createdAt: moment().format('YYYY-MM-DD hh:mm:ss'),
           },
         },
       });
@@ -64,40 +64,60 @@ export class DepositMoneyService {
 
   async sumOfDepositedAmountBySingleRestaurant(restaurantId): Promise<any> {
     const oid = new mongoose.Types.ObjectId(restaurantId);
-    return this.depositMoneyModel.aggregate([
-      {
-        $match: {
-          restaurantId: oid,
-        },
-      },
-      {
-        $unwind: '$depositObject',
-      },
-      {
-        $group: {
-          _id: restaurantId,
-          totalAmount: {
-            $sum: { $sum: '$depositObject.amount' },
-          },
-        },
-      },
-    ]);
+    const totalDebit = await this.depositMoneyModel
+      .findOne({ oid })
+      .then((deposits) => {
+        return deposits.depositObject.reduce((sum, depositObj) => {
+          return sum + Number(depositObj.amount);
+        }, 0);
+      });
+    return { totalDebit: totalDebit };
+    // return this.depositMoneyModel.aggregate([
+    //   {
+    //     $match: {
+    //       restaurantId: oid,
+    //     },
+    //   },
+    //   {
+    //     $unwind: '$depositObject',
+    //   },
+    //   {
+    //     $group: {
+    //       _id: restaurantId,
+    //       totalAmount: {
+    //         $sum: { $sum: '$depositObject.amount' },
+    //       },
+    //     },
+    //   },
+    // ]);
   }
 
   async sumOfDepositedAmountByAllRestaurant(): Promise<any> {
-    return this.depositMoneyModel.aggregate([
-      {
-        $unwind: '$depositObject',
-      },
-      {
-        $group: {
-          _id: null,
-          totalDebit: {
-            $sum: { $sum: '$depositObject.amount' },
-          },
-        },
-      },
-    ]);
+    return this.depositMoneyModel.find({}).then((deposits) => {
+      const totalDebit = deposits.reduce((total, deposit) => {
+        console.log(total);
+        return (
+          total +
+          deposit.depositObject.reduce((sum, depositObj) => {
+            return sum + Number(depositObj.amount);
+          }, 0)
+        );
+      }, 0);
+      return { totalDebit: totalDebit };
+    });
+    // return this.depositMoneyModel.aggregate([
+    //   {
+    //     $unwind: '$depositObject',
+    //   },
+    //   {
+    //     $group: {
+    //       _id: null,
+    //       totalDebit: {
+    //         $sum: { $sum: '$depositObject.amount' },
+    //       },
+    //     },
+    //   },
+    // ]);
   }
 
   async depositHistory(restaurantId): Promise<any> {

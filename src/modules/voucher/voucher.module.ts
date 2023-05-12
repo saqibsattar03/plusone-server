@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { VoucherController } from './voucher.controller';
 import { VoucherService } from './voucher.service';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -10,6 +10,7 @@ import {
 import { RestaurantModule } from '../restaurant/restaurant.module';
 import { ProfilesModule } from '../profiles/profiles.module';
 import { DepositMoneyModule } from '../deposit-money/deposit-money.module';
+import { FcmModule } from '../fcm/fcm.module';
 
 @Module({
   imports: [
@@ -24,8 +25,9 @@ import { DepositMoneyModule } from '../deposit-money/deposit-money.module';
       },
     ]),
     RestaurantModule,
-    ProfilesModule,
+    forwardRef(() => ProfilesModule),
     DepositMoneyModule,
+    // FcmModule,
   ],
   controllers: [VoucherController],
   providers: [VoucherService],

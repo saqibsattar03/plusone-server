@@ -20,6 +20,16 @@ import { ProfileDto } from '../../data/dtos/profile.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Post('sign-up')
+  @ApiBody({
+    type: ProfileDto,
+    description: 'Users Created as response',
+  })
+  @ApiBadRequestResponse({ description: 'can not create user' })
+  async createUser(@Body() data) {
+    console.log('sign up route', data);
+    return this.authService.createUser(data);
+  }
   @Post('sign-in')
   @ApiCreatedResponse({
     description: 'SignIn successful',

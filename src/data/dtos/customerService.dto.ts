@@ -1,5 +1,6 @@
 export class CustomerServiceDto {
+  // userId: string;
   subject: string;
-  customerQuery: string;
+  message: string;
   file: string;
 }

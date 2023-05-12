@@ -21,11 +21,17 @@ export class CustomerServiceService {
   }
 
   async getAllQueries(): Promise<CustomerServiceDocument[]> {
-    return this.customerModel.find();
+    return this.customerModel.find().populate({
+      path: 'userId',
+      select: 'email firstname surname -_id',
+    });
   }
 
   async getSingleQuery(queryId): Promise<CustomerServiceDocument> {
-    return this.customerModel.findById({ _id: queryId });
+    return this.customerModel.findById({ _id: queryId }).populate({
+      path: 'userId',
+      select: 'email firstname surname -_id',
+    });
   }
 
   async editQuery(queryId, data): Promise<CustomerServiceDocument> {
@@ -33,7 +39,7 @@ export class CustomerServiceService {
       { _id: queryId },
       {
         $set: {
-          customerQuery: data.customerQuery,
+          message: data.message,
         },
       },
     );

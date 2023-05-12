@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { FollowingController } from './following.controller';
 import { FollowingService } from './following.service';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -7,6 +7,8 @@ import {
   FollowingSchema,
 } from '../../data/schemas/following.schema';
 import { FollowerModule } from '../follower/follower.module';
+import { FcmModule } from '../fcm/fcm.module';
+import { ProfilesModule } from '../profiles/profiles.module';
 
 @Module({
   imports: [
@@ -16,7 +18,9 @@ import { FollowerModule } from '../follower/follower.module';
         schema: FollowingSchema,
       },
     ]),
-    FollowerModule,
+    forwardRef(() => FollowerModule),
+    forwardRef(() => FcmModule),
+    forwardRef(() => ProfilesModule),
   ],
   controllers: [FollowingController],
   providers: [FollowingService],

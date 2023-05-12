@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 
 import { jwtConstants } from './guards/constant';
@@ -14,10 +14,11 @@ import {
   ForgotPassword,
   ForgotPasswordSchema,
 } from '../../data/schemas/forgotPassword.schema';
+import { Profile, ProfileSchema } from '../../data/schemas/profile.schema';
 
 @Module({
   imports: [
-    ProfilesModule,
+    forwardRef(() => ProfilesModule),
     PassportModule,
     JwtModule.register({
       //save secret key in env file
@@ -29,6 +30,10 @@ import {
       {
         name: ForgotPassword.name,
         schema: ForgotPasswordSchema,
+      },
+      {
+        name: Profile.name,
+        schema: ProfileSchema,
       },
     ]),
   ],

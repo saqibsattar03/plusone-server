@@ -61,6 +61,7 @@ export class FollowerController {
   })
   // @UseGuards(JwtAuthGuard)
   getAllFollowers(@Query('userId') userId) {
+    console.log(userId);
     return this.followerService.getAllFollowers(userId);
   }
 }

@@ -7,11 +7,11 @@ import {
   RedeemVoucher,
   RedeemVoucherDocument,
 } from '../../data/schemas/redeemVoucher.schema';
-
 import { RestaurantService } from '../restaurant/restaurant.service';
 import { ProfilesService } from '../profiles/profiles.service';
 import { Constants } from '../../common/constants';
-import { DepositMoneyService } from '../deposit-money/deposit-money.service';
+import { uniqueCode } from '../../common/utils/uniqueCode';
+import { FcmService } from '../fcm/fcm.service';
 
 @Injectable()
 export class VoucherService {
@@ -21,8 +21,7 @@ export class VoucherService {
     @InjectModel(RedeemVoucher.name)
     private readonly redeemVoucherModel: Model<RedeemVoucherDocument>,
     private readonly restaurantService: RestaurantService,
-    private readonly profileService: ProfilesService,
-    private readonly depositMoneyService: DepositMoneyService,
+    private readonly profileService: ProfilesService, // private readonly fcmService: FcmService,
   ) {}
   async getRestaurantTotalVoucherCount(
     restaurantId,
@@ -126,7 +125,6 @@ export class VoucherService {
     }
     throw new HttpException('voucher created Successfully', HttpStatus.OK);
   }
-
   async createVoucherForBoth(voucherDto: VoucherDto): Promise<any> {
     const oid = new mongoose.Types.ObjectId(voucherDto.voucherObject._id);
     // let voucherCode = Math.floor(Math.random() * 5596 + 1249);
@@ -181,19 +179,17 @@ export class VoucherService {
     }
     throw new HttpException('voucher created Successfully', HttpStatus.OK);
   }
-
   async getSingleVoucher(voucherId): Promise<any> {
     const oid = new mongoose.Types.ObjectId(voucherId);
-    return this.voucherModel.aggregate([
+    return this.voucherModel.findOne(
+      { 'voucherObject._id': oid },
       {
-        $unwind: '$voucherObject',
-      },
-      {
-        $match: {
-          'voucherObject._id': oid,
+        restaurantId: 1,
+        voucherObject: {
+          $elemMatch: { _id: new mongoose.Types.ObjectId(oid) },
         },
       },
-    ]);
+    );
   }
   async getAllVouchersByRestaurant(restaurantId): Promise<any> {
     return this.voucherModel.findOne({ restaurantId: restaurantId });
@@ -244,7 +240,8 @@ export class VoucherService {
     );
     if (res) {
       if (res.uniqueCode == data.restaurantCode) {
-        const verificationCode = await this.fourDigitCode(4);
+        // const verificationCode = await this.fourDigitCode(4);
+        const verificationCode = await uniqueCode(4);
         const res = await this.redeemVoucherModel.create({
           userId: data.userId,
           voucherId: data.voucherId,
@@ -252,30 +249,24 @@ export class VoucherService {
           verificationCode: verificationCode,
         });
         const oid = new mongoose.Types.ObjectId(data.voucherId);
-        const rPoints = await this.profileService.getUserRewardPoints(
-          data.userId,
-        );
-        await this.profileService.updateRewardPoints(
-          data.userId,
-          rPoints.rewardPoints + 1,
-        );
-        const voucher = await this.voucherModel.aggregate([
+        const rPoints = await this.profileService.getUserEarnings(data.userId);
+        const voucher = await this.voucherModel.findOne(
+          { 'voucherObject._id': oid },
           {
-            $unwind: '$voucherObject',
-          },
-          {
-            $match: {
-              'voucherObject._id': oid,
+            voucherObject: {
+              $elemMatch: { _id: oid },
             },
           },
-        ]);
+        );
         await this.restaurantService.addTotalSalesAndDeductions(
-          voucher[0].voucherObject.estimatedCost,
+          voucher.voucherObject[0].estimatedCost,
           data.restaurantId,
         );
-        await this.profileService.updatedEstimatedSavings(
-          data.userId,
-          voucher[0].voucherObject.estimatedSavings,
+        await this.profileService.updateProfile(
+          data,
+          rPoints.estimatedSavings +
+            parseInt(voucher.voucherObject[0].estimatedSavings),
+          rPoints.rewardPoints + 1,
         );
         const availableBalance =
           await this.restaurantService.getAvailableRestaurantBalance(
@@ -284,6 +275,15 @@ export class VoucherService {
         if (availableBalance < 50) {
           // todo: send email to recharge //
         }
+
+        //*** sending voucher redemption notification to user ***//
+        // await this.fcmService.sendSingleNotification()
+        const notification = {
+          email: rPoints.email,
+          title: 'Score! Your Voucher Has Been Redeemed 🎉🛍️💰',
+          body: '🎁 Surprise! Voucher redeemed, and the savings are all yours to enjoy 🎉🛍️💰',
+        };
+        // await this.fcmService.sendSingleNotification(notification);
         return res.verificationCode;
       } else
         throw new HttpException(
@@ -354,22 +354,22 @@ export class VoucherService {
   }
   async getTotalVoucherRedeemedCount(restaurantId): Promise<any> {
     const oid = new mongoose.Types.ObjectId(restaurantId);
-    return this.redeemVoucherModel.aggregate([
-      // {
-      //   $match: {
-      //     restaurantId: oid,
-      //   },
-      // },
-      {
-        $count: 'total count',
-      },
-    ]);
+    return this.redeemVoucherModel.find({ restaurantId: oid }).count();
+    // return this.redeemVoucherModel.aggregate([
+    //   // {
+    //   //   $match: {
+    //   //     restaurantId: oid,
+    //   //   },
+    //   // },
+    //   {
+    //     $count: 'total count',
+    //   },
+    // ]);
   }
   async getUserWhoRedeemVoucher(voucherId): Promise<any> {
     const oid = new mongoose.Types.ObjectId(voucherId);
     return this.redeemVoucherModel.find({ voucherId: oid });
   }
-
   createVoucherUpdateOperation(oid, voucherDto) {
     return {
       $push: {
@@ -388,97 +388,6 @@ export class VoucherService {
       },
     };
   }
-
-  // async getAllRedeemedVouchers(restaurantId): Promise<any> {
-  //   const oid = new mongoose.Types.ObjectId(restaurantId);
-  //   if (restaurantId) {
-  //     return this.redeemVoucherModel.aggregate([
-  //       {
-  //         $match: {
-  //           restaurantId: oid,
-  //         },
-  //       },
-  //       {
-  //         $lookup: {
-  //           from: 'vouchers',
-  //           localField: 'restaurantId',
-  //           foreignField: 'restaurantId',
-  //           as: 'voucher',
-  //         },
-  //       },
-  //       {
-  //         $unwind: '$voucher',
-  //       },
-  //       {
-  //         $project: {
-  //           vouc: '$voucher.voucherObject',
-  //         },
-  //       },
-  //       {
-  //         $unwind: '$vouc',
-  //       },
-  //       {
-  //         $lookup: {
-  //           from: 'redeemvouchers',
-  //           localField: 'vouc._id',
-  //           foreignField: 'voucherId',
-  //           as: 'voucher',
-  //         },
-  //       },
-  //       {
-  //         $unwind: '$voucher',
-  //       },
-  //       {
-  //         $project: {
-  //           // _id: 1,
-  //           vouc: 1,
-  //         },
-  //       },
-  //     ]);
-  //   } else
-  //     return this.redeemVoucherModel.aggregate([
-  //       {
-  //         $lookup: {
-  //           from: 'vouchers',
-  //           localField: 'restaurantId',
-  //           foreignField: 'restaurantId',
-  //           as: 'voucher',
-  //         },
-  //       },
-  //       {
-  //         $unwind: '$voucher',
-  //       },
-  //       {
-  //         $project: {
-  //           vouc: '$voucher.voucherObject',
-  //         },
-  //       },
-  //       {
-  //         $unwind: '$vouc',
-  //       },
-  //       {
-  //         $lookup: {
-  //           from: 'redeemvouchers',
-  //           localField: 'vouc._id',
-  //           foreignField: 'voucherId',
-  //           as: 'v',
-  //         },
-  //       },
-  //       {
-  //         $unwind: '$v',
-  //       },
-  //       // {
-  //       //   count: { $sum:  },
-  //       // },
-  //       //
-  //       {
-  //         $project: {
-  //           // _id: 1,
-  //           v: 1,
-  //         },
-  //       },
-  //     ]);
-  // }
   async getAllRedeemedVouchers(restaurantId): Promise<any> {
     const oid = new mongoose.Types.ObjectId(restaurantId);
     if (restaurantId) {
@@ -515,9 +424,9 @@ export class VoucherService {
             as: 'voucher',
           },
         },
-        {
-          $unwind: '$voucher',
-        },
+        // {
+        //   $unwind: '$voucher',
+        // },
         {
           $project: {
             // _id: 1,
@@ -543,9 +452,9 @@ export class VoucherService {
             vouc: '$voucher.voucherObject',
           },
         },
-        {
-          $unwind: '$vouc',
-        },
+        // {
+        //   $unwind: '$vouc',
+        // },
         {
           $lookup: {
             from: 'redeemvouchers',
@@ -554,26 +463,17 @@ export class VoucherService {
             as: 'voucher',
           },
         },
-        {
-          $unwind: '$voucher',
-        },
+        // {
+        //   $unwind: '$voucher',
+        // },
         {
           $project: {
             // _id: 1,
-            vouc: 1,
+
+            // getting 1st element present in vouc array and projecting it as an object
+            vouc: { $arrayElemAt: ['$vouc', 0] },
           },
         },
       ]);
-  }
-  async fourDigitCode(length) {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-
-    let result = ' ';
-    const charactersLength = characters.length;
-    for (let i = 0; i < length; i++) {
-      result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-
-    return result;
   }
 }

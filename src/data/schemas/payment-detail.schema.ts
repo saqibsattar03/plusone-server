@@ -1,5 +1,4 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Restaurant } from './restaurant.schema';
 import { HydratedDocument } from 'mongoose';
 
 export type paymentDetailDocument = HydratedDocument<PaymentDetail>;

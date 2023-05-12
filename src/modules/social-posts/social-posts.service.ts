@@ -16,6 +16,8 @@ import { UpdateSocialPost } from '../../data/dtos/socialPost.dto';
 import { Constants } from '../../common/constants';
 import { FollowingService } from '../following/following.service';
 import { CommentsService } from './comments/comments.service';
+import { FcmService } from '../fcm/fcm.service';
+import { ProfilesService } from '../profiles/profiles.service';
 @Injectable()
 export class SocialPostsService {
   constructor(
@@ -26,6 +28,10 @@ export class SocialPostsService {
     private readonly followingService: FollowingService,
     @Inject(forwardRef(() => CommentsService))
     private readonly commentService: CommentsService,
+    @Inject(forwardRef(() => FcmService))
+    protected readonly fcmService: FcmService,
+    @Inject(forwardRef(() => ProfilesService))
+    protected readonly profileService: ProfilesService,
   ) {}
   async createPost(postDto: any): Promise<PostDocument> {
     try {
@@ -45,8 +51,9 @@ export class SocialPostsService {
     }
   }
   async getAllPost(paginationDto, data): Promise<any> {
+    console.log('Route called');
     const { limit, offset } = paginationDto;
-    const pipeLine = await this.getPostPipeline(data.userId);
+    const pipeLine = await this.getPostPipeline(data.loggedInUser);
     const followings = await this.followingService.getFollowingIds(data.userId);
     const followingsArray = [];
     followings.forEach((obj) => {
@@ -88,6 +95,7 @@ export class SocialPostsService {
     }
     switch (data.postAudiencePreference) {
       case Constants.PUBLIC: {
+        console.log('public');
         try {
           const match = {
             $match: {
@@ -118,6 +126,7 @@ export class SocialPostsService {
         }
       }
       case Constants.FOLLOWING: {
+        console.log('in following');
         try {
           const match = {
             $match: {
@@ -130,7 +139,7 @@ export class SocialPostsService {
           const match1 = {
             $match: {
               postAudiencePreference: {
-                $ne: 'ONLY-ME',
+                $ne: Constants.ONLYME,
               },
             },
           };
@@ -167,6 +176,8 @@ export class SocialPostsService {
         }
       }
       case Constants.MYPOSTS: {
+        console.log('my posts');
+        console.log('user Id = ', data.userId);
         try {
           return this.socialPostModel.aggregate([
             {
@@ -211,6 +222,7 @@ export class SocialPostsService {
       { new: true },
     );
   }
+
   async deleteSinglePost(userId, postId): Promise<PostDocument> {
     const post = await this.socialPostModel.findOne({
       _id: postId,
@@ -226,14 +238,16 @@ export class SocialPostsService {
     await post.deleteOne();
     throw new HttpException('post deleted successfully', HttpStatus.OK);
   }
+
   async deleteAllPostsOfSingleUser(userId): Promise<any> {
     await this.socialPostModel.deleteMany({ userId: userId });
   }
+
   async likePost(userId, postId): Promise<LikedPostDocument> {
-    const res = await this.postLikedModel.findOne({ postId: postId });
+    let res = await this.postLikedModel.findOne({ postId: postId });
     if (!res) {
-      const post = await this.postLikedModel.create({ postId: postId });
-      await post.updateOne({ $push: { userId: userId } });
+      res = await this.postLikedModel.create({ postId: postId });
+      await res.updateOne({ $push: { userId: userId } });
       const c = await this.socialPostModel
         .findOne({ _id: postId })
         .select('likesCount -_id');
@@ -246,16 +260,29 @@ export class SocialPostsService {
         await res.updateOne({ $push: { userId: userId } });
         const c = await this.socialPostModel
           .findOne({ _id: postId })
-          .select('likesCount -_id');
+          .select('likesCount userId -_id');
         await this.socialPostModel.updateOne(
           { _id: postId },
           { likesCount: c.likesCount + 1 },
         );
       }
     }
+    //*** send like post notification ***//
+
+    // const id = await this.getPostUserId(res.postId);
+    // const userData = await this.profileService.getUserEarnings(userId);
+    // const notification = {
+    //   email: id.email,
+    //   title: 'New Like! 👍',
+    //   body: `Your post just got a like from ${userData.firstname} ${userData.surname}! 👍`,
+    // };
+    // //*** like post notification ***//
+    // if (id._id.toString() != userData._id.toString())
+    //   await this.fcmService.sendSingleNotification(notification);
     throw new HttpException('post liked successfully', HttpStatus.OK);
   }
   async removeLike(userId, postId): Promise<any> {
+    console.log('like remove function');
     const res = await this.postLikedModel.findOne({ postId: postId });
     if (!res) throw new HttpException('no post found', HttpStatus.NOT_FOUND);
     if (res) {
@@ -540,5 +567,14 @@ export class SocialPostsService {
         },
       },
     ]);
+  }
+  async getPostUserId(postId): Promise<any> {
+    const postedUserId = await this.socialPostModel
+      .findOne({
+        _id: postId,
+      })
+      .select('userId -_id');
+
+    return this.profileService.getUserEarnings(postedUserId.userId);
   }
 }

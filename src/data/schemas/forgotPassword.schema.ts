@@ -5,7 +5,7 @@ import { User } from './user.schema';
 export type ForgotPasswordDocument = HydratedDocument<ForgotPassword>;
 @Schema()
 export class ForgotPassword {
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name })
   userId: User;
 
   @Prop({ type: String, required: true })

@@ -7,7 +7,6 @@ import { ProfilesModule } from './modules/profiles/profiles.module';
 import { FollowerModule } from './modules/follower/follower.module';
 import { FollowingModule } from './modules/following/following.module';
 import { RestaurantReviewModule } from './modules/restaurant-review/restaurant-review.module';
-import { ChatModule } from './modules/chat/chat.module';
 import { RestaurantModule } from './modules/restaurant/restaurant.module';
 import { VoucherModule } from './modules/voucher/voucher.module';
 import { QuoteModule } from './modules/quote/quote.module';
@@ -18,6 +17,8 @@ import { DepositMoneyModule } from './modules/deposit-money/deposit-money.module
 import { DbModule } from './common/db/db.module';
 import { ConfigModule } from '@nestjs/config';
 import { multerConfig } from './common/configs/image.config';
+import { InvitationModule } from './modules/invitation/invitation.module';
+import { FcmModule } from './modules/fcm/fcm.module';
 
 @Module({
   imports: [
@@ -33,7 +34,6 @@ import { multerConfig } from './common/configs/image.config';
     FollowerModule,
     FollowingModule,
     RestaurantReviewModule,
-    ChatModule,
     RestaurantModule,
     VoucherModule,
     QuoteModule,
@@ -41,6 +41,8 @@ import { multerConfig } from './common/configs/image.config';
     AuthModule,
     MulterModule.register(multerConfig),
     DepositMoneyModule,
+    InvitationModule,
+    FcmModule,
   ],
   controllers: [AppController],
   providers: [AppService],

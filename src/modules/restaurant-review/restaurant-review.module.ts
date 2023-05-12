@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { RestaurantReviewController } from './restaurant-review.controller';
 import { RestaurantReviewService } from './restaurant-review.service';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -17,8 +17,8 @@ import { SocialPostsModule } from '../social-posts/social-posts.module';
         schema: RestaurantReviewSchema,
       },
     ]),
-    SocialPostsModule,
-    RestaurantModule,
+    forwardRef(() => SocialPostsModule),
+    forwardRef(() => RestaurantModule),
   ],
   controllers: [RestaurantReviewController],
   providers: [RestaurantReviewService],

@@ -16,4 +16,5 @@ export enum Constants {
   MYPOSTS = 'MYPOSTS',
   FRIENDS = 'FRIENDS',
   DELETED = 'DELETED',
+  ONLYME = 'ONLY-ME',
 }

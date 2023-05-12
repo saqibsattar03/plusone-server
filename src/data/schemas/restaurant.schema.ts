@@ -8,7 +8,7 @@ export type RestaurantDocument = HydratedDocument<Restaurant>;
 export class Restaurant {
   @Prop({
     type: mongoose.Types.ObjectId,
-    ref: 'Profile',
+    ref: Profile.name,
     required: true,
     index: true,
   })

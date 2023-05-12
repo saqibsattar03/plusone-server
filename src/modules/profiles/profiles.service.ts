@@ -1,6 +1,8 @@
 import {
+  forwardRef,
   HttpException,
   HttpStatus,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -13,67 +15,86 @@ import { FollowerService } from '../follower/follower.service';
 import { SocialPostsService } from '../social-posts/social-posts.service';
 import { RestaurantReviewService } from '../restaurant-review/restaurant-review.service';
 import { RestaurantService } from '../restaurant/restaurant.service';
-import * as bcrypt from 'bcrypt';
 import { Constants } from '../../common/constants';
-import { generateToken } from '../../common/utils/generateToken';
+import {
+  comparePassword,
+  hashPassword,
+} from '../../common/utils/passwordHashing';
 
 @Injectable()
 export class ProfilesService {
   constructor(
     @InjectModel(Profile.name)
     private readonly profileModel: Model<ProfileDocument>,
+    @Inject(forwardRef(() => FollowingService))
     private readonly followeeService: FollowingService,
     private readonly followerService: FollowerService,
+    @Inject(forwardRef(() => SocialPostsService))
     private readonly socialPostService: SocialPostsService,
+    @Inject(forwardRef(() => RestaurantReviewService))
     private readonly reviewService: RestaurantReviewService,
+    @Inject(forwardRef(() => RestaurantService))
     private readonly restaurantService: RestaurantService,
   ) {}
-
-  async createUser(userDto: any) {
-    const saltOrRounds = 10;
-    userDto.password = await bcrypt.hash(userDto.password, saltOrRounds);
-    if (userDto.role == Constants.ADMIN || userDto.role == Constants.MERCHANT)
-      userDto.accountHolderType = null;
-    const userName = await this.profileModel.findOne({
-      username: userDto.username,
-    });
-    if (userName)
+  async updateProfile(
+    data,
+    estimatedSavings = null,
+    rewardPoints = null,
+  ): Promise<any> {
+    console.log('data = ', data);
+    const userEarnings = await this.getUserEarnings(data.userId);
+    const profile = await this.profileModel.findById({ _id: data.userId });
+    if (!profile) throw new NotFoundException(' Profile does not exist');
+    if (profile.role == Constants.USER && profile.status == Constants.PENDING)
       throw new HttpException(
-        'A user with this email already exists.',
+        'Account is still not verified yet',
         HttpStatus.UNAUTHORIZED,
       );
-    const user = await this.profileModel.findOne({
-      email: userDto.email,
-    });
-    if (user)
-      throw new HttpException('Email already exist', HttpStatus.UNAUTHORIZED);
-    const newUser = new this.profileModel({
-      firstname: userDto.firstname,
-      surname: userDto.surname,
-      username: userDto.username,
-      email: userDto.email,
-      password: userDto.password,
-      accountHolderType: userDto.accountHolderType,
-      role: userDto.role,
-      scopes: userDto.scopes,
-      status: userDto.status,
-      confirmationCode: await generateToken(),
-    });
-    await newUser.save();
-    if (newUser.role == Constants.MERCHANT) return newUser;
-    // sendConfirmationEmail(newUser.email, newUser.confirmationCode);
-    throw new HttpException(
-      'Account Created Successfully. Please Confirm Your Email to Active Your Account. Check Your Email for Confirmation',
-      HttpStatus.OK,
+
+    return this.profileModel.findByIdAndUpdate(
+      { _id: data.userId },
+      {
+        $set: {
+          firstname: data.firstname,
+          surname: data.surname,
+          bio: data.bio,
+          instagramLink: data.instagramLink,
+          tiktokLink: data.tiktokLink,
+          profileImage: data.profileImage,
+          favoriteRestaurants: data.favoriteRestaurants,
+          favoriteCuisines: data.favoriteCuisines,
+          favoriteChefs: data.favoriteChefs,
+          dietRequirements: data.dietRequirements,
+          scopes: data.scopes,
+          rewardPoints: rewardPoints ?? userEarnings.rewardPoints,
+          estimatedSavings: estimatedSavings ?? userEarnings.estimatedSavings,
+          isSkip: data.isSkip,
+          accountType: data.accountType,
+          postAudiencePreference: data.postAudiencePreference,
+          fcmToken: data.fcmToken,
+        },
+      },
+      {
+        new: true,
+      },
     );
   }
+
   async verifyUser(confirmationCode: string): Promise<any> {
     const verified = await this.profileModel.findOne({
       confirmationCode: confirmationCode,
     });
     if (verified) {
-      await verified.updateOne({ status: Constants.ACTIVE });
-      await verified.updateOne({ confirmationCode: null });
+      await this.profileModel.updateOne(
+        { confirmationCode: confirmationCode },
+        {
+          $set: {
+            status: Constants.ACTIVE,
+            confirmationCode: null,
+          },
+        },
+      );
+      // await verified.updateOne({ confirmationCode: null });
       throw new HttpException('Account Activated Successfully', HttpStatus.OK);
     } else
       throw new HttpException(
@@ -81,8 +102,13 @@ export class ProfilesService {
         HttpStatus.BAD_REQUEST,
       );
   }
-  async getUserRewardPoints(userId): Promise<ProfileDocument> {
-    return this.profileModel.findById({ _id: userId }).select('rewardPoints');
+
+  async getUserEarnings(userId): Promise<ProfileDocument> {
+    return this.profileModel
+      .findById({ _id: userId })
+      .select(
+        'rewardPoints estimatedSavings email firstname surname profileImage',
+      );
   }
   async getSingleProfile(userId): Promise<any> {
     return this.profileModel.aggregate([
@@ -179,6 +205,15 @@ export class ProfilesService {
       $or: [{ email: user.email }, { username: user.email }],
     });
   }
+
+  async getUser(email) {
+    console.log(email);
+    return this.profileModel
+      .findOne({
+        $or: [{ email: email }, { username: email }],
+      })
+      .select('email password accountHolderType status role fcmToken');
+  }
   async fetchProfileUsingToken(user): Promise<any> {
     const fetchedUser = await this.profileModel
       .findOne({
@@ -192,71 +227,47 @@ export class ProfilesService {
       );
     return fetchedUser;
   }
-  async updateProfile(data): Promise<any> {
-    const profile = await this.profileModel.findById({ _id: data.userId });
-    if (!profile) throw new NotFoundException(' Profile does not exist');
-    if (profile.role == Constants.USER && profile.status == Constants.PENDING)
-      throw new HttpException(
-        'Account is still not verified yet',
-        HttpStatus.UNAUTHORIZED,
-      );
 
-    return this.profileModel.findByIdAndUpdate(
-      { _id: data.userId },
-      {
-        $set: {
-          firstname: data.firstname,
-          surname: data.surname,
-          bio: data.bio,
-          instagramLink: data.instagramLink,
-          tiktokLink: data.tiktokLink,
-          profileImage: data.profileImage,
-          favoriteRestaurants: data.favoriteRestaurants,
-          favoriteCuisines: data.favoriteCuisines,
-          favoriteChefs: data.favoriteChefs,
-          dietRequirements: data.dietRequirements,
-          scopes: data.scopes,
-          isSkip: data.isSkip,
-        },
-      },
-      {
-        new: true,
-      },
-    );
+  async getUserBasedOnUserId(userId: string): Promise<any> {
+    return this.profileModel.findById(userId).select('email');
   }
-  async updateRewardPoints(userId, rewardPoints): Promise<any> {
-    await this.profileModel.findOneAndUpdate(
-      { _id: userId },
-      { rewardPoints: rewardPoints },
-    );
-  }
-  async updatedEstimatedSavings(userId, estimatedSavings): Promise<any> {
-    await this.profileModel.findByIdAndUpdate(
-      {
-        _id: userId,
-      },
-      { estimatedSavings: estimatedSavings },
-    );
-  }
+  // async updateRewardPoints(userId, rewardPoints): Promise<any> {
+  //   await this.profileModel.findOneAndUpdate(
+  //     { _id: userId },
+  //     { rewardPoints: rewardPoints },
+  //   );
+  // }
+  // async updatedEstimatedSavings(userId, estimatedSavings): Promise<any> {
+  //   await this.profileModel.findByIdAndUpdate(
+  //     {
+  //       _id: userId,
+  //     },
+  //     { estimatedSavings: estimatedSavings },
+  //   );
+  // }
   async getAllUsers(role: string): Promise<any> {
-    return this.profileModel.aggregate([
-      {
-        $match: { role: role },
-      },
-      {
-        $lookup: {
-          from: 'restaurants',
-          localField: '_id',
-          foreignField: 'userId',
-          as: 'restaurantData',
-        },
-      },
-      {
-        $unset: ['password', 'confirmationCode'],
-      },
-    ]);
+    if (role == Constants.USER || role == Constants.ADMIN)
+      return this.profileModel.find({ role });
+    return this.restaurantService.getAllUsers(role);
+    // return this.profileModel.find({ role }).populate('userId');
+    // return this.profileModel.aggregate([
+    //   {
+    //     $match: { role: role },
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: 'restaurants',
+    //       localField: '_id',
+    //       foreignField: 'userId',
+    //       as: 'restaurantData',
+    //     },
+    //   },
+    //   {
+    //     $unset: ['password', 'confirmationCode'],
+    //   },
+    // ]);
   }
-  async removeProfile(profileId): Promise<ProfileDocument> {
+  async deleteProfile(profileId): Promise<ProfileDocument> {
     const oid = new mongoose.Types.ObjectId(profileId);
     const profile = await this.profileModel.findById(profileId);
     if (!profile) throw new NotFoundException(' Profile does not exist');
@@ -275,32 +286,24 @@ export class ProfilesService {
   ): Promise<ProfileDocument[]> {
     const { limit, offset } = paginationDto;
     return this.profileModel
-      .find({ accountType: 'PUBLIC' }, {}, { skip: offset, take: limit })
-      .select([
-        '-password',
-        '-confirmationCode',
-        '-createdAt',
-        '-updatedAt',
-        '-rewardPoints',
-      ]);
+      .find(
+        { accountType: Constants.PUBLIC },
+        {},
+        { skip: offset, take: limit },
+      )
+      .select(['-createdAt', '-updatedAt', '-rewardPoints']);
   }
   async restaurantFilters(data, paginationQuery): Promise<any> {
     return this.restaurantService.restaurantFilters(data, paginationQuery);
   }
-  async resetPassword(user, password) {
-    const encryptedPassword = await bcrypt.hash(password, 10);
+  async resetPassword(user, enteredPassword) {
+    const encryptedPassword = await hashPassword(enteredPassword);
     await this.profileModel.updateOne(
       { _id: user._id },
       { password: encryptedPassword },
     );
   }
-  async getUser(email: string) {
-    return this.profileModel
-      .findOne({
-        $or: [{ email: email }, { username: email }],
-      })
-      .select('email password');
-  }
+
   // async getUserByEmailAndPassword(email, password): Promise<any> {
   //   const user = this.profileModel
   //     .findOne({
@@ -324,9 +327,8 @@ export class ProfilesService {
     const user = await this.profileModel
       .findOne({ _id: data.userId })
       .select('password');
-    console.log('user = ', user);
     if (!user) throw new HttpException('use not found', HttpStatus.NOT_FOUND);
-    const isValidPassword = await bcrypt.compare(
+    const isValidPassword = await comparePassword(
       data.oldPassword,
       user.password,
     );
@@ -335,8 +337,8 @@ export class ProfilesService {
         'Old Password is incorrect',
         HttpStatus.FORBIDDEN,
       );
-    const hashedPassword = await bcrypt.hash(data.newPassword, 10);
-    const differentPassword = await bcrypt.compare(
+    const hashedPassword = await hashPassword(data.newPassword);
+    const differentPassword = await comparePassword(
       data.oldPassword,
       hashedPassword,
     );
@@ -362,8 +364,11 @@ export class ProfilesService {
   async filterUserByName(username): Promise<any> {
     const regex = new RegExp(username, 'i');
     return this.profileModel
-      .find({ username: regex })
+      .find({ username: regex, status: Constants.ACTIVE })
       .where({ role: Constants.USER })
       .select('_id username firstname surname profileImage');
+  }
+  async updateFcmToken(id: string, token: string): Promise<any> {
+    return await this.profileModel.findByIdAndUpdate(id, { token }).exec();
   }
 }

@@ -17,7 +17,6 @@ import {
 } from '@nestjs/swagger';
 import { FollowResponse } from '../../data/dtos/following.dto';
 import { JwtAuthGuard } from '../../common/auth/guards/jwt-auth.guard';
-import { query } from 'express';
 
 @ApiTags('Followings')
 @Controller('followee')

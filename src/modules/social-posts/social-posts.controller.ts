@@ -63,7 +63,13 @@ export class SocialPostsController {
   @ApiCreatedResponse({ type: SocialPostResponseDto })
   @ApiBadRequestResponse({ description: 'can not fetch posts' })
   @Post('all')
-  getAllPost(@Query() paginationDto: PaginationDto, @Body() data) {
+  @UseGuards(JwtAuthGuard)
+  getAllPost(
+    @Query() paginationDto: PaginationDto,
+    @Body() data,
+    @Request() request,
+  ) {
+    data.loggedInUser = request.user.userId;
     return this.socialPostService.getAllPost(paginationDto, data);
   }
 

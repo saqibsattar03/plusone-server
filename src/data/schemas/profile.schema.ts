@@ -27,7 +27,7 @@ export class Profile extends User {
   })
   status: string;
 
-  @Prop({ type: String })
+  @Prop({ type: String, select: false })
   confirmationCode: string;
 
   @Prop({
@@ -90,8 +90,11 @@ export class Profile extends User {
   @Prop({ type: [String] })
   scopes: [string];
 
-  @Prop({ type: String })
+  @Prop({ type: String, default: '' })
   estimatedSavings: string;
+
+  @Prop({ type: String, default: '' })
+  fcmToken: string;
 }
 
 export const ProfileSchema = SchemaFactory.createForClass(Profile);
