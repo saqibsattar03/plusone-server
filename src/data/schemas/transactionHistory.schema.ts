@@ -2,7 +2,7 @@ import { Prop, Schema } from '@nestjs/mongoose';
 import { Restaurant } from './restaurant.schema';
 import mongoose from 'mongoose';
 
-@Schema()
+@Schema({ timestamps: true })
 export class TransactionHistory {
   @Prop({ type: new mongoose.Types.ObjectId(), ref: Restaurant.name })
   restaurantId: Restaurant;
