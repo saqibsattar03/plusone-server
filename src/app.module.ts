@@ -19,6 +19,7 @@ import { ConfigModule } from '@nestjs/config';
 import { multerConfig } from './common/configs/image.config';
 import { InvitationModule } from './modules/invitation/invitation.module';
 import { FcmModule } from './modules/fcm/fcm.module';
+import { TransactionHistoryModule } from './modules/transaction-history/transaction-history.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { FcmModule } from './modules/fcm/fcm.module';
     DepositMoneyModule,
     InvitationModule,
     FcmModule,
+    TransactionHistoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

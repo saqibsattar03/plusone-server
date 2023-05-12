@@ -200,12 +200,6 @@ export class ProfilesService {
       },
     ]);
   }
-  async getUserByEmailOrUserName(user): Promise<ProfileDocument> {
-    return this.profileModel.findOne({
-      $or: [{ email: user.email }, { username: user.email }],
-    });
-  }
-
   async getUser(email) {
     console.log(email);
     return this.profileModel
@@ -227,24 +221,6 @@ export class ProfilesService {
       );
     return fetchedUser;
   }
-
-  async getUserBasedOnUserId(userId: string): Promise<any> {
-    return this.profileModel.findById(userId).select('email');
-  }
-  // async updateRewardPoints(userId, rewardPoints): Promise<any> {
-  //   await this.profileModel.findOneAndUpdate(
-  //     { _id: userId },
-  //     { rewardPoints: rewardPoints },
-  //   );
-  // }
-  // async updatedEstimatedSavings(userId, estimatedSavings): Promise<any> {
-  //   await this.profileModel.findByIdAndUpdate(
-  //     {
-  //       _id: userId,
-  //     },
-  //     { estimatedSavings: estimatedSavings },
-  //   );
-  // }
   async getAllUsers(role: string): Promise<any> {
     if (role == Constants.USER || role == Constants.ADMIN)
       return this.profileModel.find({ role });
@@ -304,25 +280,6 @@ export class ProfilesService {
     );
   }
 
-  // async getUserByEmailAndPassword(email, password): Promise<any> {
-  //   const user = this.profileModel
-  //     .findOne({
-  //       $or: [{ email: email }, { username: email }],
-  //     })
-  //     .select('password');
-  //   const passwordValid = await bcrypt.compare(password, user.password);
-  //   if (user && passwordValid) {
-  //     const { password, ...result } = user;
-  //     return result;
-  //   }
-  //   return null;
-  // const passwordValid = await bcrypt.compare(password, user.password);
-  // if (user && passwordValid) {
-  //   const { password, ...result } = user;
-  //   return result;
-  // }
-  // return null;
-  // }
   async changePassword(data): Promise<any> {
     const user = await this.profileModel
       .findOne({ _id: data.userId })

@@ -12,6 +12,7 @@ import { ProfilesService } from '../profiles/profiles.service';
 import { Constants } from '../../common/constants';
 import { uniqueCode } from '../../common/utils/uniqueCode';
 import { FcmService } from '../fcm/fcm.service';
+import { TransactionHistoryService } from '../transaction-history/transaction-history.service';
 
 @Injectable()
 export class VoucherService {
@@ -22,6 +23,7 @@ export class VoucherService {
     private readonly redeemVoucherModel: Model<RedeemVoucherDocument>,
     private readonly restaurantService: RestaurantService,
     private readonly profileService: ProfilesService, // private readonly fcmService: FcmService,
+    private readonly transactionHistoryService: TransactionHistoryService,
   ) {}
   async getRestaurantTotalVoucherCount(
     restaurantId,
@@ -258,31 +260,41 @@ export class VoucherService {
             },
           },
         );
-        await this.restaurantService.addTotalSalesAndDeductions(
-          voucher.voucherObject[0].estimatedCost,
-          data.restaurantId,
-        );
+        const restaurantStats =
+          await this.restaurantService.addTotalSalesAndDeductions(
+            voucher.voucherObject[0].estimatedCost,
+            data.restaurantId,
+          );
+
         await this.profileService.updateProfile(
           data,
           rPoints.estimatedSavings +
             parseInt(voucher.voucherObject[0].estimatedSavings),
           rPoints.rewardPoints + 1,
         );
-        const availableBalance =
-          await this.restaurantService.getAvailableRestaurantBalance(
-            data.restaurantId,
-          );
-        if (availableBalance < 50) {
+
+        const transactionData = {
+          restaurantId: data.restaurantId,
+          transactionType: Constants.DEBIT,
+          voucherType: voucher.voucherObject[0].voucherType,
+          amount: voucher.voucherObject[0].estimatedCost,
+          deductedAmount: voucher.voucherObject[0].estimatedCost * 0.1,
+          availableDeposit: restaurantStats.availableDeposit,
+        };
+        await this.transactionHistoryService.createTransactionHistory(
+          transactionData,
+        );
+        if (restaurantStats.availableDeposit < 50) {
           // todo: send email to recharge //
         }
 
         //*** sending voucher redemption notification to user ***//
         // await this.fcmService.sendSingleNotification()
-        const notification = {
-          email: rPoints.email,
-          title: 'Score! Your Voucher Has Been Redeemed 🎉🛍️💰',
-          body: '🎁 Surprise! Voucher redeemed, and the savings are all yours to enjoy 🎉🛍️💰',
-        };
+        // const notification = {
+        //   email: rPoints.email,
+        //   title: 'Score! Your Voucher Has Been Redeemed 🎉🛍️💰',
+        //   body: '🎁 Surprise! Voucher redeemed, and the savings are all yours to enjoy 🎉🛍️💰',
+        // };
         // await this.fcmService.sendSingleNotification(notification);
         return res.verificationCode;
       } else

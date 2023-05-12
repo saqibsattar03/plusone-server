@@ -110,17 +110,6 @@ export class SocialPostsService {
             { $limit: limit },
           ];
           return this.socialPostModel.aggregate(p);
-          // return this.socialPostModel
-          //   .aggregate([
-          //     {
-          //       $match: {
-          //         postAudiencePreference: Constants.PUBLIC,
-          //       },
-          //     },
-          //     ...pipeLine,
-          //   ])
-          //   .skip(offset)
-          //   .limit(limit);
         } catch (e) {
           throw new HttpException(e.toString(), HttpStatus.BAD_REQUEST);
         }
@@ -176,8 +165,6 @@ export class SocialPostsService {
         }
       }
       case Constants.MYPOSTS: {
-        console.log('my posts');
-        console.log('user Id = ', data.userId);
         try {
           return this.socialPostModel.aggregate([
             {
@@ -196,13 +183,6 @@ export class SocialPostsService {
   async getSinglePost(postId): Promise<PostDocument> {
     return this.socialPostModel.findById(postId);
   }
-  // async getAllPostsOfSingleUser(paginationDto, userId): Promise<any> {
-  //   const { limit, offset } = paginationDto;
-  //   // return this.socialPostModel
-  //   //   .find({ userId: userId })
-  //   //   .skip(offset)
-  //   //   .limit(limit);
-  // }
   async updatePost(
     userId,
     updatePostDto: UpdateSocialPost,

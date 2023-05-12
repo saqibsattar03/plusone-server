@@ -16,6 +16,7 @@ import * as moment from 'moment';
 import { Tag, TagDocument } from '../../data/schemas/tags.schema';
 import { Constants } from '../../common/constants';
 import { AuthService } from '../../common/auth/auth.service';
+import { getRandomNumber } from '../../common/utils/generateRandomNumber';
 
 @Injectable()
 export class RestaurantService {
@@ -29,27 +30,49 @@ export class RestaurantService {
   ) {}
 
   async createRestaurant(restaurantDto: any): Promise<any> {
-    const tags = await this.tagModel.find();
-    const tagsArray = [];
-    for (let i = 0; i < tags.length; i++) {
-      tagsArray.push(tags[i].tag);
-    }
-    for (let i = 0; i < restaurantDto.tags.length; i++) {
-      if (!tagsArray.includes(restaurantDto.tags[i])) {
-        await this.tagModel.create({ tag: restaurantDto.tags[i] });
+    const tags = await this.tagModel.find({}, { tag: 1 });
+    const tagsSet = new Set(tags.map((tag) => tag.tag));
+
+    const newTags = [];
+    for (const tag of restaurantDto.tags) {
+      if (!tagsSet.has(tag)) {
+        newTags.push({ tag });
       }
     }
-    let uniqueCode = Math.floor(Math.random() * 5596 + 1249);
-    const codeCheck = await this.restaurantModel.findOne({
-      uniqueCode: uniqueCode,
-    });
-    if (codeCheck) uniqueCode = Math.floor(Math.random() * 8496 + 1949);
+    await this.tagModel.create(newTags);
+
+    let uniqueCode = await getRandomNumber(1249, 5596);
+    while (await this.restaurantModel.findOne({ uniqueCode })) {
+      uniqueCode = await getRandomNumber(1949, 8496);
+    }
+
     const user = await this.authService.createUser(restaurantDto);
     restaurantDto.userId = user._id;
     restaurantDto.uniqueCode = uniqueCode;
+
     return await this.restaurantModel.create(restaurantDto);
   }
-
+  // async createRestaurant(restaurantDto: any): Promise<any> {
+  //   const tags = await this.tagModel.find();
+  //   const tagsArray = [];
+  //   for (let i = 0; i < tags.length; i++) {
+  //     tagsArray.push(tags[i].tag);
+  //   }
+  //   for (let i = 0; i < restaurantDto.tags.length; i++) {
+  //     if (!tagsArray.includes(restaurantDto.tags[i])) {
+  //       await this.tagModel.create({ tag: restaurantDto.tags[i] });
+  //     }
+  //   }
+  //   let uniqueCode = Math.floor(Math.random() * 5596 + 1249);
+  //   const codeCheck = await this.restaurantModel.findOne({
+  //     uniqueCode: uniqueCode,
+  //   });
+  //   if (codeCheck) uniqueCode = Math.floor(Math.random() * 8496 + 1949);
+  //   const user = await this.authService.createUser(restaurantDto);
+  //   restaurantDto.userId = user._id;
+  //   restaurantDto.uniqueCode = uniqueCode;
+  //   return await this.restaurantModel.create(restaurantDto);
+  // }
   async getAllUsers(role: string): Promise<any> {
     return this.restaurantModel.find().populate({
       path: 'userId',
@@ -234,7 +257,6 @@ export class RestaurantService {
     const oid = new mongoose.Types.ObjectId(restaurantId);
     return this.restaurantModel.findById(oid);
   }
-
   async editRestaurant(restaurantId, data): Promise<RestaurantDocument> {
     return this.restaurantModel.findByIdAndUpdate(
       { _id: restaurantId },
@@ -382,25 +404,26 @@ export class RestaurantService {
       return this.restaurantModel.aggregate(pipeline);
     }
   }
-
   async depositMoney(restaurantId, amount): Promise<any> {
-    const res = await this.restaurantModel.findById({ _id: restaurantId });
+    const res = await this.restaurantModel
+      .findById({ _id: restaurantId })
+      .select('totalDeposit availableDeposit');
     if (!res)
       throw new HttpException(
         'No Such Restaurant Found',
         HttpStatus.BAD_REQUEST,
       );
-    const totalDeposit = res.totalDeposit + parseInt(amount);
-    const availableDeposit = res.availableDeposit + parseInt(amount);
-    await res.update({
-      $set: {
-        totalDeposit: totalDeposit,
-        availableDeposit: availableDeposit,
+    return this.restaurantModel.findByIdAndUpdate(
+      { _id: restaurantId },
+      {
+        $set: {
+          totalDeposit: res.totalDeposit + parseInt(amount),
+          availableDeposit: res.availableDeposit + parseInt(amount),
+        },
       },
-    });
-    return res;
+      { new: true },
+    );
   }
-
   generateLookupAndProjectStageForRestaurantFilter(fieldName) {
     return [
       {
@@ -485,7 +508,6 @@ export class RestaurantService {
       // },
     ];
   }
-
   async filterByRestaurantName(restaurantName: string): Promise<any> {
     const regex = new RegExp(restaurantName, 'i');
     return this.restaurantModel
@@ -493,7 +515,6 @@ export class RestaurantService {
       .where({ status: Constants.ACTIVE })
       .select('_id restaurantName description profileImage');
   }
-
   /*** accounts module routes below ***/
 
   /*** according to ChatGPT below query is more optimized then mongoose ***/
@@ -525,18 +546,20 @@ export class RestaurantService {
     const percent = 0.1 * estimatedCost;
     const totalDeductions = res.totalDeductions + percent;
     const availableDeposit = res.availableDeposit - percent;
-    return res.update({
-      $set: {
-        totalSales: totalSales,
-        totalDeductions: totalDeductions,
-        availableDeposit: availableDeposit,
-      },
-    });
-  }
-
-  async getAvailableRestaurantBalance(restaurantId): Promise<any> {
     return this.restaurantModel
-      .findById(restaurantId)
-      .select('availableDeposit');
+      .findOneAndUpdate(
+        { restaurantId },
+        {
+          $set: {
+            totalSales: totalSales,
+            totalDeductions: totalDeductions,
+            availableDeposit: availableDeposit,
+          },
+        },
+        {
+          new: true,
+        },
+      )
+      .select('totalSales totalDeductions availableDeposit');
   }
 }
