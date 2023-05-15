@@ -20,6 +20,7 @@ import { multerConfig } from './common/configs/image.config';
 import { InvitationModule } from './modules/invitation/invitation.module';
 import { FcmModule } from './modules/fcm/fcm.module';
 import { TransactionHistoryModule } from './modules/transaction-history/transaction-history.module';
+import { SubscriptionModule } from './modules/subscription/subscription.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { TransactionHistoryModule } from './modules/transaction-history/transact
     InvitationModule,
     FcmModule,
     TransactionHistoryModule,
+    SubscriptionModule,
   ],
   controllers: [AppController],
   providers: [AppService],

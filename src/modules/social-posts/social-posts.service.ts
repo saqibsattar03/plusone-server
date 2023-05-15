@@ -51,10 +51,11 @@ export class SocialPostsService {
     }
   }
   async getAllPost(paginationDto, data): Promise<any> {
-    console.log('Route called');
     const { limit, offset } = paginationDto;
     const pipeLine = await this.getPostPipeline(data.loggedInUser);
-    const followings = await this.followingService.getFollowingIds(data.userId);
+    const followings = await this.followingService.getFollowingIds(
+      data.loggedInUser,
+    );
     const followingsArray = [];
     followings.forEach((obj) => {
       followingsArray.push(obj.followings);

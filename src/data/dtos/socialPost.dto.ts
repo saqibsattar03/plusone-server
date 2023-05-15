@@ -50,9 +50,11 @@ export class GetSocialPostDto {
 export class SocialPostResponseDto {
   @ApiProperty({ type: String })
   _id: string;
+
   @ApiProperty({ type: String, name: 'userId' })
   @IsNotEmpty()
   userId: string;
+
   @ApiProperty({ type: String, name: 'voucherId' })
   voucherId: string;
 
@@ -104,6 +106,7 @@ export class SocialPostResponseDto {
 export class UpdateSocialPost {
   @ApiProperty({ type: String, name: 'postId' })
   postId: string;
+
   @ApiProperty({ type: LocationDto, name: 'location' })
   location: LocationDto;
 

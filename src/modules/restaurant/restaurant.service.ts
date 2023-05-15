@@ -306,7 +306,6 @@ export class RestaurantService {
       })
       .select('uniqueCode -_id');
   }
-
   async restaurantFilters(data, paginationQuery): Promise<any> {
     const fieldName = 'reviewObject';
     const lookupAndProjectStage =
@@ -531,7 +530,6 @@ export class RestaurantService {
       },
     ]);
   }
-
   async addTotalSalesAndDeductions(
     estimatedCost: number,
     restaurantId,

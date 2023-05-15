@@ -95,6 +95,15 @@ export class Profile extends User {
 
   @Prop({ type: String, default: '' })
   fcmToken: string;
+
+  @Prop({ type: String, select: false })
+  productId: string;
+
+  @Prop({ Type: Date, select: false })
+  purchasedAt: Date;
+
+  @Prop({ Type: Date, select: false })
+  expirationAt: Date;
 }
 
 export const ProfileSchema = SchemaFactory.createForClass(Profile);

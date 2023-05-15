@@ -2,6 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class FcmDto {
   @ApiProperty()
+  _id: string;
+
+  @ApiProperty()
   userId: string;
 
   @ApiProperty()
