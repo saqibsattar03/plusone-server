@@ -41,6 +41,7 @@ export class FcmService {
           title: data.title,
           body: data.body,
           seen: false,
+          profileImage: data.profileImage,
         });
       } else throw new HttpException('no token found', HttpStatus.BAD_REQUEST);
     } catch (e) {

@@ -9,7 +9,7 @@ import { ApiQuery, ApiTags } from '@nestjs/swagger';
 export class InvitationController {
   constructor(private readonly invitationService: InvitationService) {}
 
-  @Post('')
+  @Post()
   @ApiQuery({ type: String, name: 'sharedBy' })
   @ApiQuery({ type: String, name: 'recipient' })
   sendInvite(@Query('sharedBy') sharedBy, @Query('recipient') recipient) {
@@ -19,7 +19,7 @@ export class InvitationController {
     return this.invitationService.sendInvite(invitationDto);
   }
 
-  @Get('')
+  @Get()
   @ApiQuery({ type: String, name: 'sharedBy' })
   checkInviteLimit(@Query('sharedBy') sharedBy) {
     console.log('get route called');

@@ -41,7 +41,7 @@ export class SocialPostsController {
 
   /*** Create Post Route ***/
 
-  @Post('')
+  @Post()
   @ApiBearerAuth('access_token')
   @ApiBody({
     type: SocialPostDto,

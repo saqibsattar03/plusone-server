@@ -29,7 +29,7 @@ import { TransactionHistoryModule } from '../transaction-history/transaction-his
     forwardRef(() => ProfilesModule),
     DepositMoneyModule,
     TransactionHistoryModule,
-    // FcmModule,
+    FcmModule,
   ],
   controllers: [VoucherController],
   providers: [VoucherService],

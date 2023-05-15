@@ -35,7 +35,7 @@ export class QuoteController {
   getAllQuotes() {
     return this.quoteService.getAllQuotes();
   }
-  @Get('')
+  @Get()
   @ApiQuery({ type: String, name: 'quoteId' })
   @ApiCreatedResponse({ type: QuoteDto })
   @ApiBadRequestResponse({

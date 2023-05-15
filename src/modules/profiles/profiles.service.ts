@@ -42,8 +42,13 @@ export class ProfilesService {
     rewardPoints = null,
   ): Promise<any> {
     console.log('data = ', data);
-    const userEarnings = await this.getUserEarnings(data.userId);
-    const profile = await this.profileModel.findById({ _id: data.userId });
+
+    //*** uncomment it when integrating real subscription ***//
+    // const userEarnings = await this.getUserEarnings(data.userId);
+
+    const profile = await this.profileModel.findOne({
+      $or: [{ _id: data.userId }, { email: data.email }],
+    });
     if (!profile) throw new NotFoundException(' Profile does not exist');
     if (profile.role == Constants.USER && profile.status == Constants.PENDING)
       throw new HttpException(
@@ -51,8 +56,8 @@ export class ProfilesService {
         HttpStatus.UNAUTHORIZED,
       );
 
-    return this.profileModel.findByIdAndUpdate(
-      { _id: data.userId },
+    return this.profileModel.findOneAndUpdate(
+      { $or: [{ _id: data.userId }, { email: data.email }] },
       {
         $set: {
           firstname: data.firstname,
@@ -66,12 +71,22 @@ export class ProfilesService {
           favoriteChefs: data.favoriteChefs,
           dietRequirements: data.dietRequirements,
           scopes: data.scopes,
-          rewardPoints: rewardPoints ?? userEarnings.rewardPoints,
-          estimatedSavings: estimatedSavings ?? userEarnings.estimatedSavings,
+
+          //*** uncomment these when integrating real subscription ***//
+
+          // rewardPoints: rewardPoints ?? userEarnings.rewardPoints,
+          // estimatedSavings: estimatedSavings ?? userEarnings.estimatedSavings,
           isSkip: data.isSkip,
           accountType: data.accountType,
           postAudiencePreference: data.postAudiencePreference,
           fcmToken: data.fcmToken,
+
+          //*** subscription fields ***//
+
+          isPremium: data.isPremium,
+          productId: data.productId,
+          purchasedAt: data.purchasedAt,
+          expirationAt: data.expirationAt,
         },
       },
       {
@@ -107,7 +122,7 @@ export class ProfilesService {
     return this.profileModel
       .findById({ _id: userId })
       .select(
-        'rewardPoints estimatedSavings email firstname surname profileImage',
+        'rewardPoints estimatedSavings email firstname surname profileImage productId purchasedAt expirationAt isPremium',
       );
   }
   async getSingleProfile(userId): Promise<any> {

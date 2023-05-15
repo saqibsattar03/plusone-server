@@ -32,7 +32,7 @@ export class CommentsController {
 
   //create comment route
 
-  @Post('')
+  @Post()
   @ApiBearerAuth('access-token')
   @ApiBody({
     schema: {

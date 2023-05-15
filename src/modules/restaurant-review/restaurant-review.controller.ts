@@ -31,7 +31,7 @@ export class RestaurantReviewController {
     private readonly restaurantReviewService: RestaurantReviewService,
   ) {}
 
-  @Post('')
+  @Post()
   @ApiBearerAuth('access-token')
   @ApiBody({
     type: RestaurantReviewDto,

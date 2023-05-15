@@ -22,7 +22,8 @@ export class VoucherService {
     @InjectModel(RedeemVoucher.name)
     private readonly redeemVoucherModel: Model<RedeemVoucherDocument>,
     private readonly restaurantService: RestaurantService,
-    private readonly profileService: ProfilesService, // private readonly fcmService: FcmService,
+    private readonly profileService: ProfilesService,
+    private readonly fcmService: FcmService,
     private readonly transactionHistoryService: TransactionHistoryService,
   ) {}
   async getRestaurantTotalVoucherCount(
@@ -289,13 +290,13 @@ export class VoucherService {
         }
 
         //*** sending voucher redemption notification to user ***//
-        // await this.fcmService.sendSingleNotification()
-        // const notification = {
-        //   email: rPoints.email,
-        //   title: 'Score! Your Voucher Has Been Redeemed 🎉🛍️💰',
-        //   body: '🎁 Surprise! Voucher redeemed, and the savings are all yours to enjoy 🎉🛍️💰',
-        // };
-        // await this.fcmService.sendSingleNotification(notification);
+        // await this.fcmService.sendSingleNotification(transactionData);
+        const notification = {
+          email: rPoints.email,
+          title: 'Score! Your Voucher Has Been Redeemed 🎉🛍️💰',
+          body: '🎁 Surprise! Voucher redeemed, and the savings are all yours to enjoy 🎉🛍️💰',
+        };
+        await this.fcmService.sendSingleNotification(notification);
         return res.verificationCode;
       } else
         throw new HttpException(
