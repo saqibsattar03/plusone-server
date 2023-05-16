@@ -175,4 +175,9 @@ export class VoucherController {
   getRedeemedVoucher(@Query('restaurantId') restaurantId) {
     return this.voucherService.getAllRedeemedVouchers(restaurantId);
   }
+
+  @Get('savings')
+  userSavingsStats(@Query('userId') userId, @Query('value') value) {
+    return this.voucherService.userSavingsStats(userId, value);
+  }
 }

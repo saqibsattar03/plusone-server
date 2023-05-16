@@ -495,4 +495,76 @@ export class VoucherService {
         },
       ]);
   }
+
+  // todo: savings
+
+  async userSavingsStats(userId, value): Promise<any> {
+    const oid = new mongoose.Types.ObjectId(userId);
+    await this.calculateStats(oid, value);
+  }
+  async calculateStats(userId, parameter): Promise<any> {
+    let value = null;
+    if (parameter == 'WEEK') value = 7;
+    else if (parameter == 'YEAR') value = 365;
+    else if (parameter == 'MONTH') value = 60;
+    return this.redeemVoucherModel.aggregate([
+      {
+        $match: { userId: userId },
+      },
+      {
+        $lookup: {
+          from: 'vouchers',
+          let: { voucherId: '$voucherId' },
+          as: 'voucher',
+          pipeline: [
+            {
+              $unwind: '$voucherObject',
+            },
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$voucherObject._id', '$$voucherId'],
+                },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: '$voucher',
+      },
+      {
+        $project: {
+          userId: 1,
+          restaurantId: 1,
+          voucher: 1,
+        },
+      },
+      {
+        $unset: [
+          '_id',
+          'voucher.studentVoucherCount',
+          'voucher.nonStudentVoucherCount',
+          'voucher.restaurantId',
+        ],
+      },
+      {
+        $match: {
+          'voucher.createdAt': {
+            //*** calculating previous 1 week ***//
+            $lte: new Date(),
+            $gte: new Date(new Date().setDate(new Date().getDate() - value)),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { $dayOfWeek: '$voucher.createdAt' },
+          sum: {
+            $sum: { $toDouble: '$voucher.voucherObject.estimatedSavings' },
+          },
+        },
+      },
+    ]);
+  }
 }
