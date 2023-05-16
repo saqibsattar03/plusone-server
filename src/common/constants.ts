@@ -19,4 +19,7 @@ export enum Constants {
   ONLYME = 'ONLY-ME',
   DEBIT = 'DEBIT',
   CREDIT = 'CREDIT',
+  WEEK = 'WEEK',
+  MONTH = 'MONTH',
+  YEAR = 'YEAR',
 }

@@ -498,19 +498,31 @@ export class VoucherService {
 
   // todo: savings
 
-  async userSavingsStats(userId, value): Promise<any> {
+  async userSavingsStats(userId, parameter): Promise<any> {
+    console.log(parameter);
+    console.log(userId);
     const oid = new mongoose.Types.ObjectId(userId);
-    await this.calculateStats(oid, value);
-  }
-  async calculateStats(userId, parameter): Promise<any> {
     let value = null;
-    if (parameter == 'WEEK') value = 7;
-    else if (parameter == 'YEAR') value = 365;
-    else if (parameter == 'MONTH') value = 60;
-    return this.redeemVoucherModel.aggregate([
-      {
-        $match: { userId: userId },
-      },
+    if (parameter == Constants.WEEK) value = 7;
+    else if (parameter == Constants.MONTH) value = 30;
+    else if (parameter == Constants.YEAR) value = 365;
+    console.log(value);
+    const pipeline = [];
+
+    pipeline.push({
+      $match: { userId: oid },
+    });
+    if (value) {
+      pipeline.push({
+        $match: {
+          createdAt: {
+            $lte: new Date(),
+            $gte: new Date(new Date().setDate(new Date().getDate() - value)),
+          },
+        },
+      });
+    }
+    pipeline.push(
       {
         $lookup: {
           from: 'vouchers',
@@ -538,6 +550,7 @@ export class VoucherService {
           userId: 1,
           restaurantId: 1,
           voucher: 1,
+          createdAt: 1,
         },
       },
       {
@@ -549,22 +562,17 @@ export class VoucherService {
         ],
       },
       {
-        $match: {
-          'voucher.createdAt': {
-            //*** calculating previous 1 week ***//
-            $lte: new Date(),
-            $gte: new Date(new Date().setDate(new Date().getDate() - value)),
-          },
-        },
-      },
-      {
         $group: {
-          _id: { $dayOfWeek: '$voucher.createdAt' },
+          _id: { $dayOfWeek: '$createdAt' },
           sum: {
             $sum: { $toDouble: '$voucher.voucherObject.estimatedSavings' },
           },
         },
       },
-    ]);
+      {
+        $sort: { _id: 1 },
+      },
+    );
+    return this.redeemVoucherModel.aggregate(pipeline);
   }
 }

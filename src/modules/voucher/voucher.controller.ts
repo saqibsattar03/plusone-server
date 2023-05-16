@@ -177,7 +177,13 @@ export class VoucherController {
   }
 
   @Get('savings')
-  userSavingsStats(@Query('userId') userId, @Query('value') value) {
-    return this.voucherService.userSavingsStats(userId, value);
+  @ApiQuery({ type: String, name: 'userId' })
+  @ApiQuery({
+    type: String,
+    name: 'parameter',
+    enum: ['WEEK', 'MONTH', 'YEAR'],
+  })
+  userSavingsStats(@Query('userId') userId, @Query('parameter') parameter) {
+    return this.voucherService.userSavingsStats(userId, parameter);
   }
 }
