@@ -573,6 +573,7 @@ export class VoucherService {
         $sort: { _id: 1 },
       },
     );
+
     return this.redeemVoucherModel.aggregate(pipeline);
   }
 }
