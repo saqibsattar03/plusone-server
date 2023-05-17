@@ -10,7 +10,7 @@ import {
 import { RestaurantService } from '../restaurant/restaurant.service';
 import { ProfilesService } from '../profiles/profiles.service';
 import { Constants } from '../../common/constants';
-import { uniqueCode } from '../../common/utils/uniqueCode';
+import { uniqueCodeUtil } from '../../common/utils/uniqueCode.util';
 import { FcmService } from '../fcm/fcm.service';
 import { TransactionHistoryService } from '../transaction-history/transaction-history.service';
 
@@ -241,10 +241,11 @@ export class VoucherService {
       data.restaurantId,
       data.restaurantCode,
     );
+    console.log(data.restaurantCode);
     if (res) {
       if (res.uniqueCode == data.restaurantCode) {
         // const verificationCode = await this.fourDigitCode(4);
-        const verificationCode = await uniqueCode(4);
+        const verificationCode = await uniqueCodeUtil(4);
         const res = await this.redeemVoucherModel.create({
           userId: data.userId,
           voucherId: data.voucherId,

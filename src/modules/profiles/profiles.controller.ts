@@ -32,9 +32,9 @@ import { JwtAuthGuard } from '../../common/auth/guards/jwt-auth.guard';
 export class ProfilesController {
   constructor(private readonly profileService: ProfilesService) {}
 
-  @Patch('verify-account')
-  verifyUser(@Query('confirmationCode') confirmationCode) {
-    return this.profileService.verifyUser(confirmationCode);
+  @Patch('verify-account/:id')
+  verifyUser(@Query('confirmationCode') confirmationCode, @Param('id') id) {
+    return this.profileService.verifyUser(confirmationCode, id);
   }
   @Get('single/:profileId')
   @ApiParam({ name: 'profileId', type: String })

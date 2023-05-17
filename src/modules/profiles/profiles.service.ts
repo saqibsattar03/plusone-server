@@ -19,7 +19,7 @@ import { Constants } from '../../common/constants';
 import {
   comparePassword,
   hashPassword,
-} from '../../common/utils/passwordHashing';
+} from '../../common/utils/passwordHashing.util';
 
 @Injectable()
 export class ProfilesService {
@@ -95,13 +95,14 @@ export class ProfilesService {
     );
   }
 
-  async verifyUser(confirmationCode: string): Promise<any> {
-    const verified = await this.profileModel.findOne({
-      confirmationCode: confirmationCode,
-    });
-    if (verified) {
-      await this.profileModel.updateOne(
-        { confirmationCode: confirmationCode },
+  async verifyUser(confirmationCode: string, id: string): Promise<any> {
+    const user = await this.profileModel
+      .findById(id)
+      .select('confirmationCode');
+
+    if (user.confirmationCode == confirmationCode) {
+      await this.profileModel.findOneAndUpdate(
+        { _id: id },
         {
           $set: {
             status: Constants.ACTIVE,
@@ -109,7 +110,6 @@ export class ProfilesService {
           },
         },
       );
-      // await verified.updateOne({ confirmationCode: null });
       throw new HttpException('Account Activated Successfully', HttpStatus.OK);
     } else
       throw new HttpException(

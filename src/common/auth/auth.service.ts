@@ -15,10 +15,12 @@ import {
   ForgotPasswordDocument,
 } from '../../data/schemas/forgotPassword.schema';
 import { Model } from 'mongoose';
-import { generateToken } from '../utils/generateToken';
+import { generateToken } from '../utils/generateToken.util';
 import { Constants } from '../constants';
-import { comparePassword, hashPassword } from '../utils/passwordHashing';
+import { comparePassword, hashPassword } from '../utils/passwordHashing.util';
 import { Profile, ProfileDocument } from '../../data/schemas/profile.schema';
+import { AwsMailUtil } from '../utils/aws-mail-util';
+import { getRandomNumber } from '../utils/generateRandomNumber.util';
 
 @Injectable()
 export class AuthService {
@@ -33,7 +35,6 @@ export class AuthService {
   ) {}
 
   async createUser(userDto: any) {
-    console.log('here sign up route');
     userDto.password = await hashPassword(userDto.password);
     if (userDto.role == Constants.ADMIN || userDto.role == Constants.MERCHANT)
       userDto.accountHolderType = null;
@@ -52,6 +53,7 @@ export class AuthService {
           HttpStatus.UNAUTHORIZED,
         );
     }
+    const confirmationCode = await getRandomNumber(1254, 3517);
     const newUser = new this.profileModel({
       firstname: userDto.firstname,
       surname: userDto.surname,
@@ -63,11 +65,25 @@ export class AuthService {
       scopes: userDto.scopes,
       status: userDto.status,
       rewardPoints: 0,
-      confirmationCode: await generateToken(),
+      confirmationCode: confirmationCode,
     });
     await newUser.save();
     if (newUser.role == Constants.MERCHANT) return newUser;
-    // sendConfirmationEmail(newUser.email, newUser.confirmationCode);
+
+    /*** email verification ***/
+
+    const templateData = {
+      title:
+        userDto.firstname.slice(0, 1).toUpperCase() +
+        userDto.firstname.slice(1).toLowerCase(),
+      code: confirmationCode,
+    };
+    await new AwsMailUtil().sendEmail(
+      'saqibsattar710@gmail.com',
+      templateData,
+      'AccountVerification',
+    );
+
     throw new HttpException(
       'Account Created Successfully. Please Confirm Your Email to Active Your Account. Check Your Email for Confirmation',
       HttpStatus.OK,
@@ -128,11 +144,17 @@ export class AuthService {
     if (!token) {
       token = await new this.forgotModel({
         userId: user._id,
-        token: await generateToken(),
+        token: await getRandomNumber(4752, 7856),
       }).save();
     }
     // *** send this link to email service ***//
-
+    // const templateData = {
+    //   title:
+    //     user.firstname.slice(0, 1).toUpperCase() +
+    //     user.firstname.slice(1).toLowerCase(),
+    //   code:token
+    // };
+    // await new AwsMailUtil().sendEmail(email);
     // const link = `${process.env.BASE_URL}/password-reset/${user._id}/${token.token}`;
     return token;
   }

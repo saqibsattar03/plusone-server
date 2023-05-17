@@ -18,7 +18,7 @@ export class MailController {
       code: 4568,
     };
 
-    await this.mailService.sendEmail(templateName, recipient, templateData);
+    // await this.mailService.sendEmail(templateName, recipient, templateData);
 
     return { message: 'Email sent successfully' };
   }

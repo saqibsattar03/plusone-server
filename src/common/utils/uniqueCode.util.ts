@@ -1,4 +1,4 @@
-export async function uniqueCode(length): Promise<string> {
+export async function uniqueCodeUtil(length): Promise<string> {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
   let result = ' ';

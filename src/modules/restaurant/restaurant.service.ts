@@ -16,7 +16,7 @@ import * as moment from 'moment';
 import { Tag, TagDocument } from '../../data/schemas/tags.schema';
 import { Constants } from '../../common/constants';
 import { AuthService } from '../../common/auth/auth.service';
-import { getRandomNumber } from '../../common/utils/generateRandomNumber';
+import { getRandomNumber } from '../../common/utils/generateRandomNumber.util';
 
 @Injectable()
 export class RestaurantService {
@@ -52,27 +52,6 @@ export class RestaurantService {
 
     return await this.restaurantModel.create(restaurantDto);
   }
-  // async createRestaurant(restaurantDto: any): Promise<any> {
-  //   const tags = await this.tagModel.find();
-  //   const tagsArray = [];
-  //   for (let i = 0; i < tags.length; i++) {
-  //     tagsArray.push(tags[i].tag);
-  //   }
-  //   for (let i = 0; i < restaurantDto.tags.length; i++) {
-  //     if (!tagsArray.includes(restaurantDto.tags[i])) {
-  //       await this.tagModel.create({ tag: restaurantDto.tags[i] });
-  //     }
-  //   }
-  //   let uniqueCode = Math.floor(Math.random() * 5596 + 1249);
-  //   const codeCheck = await this.restaurantModel.findOne({
-  //     uniqueCode: uniqueCode,
-  //   });
-  //   if (codeCheck) uniqueCode = Math.floor(Math.random() * 8496 + 1949);
-  //   const user = await this.authService.createUser(restaurantDto);
-  //   restaurantDto.userId = user._id;
-  //   restaurantDto.uniqueCode = uniqueCode;
-  //   return await this.restaurantModel.create(restaurantDto);
-  // }
   async getAllUsers(role: string): Promise<any> {
     return this.restaurantModel.find().populate({
       path: 'userId',

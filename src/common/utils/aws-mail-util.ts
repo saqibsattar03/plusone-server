@@ -15,7 +15,7 @@ export class AwsMailUtil {
     this.ses = new AWS.SES({ apiVersion: '2010-12-01' });
   }
 
-  public createTemplate(data: any) {
+  public async createTemplate(data: any): Promise<any> {
     const params = {
       Template: {
         TemplateName: data.templateName,
@@ -40,7 +40,6 @@ export class AwsMailUtil {
   }
 
   public async sendEmail(
-    templateContent: string,
     recipient: string,
     templateData: Record<string, any>,
     name = 'AccountVerification',
