@@ -62,12 +62,12 @@ export class ProfilesController {
     return this.profileService.updateProfile(data);
   }
 
-  @Delete('')
+  @Delete()
   @ApiResponse({ description: 'Profile deleted successfully' })
   @ApiBadRequestResponse({ description: 'could not delete Profile' })
-  // @UseGuards(JwtAuthGuard)
-  async deleteProfile(@Query('profileId') profileId) {
-    return this.profileService.deleteProfile(profileId);
+  @UseGuards(JwtAuthGuard)
+  async deleteProfile(@Request() request) {
+    return this.profileService.deleteProfile(request.user.userId);
   }
 
   @Get('all')

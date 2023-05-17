@@ -71,8 +71,8 @@ export class CommentsService {
     );
     const notification = {
       email: id.email,
-      title: 'New Comment ! 💬',
-      body: `${userData.firstname} ${userData.surname} Commented On Your Post 💬`,
+      title: `${userData.firstname} ${userData.surname}`,
+      body: ' Commented On Your Post 💬',
       profileImage: userData.profileImage,
     };
     //*** sending comment notification ***/

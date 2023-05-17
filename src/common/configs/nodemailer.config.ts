@@ -1,9 +1,18 @@
-import nodemailer from 'nodemailer';
-import { authConfig } from './auth.config';
+import { SES } from 'aws-sdk';
+const ACCESS_KEY_ID = 'AKIAZR4CXEL2IAPM4S7P';
+const SECRET_ACCESS_KEY = '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';
+const AWS_REGION = 'eu-north-1';
+const SENDER_EMAIL = ' noreply@plusoneworldwide.com';
+const ses = new SES({
+  accessKeyId: ACCESS_KEY_ID,
+  secretAccessKey: SECRET_ACCESS_KEY,
+  region: AWS_REGION,
+});
 
-const user = authConfig.user;
-const pass = authConfig.pass;
-
+const params = {
+  Source: SENDER_EMAIL,
+  Template: '../',
+};
 // const transport = nodemailer.createTransport({
 //   service: 'Gmail',
 //   auth: {

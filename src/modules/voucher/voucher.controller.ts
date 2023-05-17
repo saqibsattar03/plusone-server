@@ -182,6 +182,7 @@ export class VoucherController {
     type: String,
     name: 'parameter',
     enum: ['WEEK', 'MONTH', 'YEAR'],
+    required: false,
   })
   userSavingsStats(@Query('userId') userId, @Query('parameter') parameter) {
     return this.voucherService.userSavingsStats(userId, parameter);

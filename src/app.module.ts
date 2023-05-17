@@ -21,9 +21,13 @@ import { InvitationModule } from './modules/invitation/invitation.module';
 import { FcmModule } from './modules/fcm/fcm.module';
 import { TransactionHistoryModule } from './modules/transaction-history/transaction-history.module';
 import { SubscriptionModule } from './modules/subscription/subscription.module';
+import { AwsSdkModule } from 'nest-aws-sdk';
+import { MailModule } from './modules/mail/mail.module';
+import * as process from 'process';
 
 @Module({
   imports: [
+    AwsSdkModule.forRoot(),
     //To use .env variables
     ConfigModule.forRoot({
       isGlobal: true,
@@ -47,6 +51,7 @@ import { SubscriptionModule } from './modules/subscription/subscription.module';
     FcmModule,
     TransactionHistoryModule,
     SubscriptionModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],
