@@ -281,9 +281,8 @@ export class RestaurantService {
     return this.restaurantModel
       .findOne({
         _id: restaurantId,
-        uniqueCode: restaurantCode,
       })
-      .select('uniqueCode -_id');
+      .select('uniqueCode restaurantName -_id');
   }
   async restaurantFilters(data, paginationQuery): Promise<any> {
     const fieldName = 'reviewObject';
@@ -525,7 +524,7 @@ export class RestaurantService {
     const availableDeposit = res.availableDeposit - percent;
     return this.restaurantModel
       .findOneAndUpdate(
-        { restaurantId },
+        { _id: restaurantId },
         {
           $set: {
             totalSales: totalSales,

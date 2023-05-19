@@ -20,6 +20,7 @@ export class CommentsService {
     @InjectModel(Comment.name) private readonly commentModel: Model<Comment>,
     @Inject(forwardRef(() => SocialPostsService))
     private readonly socialPostService: SocialPostsService,
+    @Inject(forwardRef(() => ProfilesService))
     protected readonly profileService: ProfilesService,
     protected readonly fcmService: FcmService,
   ) {}
@@ -158,5 +159,26 @@ export class CommentsService {
   }
   async deleteAllComment(postId): Promise<any> {
     await this.commentModel.deleteMany({ postId: postId });
+  }
+  async deleteAllCommentsOfSingleUser(userId): Promise<any> {
+    await this.commentModel.aggregate([
+      {
+        $unwind: 'commentObject',
+      },
+      {
+        $match: {
+          userId: userId,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          comments: { $push: '$commentObject' },
+        },
+      },
+      {
+        $out: 'comments', // Replace 'comments' with the name of your collection
+      },
+    ]);
   }
 }

@@ -16,7 +16,7 @@ import { FcmModule } from '../../fcm/fcm.module';
       },
     ]),
     forwardRef(() => SocialPostsModule),
-    ProfilesModule,
+    forwardRef(() => ProfilesModule),
     FcmModule,
   ],
   providers: [CommentsService],

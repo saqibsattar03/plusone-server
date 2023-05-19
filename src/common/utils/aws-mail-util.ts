@@ -1,5 +1,5 @@
 import * as AWS from 'aws-sdk';
-import fs from 'fs';
+import * as fs from 'fs';
 import { join } from 'path';
 import * as process from 'process';
 export class AwsMailUtil {
@@ -42,14 +42,14 @@ export class AwsMailUtil {
   public async sendEmail(
     recipient: string,
     templateData: Record<string, any>,
-    name = 'AccountVerification',
+    templateName,
   ) {
     const params = {
       Destination: {
         ToAddresses: [recipient],
       },
       Source: process.env.SENDER_EMAIL,
-      Template: name,
+      Template: templateName,
       TemplateData: JSON.stringify(templateData),
     };
     try {

@@ -20,6 +20,7 @@ import {
   comparePassword,
   hashPassword,
 } from '../../common/utils/passwordHashing.util';
+import { CommentsService } from '../social-posts/comments/comments.service';
 
 @Injectable()
 export class ProfilesService {
@@ -34,7 +35,7 @@ export class ProfilesService {
     @Inject(forwardRef(() => RestaurantReviewService))
     private readonly reviewService: RestaurantReviewService,
     @Inject(forwardRef(() => RestaurantService))
-    private readonly restaurantService: RestaurantService,
+    private readonly restaurantService: RestaurantService, // @Inject(forwardRef(() => CommentsService)) // private readonly commentService: CommentsService,
   ) {}
   async updateProfile(
     data,
@@ -75,7 +76,9 @@ export class ProfilesService {
           //*** uncomment these when integrating real subscription ***//
 
           // rewardPoints: rewardPoints ?? userEarnings.rewardPoints,
+          rewardPoints: rewardPoints,
           // estimatedSavings: estimatedSavings ?? userEarnings.estimatedSavings,
+          estimatedSavings: estimatedSavings,
           isSkip: data.isSkip,
           accountType: data.accountType,
           postAudiencePreference: data.postAudiencePreference,
@@ -216,12 +219,14 @@ export class ProfilesService {
     ]);
   }
   async getUser(email) {
-    console.log(email);
+    console.log('in get user = ', email);
     return this.profileModel
       .findOne({
         $or: [{ email: email }, { username: email }],
       })
-      .select('email password accountHolderType status role fcmToken');
+      .select(
+        'email password accountHolderType status role fcmToken firstname',
+      );
   }
   async fetchProfileUsingToken(user): Promise<any> {
     const fetchedUser = await this.profileModel

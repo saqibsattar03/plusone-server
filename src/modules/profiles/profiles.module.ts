@@ -12,6 +12,7 @@ import {
   ForgotPassword,
   ForgotPasswordSchema,
 } from '../../data/schemas/forgotPassword.schema';
+import { CommentsModule } from '../social-posts/comments/comments.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import {
     forwardRef(() => SocialPostsModule),
     forwardRef(() => RestaurantReviewModule),
     forwardRef(() => RestaurantModule),
+    // forwardRef(() => CommentsModule),
   ],
   controllers: [ProfilesController],
   providers: [ProfilesService],

@@ -13,6 +13,7 @@ import { Constants } from '../../common/constants';
 import { uniqueCodeUtil } from '../../common/utils/uniqueCode.util';
 import { FcmService } from '../fcm/fcm.service';
 import { TransactionHistoryService } from '../transaction-history/transaction-history.service';
+import { AwsMailUtil } from '../../common/utils/aws-mail-util';
 
 @Injectable()
 export class VoucherService {
@@ -241,7 +242,6 @@ export class VoucherService {
       data.restaurantId,
       data.restaurantCode,
     );
-    console.log(data.restaurantCode);
     if (res) {
       if (res.uniqueCode == data.restaurantCode) {
         // const verificationCode = await this.fourDigitCode(4);
@@ -267,14 +267,14 @@ export class VoucherService {
             voucher.voucherObject[0].estimatedCost,
             data.restaurantId,
           );
+        console.log('restaurant stats = ', restaurantStats);
 
-        await this.profileService.updateProfile(
+        const user = await this.profileService.updateProfile(
           data,
           rPoints.estimatedSavings +
             parseInt(voucher.voucherObject[0].estimatedSavings),
           rPoints.rewardPoints + 1,
         );
-
         const transactionData = {
           restaurantId: data.restaurantId,
           transactionType: Constants.DEBIT,
@@ -286,18 +286,33 @@ export class VoucherService {
         await this.transactionHistoryService.createTransactionHistory(
           transactionData,
         );
-        if (restaurantStats.availableDeposit < 50) {
-          // todo: send email to recharge //
-        }
+        // if (restaurantStats.availableDeposit < 50) {
+        //   //*** send email for low balance ***//
+        //   const templateData = {
+        //     title: 'Low Balance',
+        //     merchant: 'Burger King',
+        //     description:
+        //       'Low balance, urgently need to deposit funds to cover expenses.',
+        //     amount_title: 'Low Balance',
+        //     amount: restaurantStats.availableDeposit,
+        //     // merchant:
+        //     //   res.restaurantName.slice(0, 1).toUpperCase() +
+        //     //   res.restaurantName.slice(1).toLowerCase(),
+        //   };
+        //   // todo: send email to recharge //
+        //   // await new AwsMailUtil().sendEmail()
+        // }
 
         //*** sending voucher redemption notification to user ***//
-        // await this.fcmService.sendSingleNotification(transactionData);
-        const notification = {
-          email: rPoints.email,
-          title: 'Score! Your Voucher Has Been Redeemed 🎉🛍️💰',
-          body: '🎁 Surprise! Voucher redeemed, and the savings are all yours to enjoy 🎉🛍️💰',
-        };
-        await this.fcmService.sendSingleNotification(notification);
+        if (user.fcmToken) {
+          console.log('inside fcm token');
+          const notification = {
+            email: rPoints.email,
+            title: 'Score! Your Voucher Has Been Redeemed 🎉🛍️💰',
+            body: '🎁 Surprise! Voucher redeemed, and the savings are all yours to enjoy 🎉🛍️💰',
+          };
+          await this.fcmService.sendSingleNotification(notification);
+        }
         return res.verificationCode;
       } else
         throw new HttpException(
@@ -310,18 +325,26 @@ export class VoucherService {
         HttpStatus.NOT_ACCEPTABLE,
       );
   }
-  async getAllVoucherRedeemedByUser(userId): Promise<any> {
+  async getAllVoucherRedeemedByUser(userId) {
     const oid = new mongoose.Types.ObjectId(userId);
-
     return this.redeemVoucherModel.aggregate([
       {
-        $match: { userId: oid },
+        $match: {
+          userId: oid,
+        },
+      },
+      {
+        $lookup: {
+          from: 'restaurants',
+          localField: 'restaurantId',
+          foreignField: '_id',
+          as: 'restaurant',
+        },
       },
       {
         $lookup: {
           from: 'vouchers',
           let: { voucherId: '$voucherId' },
-          as: 'voucher',
           pipeline: [
             {
               $unwind: '$voucherObject',
@@ -334,13 +357,20 @@ export class VoucherService {
               },
             },
           ],
+          as: 'voucher',
+        },
+      },
+      {
+        $addFields: {
+          restaurant: { $first: '$restaurant' },
         },
       },
       {
         $project: {
-          userId: 1,
-          restaurantId: 1,
+          verificationCode: 1,
           voucher: 1,
+          restaurantName: '$restaurant.restaurantName',
+          profileImage: '$restaurant.profileImage',
         },
       },
       {
@@ -351,45 +381,12 @@ export class VoucherService {
           'voucher.restaurantId',
         ],
       },
-      //   {
-      //     $lookup: {
-      //       from: 'profiles',
-      //       // let: { userId: '$_id' },
-      //       pipeline: [
-      //         {
-      //           $match: {
-      //             $expr: {
-      //               $eq: ['$_id', oid],
-      //             },
-      //           },
-      //         },
-      //       ],
-      //       as: 'users',
-      //     },
-      //   },
-      //   {
-      //     $project: {
-      //       'users._id': 1,
-      //       'users.firstName': 1,
-      //       'users.surName': 1,
-      //       'users.profileImage': 1,
-      //       'voucher.voucherObject.voucherCode': 1,
-      //       'voucher.voucherObject.voucherPreference': 1,
-      //       'voucher.voucherObject.description': 1,
-      //       'voucher.voucherObject.discount': 1,
-      //       'voucher.voucherObject.voucherImage': 1,
-      //     },
-      //   },
     ]);
   }
   async getTotalVoucherRedeemedCount(restaurantId): Promise<any> {
     const oid = new mongoose.Types.ObjectId(restaurantId);
     return this.redeemVoucherModel.find({ restaurantId: oid }).count();
   }
-  // async getUserWhoRedeemVoucher(voucherId): Promise<any> {
-  //   const oid = new mongoose.Types.ObjectId(voucherId);
-  //   return this.redeemVoucherModel.find({ voucherId: oid });
-  // }
   createVoucherUpdateOperation(oid, voucherDto) {
     return {
       $push: {
@@ -496,20 +493,14 @@ export class VoucherService {
         },
       ]);
   }
-
-  // todo: savings
-
   async userSavingsStats(userId, parameter): Promise<any> {
-    console.log(parameter);
-    console.log(userId);
     const oid = new mongoose.Types.ObjectId(userId);
     let value = null;
-    if (parameter == Constants.WEEK) value = 7;
-    else if (parameter == Constants.MONTH) value = 30;
-    else if (parameter == Constants.YEAR) value = 365;
-    console.log(value);
+    const { WEEK, MONTH, YEAR } = Constants;
+    if (parameter == WEEK) value = 7;
+    else if (parameter == MONTH) value = 30;
+    else if (parameter == YEAR) value = 365;
     const pipeline = [];
-
     pipeline.push({
       $match: { userId: oid },
     });
@@ -554,27 +545,40 @@ export class VoucherService {
           createdAt: 1,
         },
       },
-      {
-        $unset: [
-          '_id',
-          'voucher.studentVoucherCount',
-          'voucher.nonStudentVoucherCount',
-          'voucher.restaurantId',
-        ],
-      },
-      {
-        $group: {
-          _id: { $dayOfWeek: '$createdAt' },
-          sum: {
-            $sum: { $toDouble: '$voucher.voucherObject.estimatedSavings' },
+    );
+    if (parameter) {
+      pipeline.push(
+        {
+          $group: {
+            _id:
+              parameter == WEEK || parameter == MONTH
+                ? { $dayOfWeek: '$createdAt' }
+                : { $month: '$createdAt' },
+            sum: {
+              $sum: { $toDouble: '$voucher.voucherObject.estimatedSavings' },
+            },
           },
         },
-      },
-      {
-        $sort: { _id: 1 },
-      },
-    );
-
+        {
+          $sort: { _id: 1 },
+        },
+      );
+    } else {
+      pipeline.push(
+        {
+          $group: {
+            // _id: { $dayOfWeek: '$createdAt' },
+            _id: { $dayOfYear: '$createdAt' },
+            sum: {
+              $sum: { $toDouble: '$voucher.voucherObject.estimatedSavings' },
+            },
+          },
+        },
+        {
+          $sort: { _id: 1 },
+        },
+      );
+    }
     return this.redeemVoucherModel.aggregate(pipeline);
   }
 }

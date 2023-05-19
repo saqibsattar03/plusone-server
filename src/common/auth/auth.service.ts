@@ -147,15 +147,14 @@ export class AuthService {
         token: await getRandomNumber(4752, 7856),
       }).save();
     }
-    // *** send this link to email service ***//
-    // const templateData = {
-    //   title:
-    //     user.firstname.slice(0, 1).toUpperCase() +
-    //     user.firstname.slice(1).toLowerCase(),
-    //   code:token
-    // };
-    // await new AwsMailUtil().sendEmail(email);
-    // const link = `${process.env.BASE_URL}/password-reset/${user._id}/${token.token}`;
+    // *** Send Email for to get code to reset password ***//
+    const templateData = {
+      title:
+        user.firstname.slice(0, 1).toUpperCase() +
+        user.firstname.slice(1).toLowerCase(),
+      code: token.token,
+    };
+    await new AwsMailUtil().sendEmail(email, templateData, 'ForgotPassword');
     return token;
   }
   async resetPassword(data) {

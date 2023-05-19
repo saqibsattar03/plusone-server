@@ -25,6 +25,7 @@ export class MailController {
 
   @Post('create-template')
   createTemplate(@Body() data) {
+    console.log(data);
     return this.mailService.createTemplate(data);
   }
   @Delete(':name')
