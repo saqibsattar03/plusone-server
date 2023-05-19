@@ -17,7 +17,7 @@ export class FcmService {
   ) {}
   async sendSingleNotification(data: any): Promise<any> {
     try {
-      const user = await this.profileService.getUser(data.email);
+      const user = await this.profileService.getUser(data.email.toLowerCase());
       if (user.fcmToken) {
         const message = {
           notification: {
@@ -43,7 +43,7 @@ export class FcmService {
           seen: false,
           profileImage: data.profileImage,
         });
-      } else throw new HttpException('no token found', HttpStatus.BAD_REQUEST);
+      }
     } catch (e) {
       throw new HttpException(e.toString(), HttpStatus.BAD_REQUEST);
     }
