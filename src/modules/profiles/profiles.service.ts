@@ -19,7 +19,8 @@ import { Constants } from '../../common/constants';
 import {
   comparePassword,
   hashPassword,
-} from '../../common/utils/passwordHashing';
+} from '../../common/utils/passwordHashing.util';
+import { CommentsService } from '../social-posts/comments/comments.service';
 
 @Injectable()
 export class ProfilesService {
@@ -34,7 +35,7 @@ export class ProfilesService {
     @Inject(forwardRef(() => RestaurantReviewService))
     private readonly reviewService: RestaurantReviewService,
     @Inject(forwardRef(() => RestaurantService))
-    private readonly restaurantService: RestaurantService,
+    private readonly restaurantService: RestaurantService, // @Inject(forwardRef(() => CommentsService)) // private readonly commentService: CommentsService,
   ) {}
   async updateProfile(
     data,
@@ -42,8 +43,13 @@ export class ProfilesService {
     rewardPoints = null,
   ): Promise<any> {
     console.log('data = ', data);
-    const userEarnings = await this.getUserEarnings(data.userId);
-    const profile = await this.profileModel.findById({ _id: data.userId });
+
+    //*** uncomment it when integrating real subscription ***//
+    // const userEarnings = await this.getUserEarnings(data.userId);
+
+    const profile = await this.profileModel.findOne({
+      $or: [{ _id: data.userId }, { email: data.email }],
+    });
     if (!profile) throw new NotFoundException(' Profile does not exist');
     if (profile.role == Constants.USER && profile.status == Constants.PENDING)
       throw new HttpException(
@@ -51,8 +57,8 @@ export class ProfilesService {
         HttpStatus.UNAUTHORIZED,
       );
 
-    return this.profileModel.findByIdAndUpdate(
-      { _id: data.userId },
+    return this.profileModel.findOneAndUpdate(
+      { $or: [{ _id: data.userId }, { email: data.email }] },
       {
         $set: {
           firstname: data.firstname,
@@ -66,12 +72,24 @@ export class ProfilesService {
           favoriteChefs: data.favoriteChefs,
           dietRequirements: data.dietRequirements,
           scopes: data.scopes,
-          rewardPoints: rewardPoints ?? userEarnings.rewardPoints,
-          estimatedSavings: estimatedSavings ?? userEarnings.estimatedSavings,
+
+          //*** uncomment these when integrating real subscription ***//
+
+          // rewardPoints: rewardPoints ?? userEarnings.rewardPoints,
+          rewardPoints: rewardPoints,
+          // estimatedSavings: estimatedSavings ?? userEarnings.estimatedSavings,
+          estimatedSavings: estimatedSavings,
           isSkip: data.isSkip,
           accountType: data.accountType,
           postAudiencePreference: data.postAudiencePreference,
           fcmToken: data.fcmToken,
+
+          //*** subscription fields ***//
+
+          isPremium: data.isPremium,
+          productId: data.productId,
+          purchasedAt: data.purchasedAt,
+          expirationAt: data.expirationAt,
         },
       },
       {
@@ -80,13 +98,14 @@ export class ProfilesService {
     );
   }
 
-  async verifyUser(confirmationCode: string): Promise<any> {
-    const verified = await this.profileModel.findOne({
-      confirmationCode: confirmationCode,
-    });
-    if (verified) {
-      await this.profileModel.updateOne(
-        { confirmationCode: confirmationCode },
+  async verifyUser(confirmationCode: string, id: string): Promise<any> {
+    const user = await this.profileModel
+      .findById(id)
+      .select('confirmationCode');
+
+    if (user.confirmationCode == confirmationCode) {
+      await this.profileModel.findOneAndUpdate(
+        { _id: id },
         {
           $set: {
             status: Constants.ACTIVE,
@@ -94,7 +113,6 @@ export class ProfilesService {
           },
         },
       );
-      // await verified.updateOne({ confirmationCode: null });
       throw new HttpException('Account Activated Successfully', HttpStatus.OK);
     } else
       throw new HttpException(
@@ -107,7 +125,7 @@ export class ProfilesService {
     return this.profileModel
       .findById({ _id: userId })
       .select(
-        'rewardPoints estimatedSavings email firstname surname profileImage',
+        'rewardPoints estimatedSavings email firstname surname profileImage productId purchasedAt expirationAt isPremium',
       );
   }
   async getSingleProfile(userId): Promise<any> {
@@ -200,19 +218,15 @@ export class ProfilesService {
       },
     ]);
   }
-  async getUserByEmailOrUserName(user): Promise<ProfileDocument> {
-    return this.profileModel.findOne({
-      $or: [{ email: user.email }, { username: user.email }],
-    });
-  }
-
   async getUser(email) {
-    console.log(email);
+    console.log('in get user = ', email);
     return this.profileModel
       .findOne({
         $or: [{ email: email }, { username: email }],
       })
-      .select('email password accountHolderType status role fcmToken');
+      .select(
+        'email password accountHolderType status role fcmToken firstname',
+      );
   }
   async fetchProfileUsingToken(user): Promise<any> {
     const fetchedUser = await this.profileModel
@@ -227,24 +241,6 @@ export class ProfilesService {
       );
     return fetchedUser;
   }
-
-  async getUserBasedOnUserId(userId: string): Promise<any> {
-    return this.profileModel.findById(userId).select('email');
-  }
-  // async updateRewardPoints(userId, rewardPoints): Promise<any> {
-  //   await this.profileModel.findOneAndUpdate(
-  //     { _id: userId },
-  //     { rewardPoints: rewardPoints },
-  //   );
-  // }
-  // async updatedEstimatedSavings(userId, estimatedSavings): Promise<any> {
-  //   await this.profileModel.findByIdAndUpdate(
-  //     {
-  //       _id: userId,
-  //     },
-  //     { estimatedSavings: estimatedSavings },
-  //   );
-  // }
   async getAllUsers(role: string): Promise<any> {
     if (role == Constants.USER || role == Constants.ADMIN)
       return this.profileModel.find({ role });
@@ -304,25 +300,6 @@ export class ProfilesService {
     );
   }
 
-  // async getUserByEmailAndPassword(email, password): Promise<any> {
-  //   const user = this.profileModel
-  //     .findOne({
-  //       $or: [{ email: email }, { username: email }],
-  //     })
-  //     .select('password');
-  //   const passwordValid = await bcrypt.compare(password, user.password);
-  //   if (user && passwordValid) {
-  //     const { password, ...result } = user;
-  //     return result;
-  //   }
-  //   return null;
-  // const passwordValid = await bcrypt.compare(password, user.password);
-  // if (user && passwordValid) {
-  //   const { password, ...result } = user;
-  //   return result;
-  // }
-  // return null;
-  // }
   async changePassword(data): Promise<any> {
     const user = await this.profileModel
       .findOne({ _id: data.userId })

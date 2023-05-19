@@ -5,6 +5,8 @@ import {
   HttpStatus,
   Patch,
   Query,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { VoucherService } from './voucher.service';
 import { Get, Post } from '@nestjs/common/decorators';
@@ -17,8 +19,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { UpdateVoucherDto, VoucherDto } from '../../data/dtos/voucher.dto';
-import { ProfileDto } from '../../data/dtos/profile.dto';
 import { Constants } from '../../common/constants';
+import { JwtAuthGuard } from '../../common/auth/guards/jwt-auth.guard';
 
 @ApiTags('Voucher')
 @Controller('voucher')
@@ -79,7 +81,7 @@ export class VoucherController {
     return this.voucherService.getSingleVoucher(voucherId);
   }
 
-  @Patch('')
+  @Patch()
   @ApiQuery({ type: 'string', name: 'voucherId' })
   @ApiBody({ type: UpdateVoucherDto })
   @ApiCreatedResponse({ type: VoucherDto })
@@ -126,26 +128,27 @@ export class VoucherController {
   }
 
   @Get('all-redeemed-by-user')
-  getAllVoucherRedeemedByUser(@Query('userId') userId) {
-    return this.voucherService.getAllVoucherRedeemedByUser(userId);
+  @UseGuards(JwtAuthGuard)
+  getAllVoucherRedeemedByUser(@Request() request) {
+    return this.voucherService.getAllVoucherRedeemedByUser(request.user.userId);
   }
 
   @Get('redeem-count')
   getTotalVoucherRedeemedCount(@Query('restaurantId') restaurantId) {
     return this.voucherService.getTotalVoucherRedeemedCount(restaurantId);
   }
-  @Get('redeemed-by-all-users')
-  @ApiCreatedResponse({
-    type: ProfileDto,
-    description: 'All Users',
-  })
-  @ApiQuery({ name: 'voucherId', type: 'string' })
-  @ApiBadRequestResponse({
-    description: 'can not get users who redeemed the voucher',
-  })
-  getUserWhoRedeemVoucher(@Query('voucherId') voucherId) {
-    return this.voucherService.getUserWhoRedeemVoucher(voucherId);
-  }
+  // @Get('redeemed-by-all-users')
+  // @ApiCreatedResponse({
+  //   type: ProfileDto,
+  //   description: 'All Users',
+  // })
+  // @ApiQuery({ name: 'voucherId', type: 'string' })
+  // @ApiBadRequestResponse({
+  //   description: 'can not get users who redeemed the voucher',
+  // })
+  // getUserWhoRedeemVoucher(@Query('voucherId') voucherId) {
+  //   return this.voucherService.getUserWhoRedeemVoucher(voucherId);
+  // }
 
   @Patch('disable')
   @ApiBody({
@@ -171,5 +174,17 @@ export class VoucherController {
   @ApiQuery({ type: String, name: 'restaurantId', required: false })
   getRedeemedVoucher(@Query('restaurantId') restaurantId) {
     return this.voucherService.getAllRedeemedVouchers(restaurantId);
+  }
+
+  @Get('savings')
+  @ApiQuery({ type: String, name: 'userId' })
+  @ApiQuery({
+    type: String,
+    name: 'parameter',
+    enum: ['WEEK', 'MONTH', 'YEAR'],
+    required: false,
+  })
+  userSavingsStats(@Query('userId') userId, @Query('parameter') parameter) {
+    return this.voucherService.userSavingsStats(userId, parameter);
   }
 }

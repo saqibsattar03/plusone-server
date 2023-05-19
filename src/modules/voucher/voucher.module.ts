@@ -11,6 +11,7 @@ import { RestaurantModule } from '../restaurant/restaurant.module';
 import { ProfilesModule } from '../profiles/profiles.module';
 import { DepositMoneyModule } from '../deposit-money/deposit-money.module';
 import { FcmModule } from '../fcm/fcm.module';
+import { TransactionHistoryModule } from '../transaction-history/transaction-history.module';
 
 @Module({
   imports: [
@@ -27,7 +28,8 @@ import { FcmModule } from '../fcm/fcm.module';
     RestaurantModule,
     forwardRef(() => ProfilesModule),
     DepositMoneyModule,
-    // FcmModule,
+    TransactionHistoryModule,
+    FcmModule,
   ],
   controllers: [VoucherController],
   providers: [VoucherService],

@@ -47,6 +47,7 @@ export class AuthController {
   @ApiUnauthorizedResponse({ description: 'email or password is incorrect' })
   @UseGuards(LocalAuthGuard)
   login(@Request() request: any): Promise<any> {
+    console.log('login route called');
     return this.authService.login(request.body);
   }
 

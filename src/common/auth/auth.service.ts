@@ -15,10 +15,12 @@ import {
   ForgotPasswordDocument,
 } from '../../data/schemas/forgotPassword.schema';
 import { Model } from 'mongoose';
-import { generateToken } from '../utils/generateToken';
+import { generateToken } from '../utils/generateToken.util';
 import { Constants } from '../constants';
-import { comparePassword, hashPassword } from '../utils/passwordHashing';
+import { comparePassword, hashPassword } from '../utils/passwordHashing.util';
 import { Profile, ProfileDocument } from '../../data/schemas/profile.schema';
+import { AwsMailUtil } from '../utils/aws-mail-util';
+import { getRandomNumber } from '../utils/generateRandomNumber.util';
 
 @Injectable()
 export class AuthService {
@@ -33,15 +35,17 @@ export class AuthService {
   ) {}
 
   async createUser(userDto: any) {
-    console.log('here sign up route');
     userDto.password = await hashPassword(userDto.password);
     if (userDto.role == Constants.ADMIN || userDto.role == Constants.MERCHANT)
       userDto.accountHolderType = null;
     const existingUser = await this.profileModel.findOne({
-      $or: [{ username: userDto.username }, { email: userDto.email }],
+      $or: [
+        { username: userDto.username.toLowerCase() },
+        { email: userDto.email.toLowerCase() },
+      ],
     });
     if (existingUser) {
-      if (existingUser.username === userDto.username)
+      if (existingUser.username === userDto.username.toLowerCase())
         throw new HttpException(
           'A user with this Username already exists',
           HttpStatus.UNAUTHORIZED,
@@ -52,29 +56,45 @@ export class AuthService {
           HttpStatus.UNAUTHORIZED,
         );
     }
+    const confirmationCode = await getRandomNumber(1254, 3517);
     const newUser = new this.profileModel({
       firstname: userDto.firstname,
       surname: userDto.surname,
-      username: userDto.username,
-      email: userDto.email,
+      username: userDto.username.toLowerCase(),
+      email: userDto.email.toLowerCase(),
       password: userDto.password,
       accountHolderType: userDto.accountHolderType,
       role: userDto.role,
       scopes: userDto.scopes,
       status: userDto.status,
       rewardPoints: 0,
-      confirmationCode: await generateToken(),
+      confirmationCode: confirmationCode,
     });
     await newUser.save();
     if (newUser.role == Constants.MERCHANT) return newUser;
-    // sendConfirmationEmail(newUser.email, newUser.confirmationCode);
+
+    /*** email verification ***/
+    // todo: uncomment these line to activate email system
+    // const templateData = {
+    //   title:
+    //     userDto.firstname.slice(0, 1).toUpperCase() +
+    //     userDto.firstname.slice(1).toLowerCase(),
+    //   code: confirmationCode,
+    // };
+    //
+    // await new AwsMailUtil().sendEmail(
+    //   'saqibsattar710@gmail.com',
+    //   templateData,
+    //   'AccountVerification',
+    // );
+
     throw new HttpException(
       'Account Created Successfully. Please Confirm Your Email to Active Your Account. Check Your Email for Confirmation',
       HttpStatus.OK,
     );
   }
   async validateUser(email: string, enteredPassword: string): Promise<any> {
-    const user = await this.profileService.getUser(email);
+    const user = await this.profileService.getUser(email.toLowerCase());
     // await this.profileService.getUserByEmailAndPassword(email, password);
     if (!user) {
       throw new NotAcceptableException(
@@ -94,10 +114,10 @@ export class AuthService {
   }
   async login(user: any) {
     console.log('user = ', user);
-    const fetchedUser = await this.profileService.getUser(user.email);
-    console.log('f user = ', fetchedUser);
+    const fetchedUser = await this.profileService.getUser(
+      user.email.toLowerCase(),
+    );
     if (fetchedUser.accountHolderType != user.accountHolderType) {
-      console.log('fetched user = ', fetchedUser);
       throw new HttpException(
         'user Account Type Does Not Match',
         HttpStatus.UNAUTHORIZED,
@@ -128,12 +148,18 @@ export class AuthService {
     if (!token) {
       token = await new this.forgotModel({
         userId: user._id,
-        token: await generateToken(),
+        token: await getRandomNumber(4752, 7856),
       }).save();
     }
-    // *** send this link to email service ***//
-
-    // const link = `${process.env.BASE_URL}/password-reset/${user._id}/${token.token}`;
+    // *** Send Email for to get code to reset password ***//
+    // todo: uncomment these lines to active forgot password email
+    // const templateData = {
+    //   title:
+    //     user.firstname.slice(0, 1).toUpperCase() +
+    //     user.firstname.slice(1).toLowerCase(),
+    //   code: token.token,
+    // };
+    // await new AwsMailUtil().sendEmail(email, templateData, 'ForgotPassword');
     return token;
   }
   async resetPassword(data) {

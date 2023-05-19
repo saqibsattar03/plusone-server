@@ -99,7 +99,7 @@ export class RestaurantController {
   //   );
   // }
 
-  @Patch('')
+  @Patch()
   @ApiBody({ type: UpdateRestaurantDto })
   @ApiCreatedResponse({
     type: ProfileDto,

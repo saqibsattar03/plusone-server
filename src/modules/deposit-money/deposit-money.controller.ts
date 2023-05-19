@@ -53,15 +53,8 @@ export class DepositMoneyController {
       restaurantId,
     );
   }
-
   @Get('all-restaurants')
   sumOfDepositedAmountByAllRestaurant() {
     return this.depositMoneyService.sumOfDepositedAmountByAllRestaurant();
-  }
-
-  @Get('history')
-  @ApiQuery({ type: String, name: 'restaurantId' })
-  depositHistory(@Query('restaurantId') restaurantId) {
-    return this.depositMoneyService.depositHistory(restaurantId);
   }
 }

@@ -24,12 +24,12 @@ export class FcmService {
             title: data.title,
             body: data.body,
           },
-          android: {
-            notification: {
-              imageUrl:
-                'http://192.168.18.56:3000/uploads/433c63ac-6af6-4f04-8d63-2c78a0623022.png',
-            },
-          },
+          // android: {
+          //   notification: {
+          //     imageUrl:
+          //       'http://192.168.18.56:3000/uploads/433c63ac-6af6-4f04-8d63-2c78a0623022.png',
+          //   },
+          // },
           token: user.fcmToken,
           data: {
             createdAt: new Date().toISOString(),
@@ -41,6 +41,7 @@ export class FcmService {
           title: data.title,
           body: data.body,
           seen: false,
+          profileImage: data.profileImage,
         });
       } else throw new HttpException('no token found', HttpStatus.BAD_REQUEST);
     } catch (e) {

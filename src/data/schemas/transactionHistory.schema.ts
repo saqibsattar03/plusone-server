@@ -1,10 +1,15 @@
-import { Prop, Schema } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Restaurant } from './restaurant.schema';
-import mongoose from 'mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
 
+export type TransactionHistoryDocument = HydratedDocument<TransactionHistory>;
 @Schema({ timestamps: true })
 export class TransactionHistory {
-  @Prop({ type: new mongoose.Types.ObjectId(), ref: Restaurant.name })
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: Restaurant.name,
+    required: true,
+  })
   restaurantId: Restaurant;
 
   @Prop({ type: String })
@@ -20,5 +25,13 @@ export class TransactionHistory {
   voucherSalePrice: number;
 
   @Prop({ type: Number })
-  currentBalance: number;
+  deductedAmount: number;
+
+  @Prop({ type: Number })
+  availableDeposit: number;
+
+  @Prop({ type: Date })
+  createAt: Date;
 }
+export const TransactionHistorySchema =
+  SchemaFactory.createForClass(TransactionHistory);

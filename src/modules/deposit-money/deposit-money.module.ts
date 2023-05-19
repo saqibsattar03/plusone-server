@@ -11,6 +11,7 @@ import {
   PaymentDetailSchema,
 } from '../../data/schemas/payment-detail.schema';
 import { RestaurantModule } from '../restaurant/restaurant.module';
+import { TransactionHistoryModule } from '../transaction-history/transaction-history.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { RestaurantModule } from '../restaurant/restaurant.module';
       },
     ]),
     RestaurantModule,
+    TransactionHistoryModule,
   ],
   controllers: [DepositMoneyController],
   providers: [DepositMoneyService],

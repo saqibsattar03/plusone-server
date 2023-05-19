@@ -20,6 +20,7 @@ export class CommentsService {
     @InjectModel(Comment.name) private readonly commentModel: Model<Comment>,
     @Inject(forwardRef(() => SocialPostsService))
     private readonly socialPostService: SocialPostsService,
+    @Inject(forwardRef(() => ProfilesService))
     protected readonly profileService: ProfilesService,
     protected readonly fcmService: FcmService,
   ) {}
@@ -65,17 +66,18 @@ export class CommentsService {
     }
 
     //*** send comment notification ***/
-    // const id = await this.socialPostService.getPostUserId(commentDto.postId);
-    // const userData = await this.profileService.getUserEarnings(
-    //   commentDto.commentObject.userId,
-    // );
-    // const notification = {
-    //   email: id.email,
-    //   title: 'New Comment ! 💬',
-    //   body: `${userData.firstname} ${userData.surname} Commented On Your Post 💬`,
-    // };
-    // //*** sending comment notification ***/
-    // await this.fcmService.sendSingleNotification(notification);
+    const id = await this.socialPostService.getPostUserId(commentDto.postId);
+    const userData = await this.profileService.getUserEarnings(
+      commentDto.commentObject.userId,
+    );
+    const notification = {
+      email: id.email,
+      title: `${userData.firstname} ${userData.surname}`,
+      body: ' Commented On Your Post 💬',
+      profileImage: userData.profileImage,
+    };
+    //*** sending comment notification ***/
+    await this.fcmService.sendSingleNotification(notification);
     throw new HttpException('comment posted successfully ', HttpStatus.OK);
   }
   async editComment(postId, data): Promise<any> {
@@ -157,5 +159,26 @@ export class CommentsService {
   }
   async deleteAllComment(postId): Promise<any> {
     await this.commentModel.deleteMany({ postId: postId });
+  }
+  async deleteAllCommentsOfSingleUser(userId): Promise<any> {
+    await this.commentModel.aggregate([
+      {
+        $unwind: 'commentObject',
+      },
+      {
+        $match: {
+          userId: userId,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          comments: { $push: '$commentObject' },
+        },
+      },
+      {
+        $out: 'comments', // Replace 'comments' with the name of your collection
+      },
+    ]);
   }
 }

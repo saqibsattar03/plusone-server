@@ -17,4 +17,9 @@ export enum Constants {
   FRIENDS = 'FRIENDS',
   DELETED = 'DELETED',
   ONLYME = 'ONLY-ME',
+  DEBIT = 'DEBIT',
+  CREDIT = 'CREDIT',
+  WEEK = 'WEEK',
+  MONTH = 'MONTH',
+  YEAR = 'YEAR',
 }
