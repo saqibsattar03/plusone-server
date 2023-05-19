@@ -246,6 +246,7 @@ export class VoucherService {
       if (res.uniqueCode == data.restaurantCode) {
         // const verificationCode = await this.fourDigitCode(4);
         const verificationCode = await uniqueCodeUtil(4);
+        console.log(verificationCode);
         const res = await this.redeemVoucherModel.create({
           userId: data.userId,
           voucherId: data.voucherId,
@@ -267,7 +268,6 @@ export class VoucherService {
             voucher.voucherObject[0].estimatedCost,
             data.restaurantId,
           );
-        console.log('restaurant stats = ', restaurantStats);
 
         const user = await this.profileService.updateProfile(
           data,

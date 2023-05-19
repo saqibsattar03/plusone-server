@@ -39,10 +39,13 @@ export class AuthService {
     if (userDto.role == Constants.ADMIN || userDto.role == Constants.MERCHANT)
       userDto.accountHolderType = null;
     const existingUser = await this.profileModel.findOne({
-      $or: [{ username: userDto.username }, { email: userDto.email }],
+      $or: [
+        { username: userDto.username.toLowerCase() },
+        { email: userDto.email.toLowerCase() },
+      ],
     });
     if (existingUser) {
-      if (existingUser.username === userDto.username)
+      if (existingUser.username === userDto.username.toLowerCase())
         throw new HttpException(
           'A user with this Username already exists',
           HttpStatus.UNAUTHORIZED,
@@ -57,8 +60,8 @@ export class AuthService {
     const newUser = new this.profileModel({
       firstname: userDto.firstname,
       surname: userDto.surname,
-      username: userDto.username,
-      email: userDto.email,
+      username: userDto.username.toLowerCase(),
+      email: userDto.email.toLowerCase(),
       password: userDto.password,
       accountHolderType: userDto.accountHolderType,
       role: userDto.role,
@@ -71,18 +74,19 @@ export class AuthService {
     if (newUser.role == Constants.MERCHANT) return newUser;
 
     /*** email verification ***/
-
-    const templateData = {
-      title:
-        userDto.firstname.slice(0, 1).toUpperCase() +
-        userDto.firstname.slice(1).toLowerCase(),
-      code: confirmationCode,
-    };
-    await new AwsMailUtil().sendEmail(
-      'saqibsattar710@gmail.com',
-      templateData,
-      'AccountVerification',
-    );
+    // todo: uncomment these line to activate email system
+    // const templateData = {
+    //   title:
+    //     userDto.firstname.slice(0, 1).toUpperCase() +
+    //     userDto.firstname.slice(1).toLowerCase(),
+    //   code: confirmationCode,
+    // };
+    //
+    // await new AwsMailUtil().sendEmail(
+    //   'saqibsattar710@gmail.com',
+    //   templateData,
+    //   'AccountVerification',
+    // );
 
     throw new HttpException(
       'Account Created Successfully. Please Confirm Your Email to Active Your Account. Check Your Email for Confirmation',
@@ -90,7 +94,7 @@ export class AuthService {
     );
   }
   async validateUser(email: string, enteredPassword: string): Promise<any> {
-    const user = await this.profileService.getUser(email);
+    const user = await this.profileService.getUser(email.toLowerCase());
     // await this.profileService.getUserByEmailAndPassword(email, password);
     if (!user) {
       throw new NotAcceptableException(
@@ -110,10 +114,10 @@ export class AuthService {
   }
   async login(user: any) {
     console.log('user = ', user);
-    const fetchedUser = await this.profileService.getUser(user.email);
-    console.log('f user = ', fetchedUser);
+    const fetchedUser = await this.profileService.getUser(
+      user.email.toLowerCase(),
+    );
     if (fetchedUser.accountHolderType != user.accountHolderType) {
-      console.log('fetched user = ', fetchedUser);
       throw new HttpException(
         'user Account Type Does Not Match',
         HttpStatus.UNAUTHORIZED,
@@ -148,13 +152,14 @@ export class AuthService {
       }).save();
     }
     // *** Send Email for to get code to reset password ***//
-    const templateData = {
-      title:
-        user.firstname.slice(0, 1).toUpperCase() +
-        user.firstname.slice(1).toLowerCase(),
-      code: token.token,
-    };
-    await new AwsMailUtil().sendEmail(email, templateData, 'ForgotPassword');
+    // todo: uncomment these lines to active forgot password email
+    // const templateData = {
+    //   title:
+    //     user.firstname.slice(0, 1).toUpperCase() +
+    //     user.firstname.slice(1).toLowerCase(),
+    //   code: token.token,
+    // };
+    // await new AwsMailUtil().sendEmail(email, templateData, 'ForgotPassword');
     return token;
   }
   async resetPassword(data) {

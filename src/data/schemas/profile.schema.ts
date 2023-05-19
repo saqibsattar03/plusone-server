@@ -16,6 +16,7 @@ export class Profile extends User {
     type: String,
     required: true,
     unique: true,
+    lowercase: true,
     validate: validator.isEmail,
   })
   email: string;
