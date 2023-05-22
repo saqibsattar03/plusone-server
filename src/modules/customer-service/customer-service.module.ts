@@ -6,6 +6,7 @@ import {
   CustomerService,
   CustomerServiceSchema,
 } from '../../data/schemas/customerService.schema';
+import { ProfilesModule } from '../profiles/profiles.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import {
         schema: CustomerServiceSchema,
       },
     ]),
+    ProfilesModule,
   ],
   controllers: [CustomerServiceController],
   providers: [CustomerServiceService],

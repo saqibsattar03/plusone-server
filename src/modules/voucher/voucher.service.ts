@@ -246,7 +246,6 @@ export class VoucherService {
       if (res.uniqueCode == data.restaurantCode) {
         // const verificationCode = await this.fourDigitCode(4);
         const verificationCode = await uniqueCodeUtil(4);
-        console.log(verificationCode);
         const res = await this.redeemVoucherModel.create({
           userId: data.userId,
           voucherId: data.voucherId,
@@ -254,7 +253,7 @@ export class VoucherService {
           verificationCode: verificationCode,
         });
         const oid = new mongoose.Types.ObjectId(data.voucherId);
-        const rPoints = await this.profileService.getUserEarnings(data.userId);
+        const rPoints = await this.profileService.getUserFields(data.userId);
         const voucher = await this.voucherModel.findOne(
           { 'voucherObject._id': oid },
           {
@@ -286,33 +285,39 @@ export class VoucherService {
         await this.transactionHistoryService.createTransactionHistory(
           transactionData,
         );
-        // if (restaurantStats.availableDeposit < 50) {
-        //   //*** send email for low balance ***//
-        //   const templateData = {
-        //     title: 'Low Balance',
-        //     merchant: 'Burger King',
-        //     description:
-        //       'Low balance, urgently need to deposit funds to cover expenses.',
-        //     amount_title: 'Low Balance',
-        //     amount: restaurantStats.availableDeposit,
-        //     // merchant:
-        //     //   res.restaurantName.slice(0, 1).toUpperCase() +
-        //     //   res.restaurantName.slice(1).toLowerCase(),
-        //   };
-        //   // todo: send email to recharge //
-        //   // await new AwsMailUtil().sendEmail()
-        // }
+
+        if (restaurantStats.availableDeposit < 50) {
+          const restaurantEmail = await this.profileService.getUserFields(
+            restaurantStats.userId,
+          );
+
+          //*** send email for low balance ***//
+          const templateData = {
+            title: 'Low Balance Alert!',
+            merchant: restaurantStats.restaurantName,
+            description:
+              'Low balance, urgently need to deposit funds to cover expenses.',
+            amount_title: 'Current Balance',
+            amount: restaurantStats.availableDeposit,
+          };
+          console.log(templateData);
+          // todo: send email to recharge //
+          await new AwsMailUtil().sendEmail(
+            restaurantEmail.email,
+            templateData,
+            'RestaurantBalance',
+          );
+        }
 
         //*** sending voucher redemption notification to user ***//
-        if (user.fcmToken) {
-          console.log('inside fcm token');
-          const notification = {
-            email: rPoints.email,
-            title: 'Score! Your Voucher Has Been Redeemed 🎉🛍️💰',
-            body: '🎁 Surprise! Voucher redeemed, and the savings are all yours to enjoy 🎉🛍️💰',
-          };
-          await this.fcmService.sendSingleNotification(notification);
-        }
+
+        // const notification = {
+        //   email: rPoints.email,
+        //   title: 'Score! Your Voucher Has Been Redeemed 🎉🛍️💰',
+        //   body: '🎁 Surprise! Voucher redeemed, and the savings are all yours to enjoy 🎉🛍️💰',
+        // };
+        // await this.fcmService.sendSingleNotification(notification);
+
         return res.verificationCode;
       } else
         throw new HttpException(

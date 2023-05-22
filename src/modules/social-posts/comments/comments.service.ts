@@ -67,7 +67,7 @@ export class CommentsService {
 
     //*** send comment notification ***/
     const id = await this.socialPostService.getPostUserId(commentDto.postId);
-    const userData = await this.profileService.getUserEarnings(
+    const userData = await this.profileService.getUserFields(
       commentDto.commentObject.userId,
     );
     const notification = {

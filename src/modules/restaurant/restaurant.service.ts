@@ -259,7 +259,6 @@ export class RestaurantService {
       { new: true },
     );
   }
-  /*** check if these methods are being used at the end of the project if not then remove the review count system completely ***/
   async getRestaurantReviewCount(restaurantId): Promise<any> {
     return this.restaurantModel
       .findOne({ _id: restaurantId })
@@ -272,8 +271,6 @@ export class RestaurantService {
       { reviewCount: reviewCount },
     );
   }
-
-  /*** till  here ***/
   async getRestaurantVerificationCode(
     restaurantId,
     restaurantCode,
@@ -454,35 +451,6 @@ export class RestaurantService {
           [`${fieldName}`]: '$restaurantReviews.reviewObject.rating',
         },
       },
-      // {
-      //   $project: {
-      //     _id: '$_id',
-      //     restaurantName: '$restaurantName',
-      //     profileImage: '$profileImage',
-      //     description: '$description',
-      //     phoneNumber: '$phoneNumber',
-      //     media: '$media',
-      //     voucher: '$voucher',
-      //     studentVoucherCount: {
-      //       $sum: {
-      //         $cond: [
-      //           { $eq: ['$voucher.voucherObject.voucherPreference', 'BOTH'] },
-      //           1,
-      //           0,
-      //         ],
-      //       },
-      //     },
-      //     menu: '$menu',
-      //     isSponsored: '$isSponsored',
-      //     location: '$location',
-      //     distanceFromMe: '$distanceFromMe',
-      //     totalVoucherCount: '$totalVoucherCount',
-      //     reviewCount: '$reviewCount',
-      //     createdAt: '$createdAt',
-      //     updatedAt: '$updatedAt',
-      //     [`${fieldName}`]: '$restaurantReviews.reviewObject.rating',
-      //   },
-      // },
     ];
   }
   async filterByRestaurantName(restaurantName: string): Promise<any> {
@@ -536,6 +504,8 @@ export class RestaurantService {
           new: true,
         },
       )
-      .select('totalSales totalDeductions availableDeposit');
+      .select(
+        'totalSales totalDeductions availableDeposit restaurantName userId',
+      );
   }
 }

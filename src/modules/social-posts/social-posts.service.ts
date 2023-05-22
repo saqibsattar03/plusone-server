@@ -251,7 +251,7 @@ export class SocialPostsService {
     //*** send like post notification ***//
 
     const id = await this.getPostUserId(res.postId);
-    const userData = await this.profileService.getUserEarnings(userId);
+    const userData = await this.profileService.getUserFields(userId);
     const notification = {
       email: id.email,
       title: 'New Like! 👍',
@@ -557,6 +557,6 @@ export class SocialPostsService {
       })
       .select('userId -_id');
 
-    return this.profileService.getUserEarnings(postedUserId.userId);
+    return this.profileService.getUserFields(postedUserId.userId);
   }
 }

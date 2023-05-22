@@ -64,60 +64,6 @@ export class DepositMoneyService {
     throw new HttpException('Money Deposited Successfully', HttpStatus.OK);
   }
 
-  // async deposit(depositDto: DepositMoneyDto, restaurantId): Promise<any> {
-  //   const oid = new mongoose.Types.ObjectId(restaurantId);
-  //   const res = await this.depositMoneyModel.findOne({
-  //     restaurantId: oid,
-  //   });
-  //   if (!res) {
-  //     const restaurant = await this.depositMoneyModel.create({
-  //       restaurantId: restaurantId,
-  //     });
-  //     await restaurant.updateOne({
-  //       $push: {
-  //         depositObject: {
-  //           amount: depositDto.depositObject.amount,
-  //           createdAt: moment().format('YYYY-MM-DD hh:mm:ss'),
-  //         },
-  //       },
-  //     });
-  //     const res = await this.restaurantService.depositMoney(
-  //       restaurantId,
-  //       depositDto.depositObject.amount,
-  //     );
-  //     const data = {
-  //       restaurantId: restaurantId,
-  //       transactionType: Constants.CREDIT,
-  //       amount: depositDto.depositObject.amount,
-  //       availableDeposit: res.availableDeposit,
-  //     };
-  //     await this.transactionHistoryService.createTransactionHistory(data);
-  //     throw new HttpException('Money Deposited Successfully', HttpStatus.OK);
-  //   } else {
-  //     await res.updateOne({
-  //       $push: {
-  //         depositObject: {
-  //           amount: depositDto.depositObject.amount,
-  //           createdAt: moment().format('YYYY-MM-DD hh:mm:ss'),
-  //         },
-  //       },
-  //     });
-  //     const res1 = await this.restaurantService.depositMoney(
-  //       restaurantId,
-  //       depositDto.depositObject.amount,
-  //     );
-  //
-  //     const data = {
-  //       restaurantId: restaurantId,
-  //       transactionType: Constants.CREDIT,
-  //       amount: depositDto.depositObject.amount,
-  //       availableDeposit: res1.availableDeposit,
-  //     };
-  //     await this.transactionHistoryService.createTransactionHistory(data);
-  //     throw new HttpException('Money Deposited Successfully', HttpStatus.OK);
-  //   }
-  // }
-
   async sumOfDepositedAmountBySingleRestaurant(restaurantId): Promise<any> {
     const oid = new mongoose.Types.ObjectId(restaurantId);
     const totalDebit = await this.depositMoneyModel

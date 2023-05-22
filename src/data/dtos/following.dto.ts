@@ -23,3 +23,18 @@ export class FollowResponse {
   @ApiProperty({ type: String })
   profileImage: string;
 }
+
+export class FollowRequest {
+  @ApiProperty()
+  requestedFrom: {
+    _id: string;
+    firstname: string;
+    surname: string;
+  };
+
+  @ApiProperty()
+  createdAt: string;
+
+  @ApiProperty()
+  updatedAt: string;
+}

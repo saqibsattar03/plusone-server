@@ -9,6 +9,10 @@ import {
 import { FollowerModule } from '../follower/follower.module';
 import { FcmModule } from '../fcm/fcm.module';
 import { ProfilesModule } from '../profiles/profiles.module';
+import {
+  FollowRequest,
+  FollowRequestSchema,
+} from '../../data/schemas/follow-request.schema';
 
 @Module({
   imports: [
@@ -16,6 +20,10 @@ import { ProfilesModule } from '../profiles/profiles.module';
       {
         name: Following.name,
         schema: FollowingSchema,
+      },
+      {
+        name: FollowRequest.name,
+        schema: FollowRequestSchema,
       },
     ]),
     forwardRef(() => FollowerModule),
