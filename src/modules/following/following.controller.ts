@@ -121,6 +121,8 @@ export class FollowingController {
   @ApiCreatedResponse({ type: [FollowRequest] })
   @UseGuards(JwtAuthGuard)
   getAllFollowRequest(@Request() request) {
+    console.log('called');
+    console.log(request.user.userId);
     return this.followingService.getAllFollowRequest(request.user.userId);
   }
 

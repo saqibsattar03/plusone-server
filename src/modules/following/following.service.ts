@@ -41,6 +41,10 @@ export class FollowingService {
     if (!res) {
       const user = await this.followingModel.create({ userId: userId });
       await user.updateOne({ $push: { followings: followeeId } });
+      await this.followRequestModel.findOneAndDelete({
+        requestedFrom: new mongoose.Types.ObjectId(userId),
+        requestedTo: new mongoose.Types.ObjectId(followeeId),
+      });
       await this.followerService.addFollower(followeeId, userId);
     } else if (res) {
       if (!res.followings.includes(followeeId)) {
@@ -53,30 +57,29 @@ export class FollowingService {
         await this.followerService.addFollower(followeeId, userId);
         await this.followRequestModel.findOneAndDelete({
           requestedFrom: new mongoose.Types.ObjectId(userId),
+          requestedTo: new mongoose.Types.ObjectId(followeeId),
         });
-        throw new HttpException('Request Accepted', HttpStatus.OK);
       }
-      // } else
-      //   throw new HttpException('already following', HttpStatus.BAD_REQUEST);
     }
-
     //*** sending follow added notification ***//
 
     const id = await this.profileService.getUserFields(userId);
     const userData = await this.profileService.getUserFields(followeeId);
     const notification = {
-      email: userData.email,
+      email: id.email,
       title: 'New Follow Request! 👋',
-      body: `🎉 Alert! ${id.firstname} ${id.surname} is Now Following You 👀`,
+      body: `🎉 Alert! ${userData.firstname} ${userData.surname} Accepted Your Follow Request 👀`,
       profileImage: userData.profileImage,
     };
 
     await this.fcmService.sendSingleNotification(notification);
-    throw new HttpException('follwee added successfully', HttpStatus.OK);
+    return { isRequested: false };
   }
   async SingleUserFollowCheck(currentUser, searchedUser): Promise<any> {
+    console.log('currentUser = ', currentUser);
+    console.log('searchedUser = ', searchedUser);
     const res = await this.followingModel.findOne({ userId: currentUser });
-    if (!res) throw new HttpException('invalid user', HttpStatus.BAD_REQUEST);
+    if (!res) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
     const arr = res.followings.map((id) => id.toString());
     const followed = arr.some((id) => id === searchedUser);
     return followed ? { followed: true } : { followed: false };
@@ -176,6 +179,7 @@ export class FollowingService {
   }
   async followRequest(data) {
     const user = await this.profileService.getUserFields(data.requestedTo);
+    const user1 = await this.profileService.getUserFields(data.requestedFrom);
     const res = await this.followRequestModel.findOne({
       requestedFrom: data.requestedFrom,
       requestedTo: data.requestedTo,
@@ -183,19 +187,29 @@ export class FollowingService {
     if (!res) {
       if (user.accountType == Constants.PRIVATE) {
         await this.followRequestModel.create(data);
-        throw new HttpException('Follow Request Sent', HttpStatus.OK);
-      } else await this.addFollowee(data.requestedFrom, data.requestedTo);
+        const notification = {
+          email: user.email,
+          title: 'New Follow Request! 👋',
+          body: `🎉 Alert! ${user1.firstname} ${user1.surname} Requested To Follow You 👀`,
+          profileImage: user.profileImage,
+        };
+        await this.fcmService.sendSingleNotification(notification);
+        return { isRequested: true };
+      } else {
+        return await this.addFollowee(data.requestedFrom, data.requestedTo);
+      }
     } else throw new HttpException('Already Requested', HttpStatus.BAD_REQUEST);
   }
   async followRequestStatus(data): Promise<any> {
     if (data.status == Constants.ACCEPTED) {
-      await this.addFollowee(data.requestedFrom, data.requestedTo);
+      await this.addFollowee(data.requestedTo, data.requestedFrom);
     } else if (data.status == Constants.REJECTED) {
       await this.followRequestModel.findOneAndDelete({
-        requestedFrom: new mongoose.Types.ObjectId(data.requestedFrom),
+        requestedFrom: new mongoose.Types.ObjectId(data.requestedTo),
+        requestedTo: new mongoose.Types.ObjectId(data.requestedFrom),
       });
-      throw new HttpException('Request Rejected', HttpStatus.BAD_REQUEST);
     }
+    throw new HttpException('Request Rejected', HttpStatus.OK);
   }
   async getAllFollowRequest(userId): Promise<any> {
     return this.followRequestModel
@@ -203,7 +217,7 @@ export class FollowingService {
       .select('-_id -requestedTo')
       .populate({
         path: 'requestedFrom',
-        select: 'firstname surname',
+        select: 'firstname surname profileImage',
       });
   }
   async checkFollowRequest(data): Promise<any> {

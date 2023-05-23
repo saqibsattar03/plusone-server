@@ -15,6 +15,7 @@ import {
   ForgotPasswordSchema,
 } from '../../data/schemas/forgotPassword.schema';
 import { Profile, ProfileSchema } from '../../data/schemas/profile.schema';
+import * as process from 'process';
 
 @Module({
   imports: [
@@ -22,9 +23,9 @@ import { Profile, ProfileSchema } from '../../data/schemas/profile.schema';
     PassportModule,
     JwtModule.register({
       //save secret key in env file
-      // secret: jwtConstants.secret,
+      // secret: process.env.SECRET_KEY,
       secret: jwtConstants.secret,
-      signOptions: { expiresIn: '168 hours' },
+      signOptions: { expiresIn: '60d' },
     }),
     MongooseModule.forFeature([
       {

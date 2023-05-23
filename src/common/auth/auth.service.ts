@@ -15,7 +15,6 @@ import {
   ForgotPasswordDocument,
 } from '../../data/schemas/forgotPassword.schema';
 import mongoose, { Model } from 'mongoose';
-import { generateToken } from '../utils/generateToken.util';
 import { Constants } from '../constants';
 import { comparePassword, hashPassword } from '../utils/passwordHashing.util';
 import { Profile, ProfileDocument } from '../../data/schemas/profile.schema';
@@ -94,6 +93,7 @@ export class AuthService {
     );
   }
   async verifyUser(data): Promise<any> {
+    console.log(data);
     const oid = new mongoose.Types.ObjectId(data._id);
     const user = await this.profileModel
       .findById({ _id: oid })

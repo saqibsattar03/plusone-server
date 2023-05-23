@@ -20,7 +20,6 @@ import {
   comparePassword,
   hashPassword,
 } from '../../common/utils/passwordHashing.util';
-import { CommentsService } from '../social-posts/comments/comments.service';
 
 @Injectable()
 export class ProfilesService {
