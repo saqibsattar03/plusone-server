@@ -263,6 +263,7 @@ export class ProfilesService {
       .select(['-createdAt', '-updatedAt', '-rewardPoints']);
   }
   async restaurantFilters(data, paginationQuery): Promise<any> {
+    console.log('data = ', data);
     return this.restaurantService.restaurantFilters(data, paginationQuery);
   }
   async resetPassword(user, enteredPassword) {

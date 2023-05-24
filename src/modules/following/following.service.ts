@@ -36,7 +36,7 @@ export class FollowingService {
     @Inject(forwardRef(() => ProfilesService))
     protected readonly profileService: ProfilesService,
   ) {}
-  async addFollowee(userId, followeeId): Promise<any> {
+  async addFollowee(userId, followeeId, isPrivate = false): Promise<any> {
     const res = await this.followingModel.findOne({ userId: userId });
     if (!res) {
       const user = await this.followingModel.create({ userId: userId });
@@ -62,17 +62,17 @@ export class FollowingService {
       }
     }
     //*** sending follow added notification ***//
-
-    const id = await this.profileService.getUserFields(userId);
-    const userData = await this.profileService.getUserFields(followeeId);
-    const notification = {
-      email: id.email,
-      title: 'New Follow Request! 👋',
-      body: `🎉 Alert! ${userData.firstname} ${userData.surname} Accepted Your Follow Request 👀`,
-      profileImage: userData.profileImage,
-    };
-
-    await this.fcmService.sendSingleNotification(notification);
+    if (isPrivate) {
+      const id = await this.profileService.getUserFields(userId);
+      const userData = await this.profileService.getUserFields(followeeId);
+      const notification = {
+        email: id.email,
+        title: 'New Follow Request! 👋',
+        body: `🎉 Alert! ${userData.firstname} ${userData.surname} Accepted Your Follow Request 👀`,
+        profileImage: userData.profileImage,
+      };
+      await this.fcmService.sendSingleNotification(notification);
+    }
     return { isRequested: false };
   }
   async SingleUserFollowCheck(currentUser, searchedUser): Promise<any> {
@@ -196,13 +196,24 @@ export class FollowingService {
         await this.fcmService.sendSingleNotification(notification);
         return { isRequested: true };
       } else {
-        return await this.addFollowee(data.requestedFrom, data.requestedTo);
+        const notification = {
+          email: user.email,
+          title: 'New Follow Request! 👋',
+          body: `🎉 Alert! ${user1.firstname} ${user1.surname} Started To Follow You 👀`,
+          profileImage: user.profileImage,
+        };
+        await this.fcmService.sendSingleNotification(notification);
+        return await this.addFollowee(
+          data.requestedFrom,
+          data.requestedTo,
+          false,
+        );
       }
     } else throw new HttpException('Already Requested', HttpStatus.BAD_REQUEST);
   }
   async followRequestStatus(data): Promise<any> {
     if (data.status == Constants.ACCEPTED) {
-      await this.addFollowee(data.requestedTo, data.requestedFrom);
+      await this.addFollowee(data.requestedTo, data.requestedFrom, true);
     } else if (data.status == Constants.REJECTED) {
       await this.followRequestModel.findOneAndDelete({
         requestedFrom: new mongoose.Types.ObjectId(data.requestedTo),

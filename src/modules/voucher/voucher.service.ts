@@ -573,7 +573,19 @@ export class VoucherService {
         {
           $group: {
             // _id: { $dayOfWeek: '$createdAt' },
-            _id: { $dayOfYear: '$createdAt' },
+            _id: {
+              $dateToString: {
+                format: '%m-%d', // or "%Y%m%d" for a numeric format
+                date: '$createdAt',
+              },
+            },
+            // _id: '$createdAt',
+            // _id: {
+            //   $dateToString: {
+            //     format: '%m%d',
+            //     date: '$createdAt',
+            //   },
+            // },
             sum: {
               $sum: { $toDouble: '$voucher.voucherObject.estimatedSavings' },
             },

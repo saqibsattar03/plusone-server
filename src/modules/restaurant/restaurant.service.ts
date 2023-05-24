@@ -30,16 +30,17 @@ export class RestaurantService {
   ) {}
 
   async createRestaurant(restaurantDto: any): Promise<any> {
-    const tags = await this.tagModel.find({}, { tag: 1 });
-    const tagsSet = new Set(tags.map((tag) => tag.tag));
-
-    const newTags = [];
-    for (const tag of restaurantDto.tags) {
-      if (!tagsSet.has(tag)) {
-        newTags.push({ tag });
-      }
-    }
-    await this.tagModel.create(newTags);
+    // const tags = await this.tagModel.find({}, { tag: 1 });
+    // const tagsSet = new Set(tags.map((tag) => tag.tag));
+    //
+    // const newTags = [];
+    // for (const tag of restaurantDto.tags) {
+    //   if (!tagsSet.has(tag)) {
+    //     newTags.push({ tag });
+    //   }
+    // }
+    // await this.tagModel.create(newTags);
+    console.log('restaurantDto = ', restaurantDto);
 
     let uniqueCode = await getRandomNumber(1249, 5596);
     while (await this.restaurantModel.findOne({ uniqueCode })) {
