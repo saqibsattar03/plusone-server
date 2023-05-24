@@ -92,7 +92,7 @@ export class FollowerService {
           from: 'followings',
           let: {
             // uId: ObjectId('644a4c7d1913f5e2b20fd596'),
-            uId: oid,
+            uId: new mongoose.Types.ObjectId(userId),
           },
           pipeline: [
             {
@@ -106,12 +106,12 @@ export class FollowerService {
           as: 'followed',
         },
       },
-      // {
-      //   $unwind: {
-      //     path: '$followed',
-      //     preserveNullAndEmptyArrays: true,
-      //   },
-      // },
+      {
+        $unwind: {
+          path: '$followed',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
       {
         $lookup: {
           from: 'followrequests',
@@ -155,6 +155,7 @@ export class FollowerService {
               else: {
                 $cond: {
                   if: {
+                    // $eq: ['$followers._id', '$followed.followings'],
                     $in: ['$followers._id', '$followed.followings'],
                   },
                   then: true,
