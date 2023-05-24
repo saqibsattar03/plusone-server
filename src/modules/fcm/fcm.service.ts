@@ -18,6 +18,7 @@ export class FcmService {
   async sendSingleNotification(data: any): Promise<any> {
     try {
       const user = await this.profileService.getUser(data.email.toLowerCase());
+      console.log('user = ', user);
       if (user.fcmToken) {
         const message = {
           notification: {

@@ -35,14 +35,17 @@ export class SocialPostsService {
   ) {}
   async createPost(postDto: any): Promise<PostDocument> {
     try {
+      const userType = await this.profileService.getUserFields(postDto.userId);
       if (postDto.postType == Constants.FEED) {
         postDto.voucherId = null;
+        postDto.postToShow = userType.accountHolderType;
         return this.socialPostModel.create(postDto);
       } else {
         return this.socialPostModel.create({
           userId: postDto.reviewObject.userId,
           voucherId: postDto.reviewObject.voucherId,
           caption: postDto.reviewObject.reviewText,
+          accountHolderType: userType.accountHolderType,
           postType: Constants.REVIEW,
         });
       }
@@ -75,7 +78,6 @@ export class SocialPostsService {
       });
     }
     if (data.longitude && data.latitude && !data.caption) {
-      // sort = -1;
       query.push({
         $geoNear: {
           near: {
@@ -231,16 +233,16 @@ export class SocialPostsService {
     }
     //*** send like post notification ***//
 
-    const id = await this.getPostUserId(res.postId);
+    const postedUser = await this.getPostUserId(res.postId);
     const userData = await this.profileService.getUserFields(userId);
     const notification = {
-      email: id.email,
+      email: postedUser.email,
       title: 'New Like! 👍',
       body: `Your post just got a like from ${userData.firstname} ${userData.surname}! 👍`,
       profileImage: userData.profileImage,
     };
     //*** like post notification ***//
-    if (id._id.toString() != userData._id.toString())
+    if (postedUser._id.toString() != userData._id.toString())
       await this.fcmService.sendSingleNotification(notification);
     throw new HttpException('post liked successfully', HttpStatus.OK);
   }
@@ -290,7 +292,14 @@ export class SocialPostsService {
   }
 
   async getPostPipeline(userId) {
+    const userType = await this.profileService.getUserFields(userId);
     return [
+      // checking if post is for student or non-student user //
+      {
+        $match: {
+          postToShow: userType.accountHolderType,
+        },
+      },
       {
         $lookup: {
           from: 'vouchers',
@@ -374,6 +383,7 @@ export class SocialPostsService {
           user: 1,
           location: 1,
           caption: 1,
+          postToShow: 1,
           postAudiencePreference: 1,
           postType: 1,
           voucherId: 1,
@@ -430,6 +440,7 @@ export class SocialPostsService {
           userId: 1,
           location: 1,
           caption: 1,
+          postToShow: 1,
           postAudiencePreference: 1,
           postType: 1,
           voucherId: 1,
@@ -463,6 +474,7 @@ export class SocialPostsService {
           profileImage: '$user.profileImage',
           caption: 1,
           location: 1,
+          postToShow: 1,
           postAudiencePreference: 1,
           postType: 1,
           postLiked: {
@@ -590,5 +602,20 @@ export class SocialPostsService {
       .select('userId -_id');
 
     return this.profileService.getUserFields(postedUserId.userId);
+  }
+  async updateManyPosts(): Promise<any> {
+    const posts = await this.socialPostModel.find({});
+    const updatedPosts = posts.map((post) => {
+      const randomValue = Math.random() < 0.5 ? 'STUDENT' : 'NON-STUDENT';
+      return { _id: post._id, postToShow: randomValue };
+    });
+
+    const updatePromises = updatedPosts.map((updatedPost) => {
+      return this.socialPostModel.findByIdAndUpdate(updatedPost._id, {
+        postToShow: updatedPost.postToShow,
+      });
+    });
+
+    await Promise.all(updatePromises);
   }
 }

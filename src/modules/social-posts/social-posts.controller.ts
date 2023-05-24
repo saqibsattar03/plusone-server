@@ -206,4 +206,9 @@ export class SocialPostsController {
   searchPostByLocation(@Body() data) {
     return this.socialPostService.searchPostByLocation(data);
   }
+
+  @Patch('update-all')
+  update() {
+    return this.socialPostService.updateManyPosts();
+  }
 }

@@ -127,7 +127,7 @@ export class ProfilesController {
       },
     },
   })
-  filterUserByName(@Query('username') username) {
-    return this.profileService.filterUserByName(username);
+  filterUserByName(@Query('username') username, @Query('userType') userType) {
+    return this.profileService.filterUserByName(username, userType);
   }
 }
