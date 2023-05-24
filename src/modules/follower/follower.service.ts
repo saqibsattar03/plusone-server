@@ -58,6 +58,7 @@ export class FollowerService {
   }
 
   async getAllFollowers(userId): Promise<any> {
+    console.log(userId);
     const oid = new mongoose.Types.ObjectId(userId);
     return this.followerModel.aggregate([
       {
@@ -105,17 +106,17 @@ export class FollowerService {
           as: 'followed',
         },
       },
-      {
-        $unwind: {
-          path: '$followed',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
+      // {
+      //   $unwind: {
+      //     path: '$followed',
+      //     preserveNullAndEmptyArrays: true,
+      //   },
+      // },
       {
         $lookup: {
           from: 'followrequests',
           let: {
-            // // uId: ObjectId('644a4c7d1913f5e2b20fd596'),
+            uId: oid,
             // uId: oid,
             rTo: '$followers._id',
           },
@@ -123,7 +124,14 @@ export class FollowerService {
             {
               $match: {
                 $expr: {
-                  $eq: ['$requestedTo', '$$rTo'],
+                  $and: [
+                    {
+                      $eq: ['$requestedFrom', '$$uId'],
+                    },
+                    {
+                      $eq: ['$requestedTo', '$$rTo'],
+                    },
+                  ],
                 },
               },
             },
