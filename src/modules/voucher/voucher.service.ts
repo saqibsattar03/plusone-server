@@ -499,6 +499,7 @@ export class VoucherService {
       ]);
   }
   async userSavingsStats(userId, parameter): Promise<any> {
+    console.log(new Date());
     const oid = new mongoose.Types.ObjectId(userId);
     let value = null;
     const { WEEK, MONTH, YEAR } = Constants;
@@ -551,14 +552,40 @@ export class VoucherService {
         },
       },
     );
-    if (parameter) {
+    if (parameter == WEEK) {
       pipeline.push(
         {
           $group: {
-            _id:
-              parameter == WEEK || parameter == MONTH
-                ? { $dayOfWeek: '$createdAt' }
-                : { $month: '$createdAt' },
+            _id: { $dayOfWeek: '$createdAt' },
+
+            sum: {
+              $sum: { $toDouble: '$voucher.voucherObject.estimatedSavings' },
+            },
+          },
+        },
+        {
+          $sort: { _id: 1 },
+        },
+      );
+    } else if (parameter == MONTH) {
+      pipeline.push(
+        {
+          $group: {
+            _id: { $dayOfMonth: '$createdAt' },
+            sum: {
+              $sum: { $toDouble: '$voucher.voucherObject.estimatedSavings' },
+            },
+          },
+        },
+        {
+          $sort: { _id: 1 },
+        },
+      );
+    } else if (parameter == YEAR) {
+      pipeline.push(
+        {
+          $group: {
+            _id: { $month: '$createdAt' },
             sum: {
               $sum: { $toDouble: '$voucher.voucherObject.estimatedSavings' },
             },
@@ -569,23 +596,17 @@ export class VoucherService {
         },
       );
     } else {
+      // all savings
+
       pipeline.push(
         {
           $group: {
-            // _id: { $dayOfWeek: '$createdAt' },
             _id: {
               $dateToString: {
                 format: '%m-%d', // or "%Y%m%d" for a numeric format
                 date: '$createdAt',
               },
             },
-            // _id: '$createdAt',
-            // _id: {
-            //   $dateToString: {
-            //     format: '%m%d',
-            //     date: '$createdAt',
-            //   },
-            // },
             sum: {
               $sum: { $toDouble: '$voucher.voucherObject.estimatedSavings' },
             },
