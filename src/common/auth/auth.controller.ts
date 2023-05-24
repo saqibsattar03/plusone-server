@@ -1,4 +1,4 @@
-import { Controller, Query, UseGuards } from '@nestjs/common';
+import { Controller, Param, Patch, Query, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Body, Get, Post, Request } from '@nestjs/common/decorators';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -29,6 +29,26 @@ export class AuthController {
   async createUser(@Body() data) {
     console.log('sign up route', data);
     return this.authService.createUser(data);
+  }
+
+  @Patch('verify-account')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+        confirmationCode: { type: 'string' },
+      },
+    },
+  })
+  verifyUser(@Body() data) {
+    return this.authService.verifyUser(data);
+  }
+
+  @Post('resend-verification-code')
+  @ApiQuery({ type: String, name: 'email' })
+  resendVerificationCode(@Query('email') email) {
+    return this.authService.resendVerificationCode(email);
   }
   @Post('sign-in')
   @ApiCreatedResponse({
@@ -73,7 +93,26 @@ export class AuthController {
   forgotPassword(@Query('email') email: string) {
     return this.authService.forgotPassword(email);
   }
-  // @UseGuards(JwtAuthGuard)
+
+  @Post('verify-password-token')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string' },
+        token: { type: 'number' },
+      },
+    },
+  })
+  verifyPasswordToken(@Body() data) {
+    return this.authService.verifyPasswordToken(data);
+  }
+
+  @Post('resend-password-token')
+  @ApiQuery({ type: String, name: 'email' })
+  resendPasswordToken(@Query('email') email) {
+    return this.authService.resendPasswordToken(email);
+  }
   @Post('reset-password')
   @ApiResponse({ description: 'Password Reset Successfully' })
   @ApiBadRequestResponse({
@@ -85,7 +124,6 @@ export class AuthController {
       properties: {
         email: { type: 'string' },
         password: { type: 'string' },
-        token: { type: 'string' },
       },
     },
   })

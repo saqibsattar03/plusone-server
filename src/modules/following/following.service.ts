@@ -14,12 +14,21 @@ import mongoose, { Model } from 'mongoose';
 import { FollowerService } from '../follower/follower.service';
 import { FcmService } from '../fcm/fcm.service';
 import { ProfilesService } from '../profiles/profiles.service';
+import {
+  FollowRequest,
+  FollowRequestDocument,
+} from '../../data/schemas/follow-request.schema';
+import { Constants } from '../../common/constants';
 
 @Injectable()
 export class FollowingService {
   constructor(
     @InjectModel(Following.name)
     private readonly followingModel: Model<FollowingDocument>,
+
+    @InjectModel(FollowRequest.name)
+    private readonly followRequestModel: Model<FollowRequestDocument>,
+
     @Inject(forwardRef(() => FollowerService))
     private readonly followerService: FollowerService,
     @Inject(forwardRef(() => FcmService))
@@ -27,11 +36,15 @@ export class FollowingService {
     @Inject(forwardRef(() => ProfilesService))
     protected readonly profileService: ProfilesService,
   ) {}
-  async addFollowee(userId, followeeId): Promise<any> {
+  async addFollowee(userId, followeeId, isPrivate = false): Promise<any> {
     const res = await this.followingModel.findOne({ userId: userId });
     if (!res) {
       const user = await this.followingModel.create({ userId: userId });
       await user.updateOne({ $push: { followings: followeeId } });
+      await this.followRequestModel.findOneAndDelete({
+        requestedFrom: new mongoose.Types.ObjectId(userId),
+        requestedTo: new mongoose.Types.ObjectId(followeeId),
+      });
       await this.followerService.addFollower(followeeId, userId);
     } else if (res) {
       if (!res.followings.includes(followeeId)) {
@@ -42,27 +55,31 @@ export class FollowingService {
           },
         );
         await this.followerService.addFollower(followeeId, userId);
-      } else
-        throw new HttpException('already following', HttpStatus.BAD_REQUEST);
+        await this.followRequestModel.findOneAndDelete({
+          requestedFrom: new mongoose.Types.ObjectId(userId),
+          requestedTo: new mongoose.Types.ObjectId(followeeId),
+        });
+      }
     }
-
     //*** sending follow added notification ***//
-
-    const id = await this.profileService.getUserEarnings(userId);
-    const userData = await this.profileService.getUserEarnings(followeeId);
-    const notification = {
-      email: userData.email,
-      title: 'New Follow Request! 👋',
-      body: `🎉 Alert! ${id.firstname} ${id.surname} is Now Following You 👀`,
-      profileImage: userData.profileImage,
-    };
-
-    await this.fcmService.sendSingleNotification(notification);
-    throw new HttpException('follwee added successfully', HttpStatus.OK);
+    if (isPrivate) {
+      const id = await this.profileService.getUserFields(userId);
+      const userData = await this.profileService.getUserFields(followeeId);
+      const notification = {
+        email: id.email,
+        title: 'New Follow Request! 👋',
+        body: `🎉 Alert! ${userData.firstname} ${userData.surname} Accepted Your Follow Request 👀`,
+        profileImage: userData.profileImage,
+      };
+      await this.fcmService.sendSingleNotification(notification);
+    }
+    return { isRequested: false };
   }
   async SingleUserFollowCheck(currentUser, searchedUser): Promise<any> {
+    console.log('currentUser = ', currentUser);
+    console.log('searchedUser = ', searchedUser);
     const res = await this.followingModel.findOne({ userId: currentUser });
-    if (!res) throw new HttpException('invalid user', HttpStatus.BAD_REQUEST);
+    if (!res) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
     const arr = res.followings.map((id) => id.toString());
     const followed = arr.some((id) => id === searchedUser);
     return followed ? { followed: true } : { followed: false };
@@ -160,8 +177,66 @@ export class FollowingService {
       // },
     ]);
   }
-
-  async getSingleFollowings(userId): Promise<any> {
-    return this.followingModel.findOne({ userId }).select('followings');
+  async followRequest(data) {
+    const user = await this.profileService.getUserFields(data.requestedTo);
+    const user1 = await this.profileService.getUserFields(data.requestedFrom);
+    const res = await this.followRequestModel.findOne({
+      requestedFrom: data.requestedFrom,
+      requestedTo: data.requestedTo,
+    });
+    if (!res) {
+      if (user.accountType == Constants.PRIVATE) {
+        await this.followRequestModel.create(data);
+        const notification = {
+          email: user.email,
+          title: 'New Follow Request! 👋',
+          body: `🎉 Alert! ${user1.firstname} ${user1.surname} Requested To Follow You 👀`,
+          profileImage: user.profileImage,
+        };
+        await this.fcmService.sendSingleNotification(notification);
+        return { isRequested: true };
+      } else {
+        const notification = {
+          email: user.email,
+          title: 'New Follow Request! 👋',
+          body: `🎉 Alert! ${user1.firstname} ${user1.surname} Started To Follow You 👀`,
+          profileImage: user.profileImage,
+        };
+        await this.fcmService.sendSingleNotification(notification);
+        return await this.addFollowee(
+          data.requestedFrom,
+          data.requestedTo,
+          false,
+        );
+      }
+    } else throw new HttpException('Already Requested', HttpStatus.BAD_REQUEST);
+  }
+  async followRequestStatus(data): Promise<any> {
+    if (data.status == Constants.ACCEPTED) {
+      await this.addFollowee(data.requestedTo, data.requestedFrom, true);
+    } else if (data.status == Constants.REJECTED) {
+      await this.followRequestModel.findOneAndDelete({
+        requestedFrom: new mongoose.Types.ObjectId(data.requestedTo),
+        requestedTo: new mongoose.Types.ObjectId(data.requestedFrom),
+      });
+    }
+    throw new HttpException('Request Rejected', HttpStatus.OK);
+  }
+  async getAllFollowRequest(userId): Promise<any> {
+    return this.followRequestModel
+      .find({ requestedTo: userId })
+      .select('-_id -requestedTo')
+      .populate({
+        path: 'requestedFrom',
+        select: 'firstname surname profileImage',
+      });
+  }
+  async checkFollowRequest(data): Promise<any> {
+    const res = await this.followRequestModel.findOne({
+      requestedFrom: data.requestedFrom,
+      requestedTo: data.requestedTo,
+    });
+    if (res) return { requestSent: true };
+    else return { requestSent: false };
   }
 }

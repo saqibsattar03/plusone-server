@@ -20,14 +20,14 @@ export class InvitationService {
   async sendInvite(invitationDto: InvitationDto): Promise<any> {
     const link = await this.invitationModel.create(invitationDto);
     if (link) {
-      const rPoints = await this.profileService.getUserEarnings(link.sharedBy);
+      const rPoints = await this.profileService.getUserFields(link.sharedBy);
       console.log(rPoints);
       const data = {
         userId: link.sharedBy,
       };
 
       // *** send invitation notification ***//
-      const userData = await this.profileService.getUserEarnings(data.userId);
+      const userData = await this.profileService.getUserFields(data.userId);
       console.log(userData);
       const notification = {
         email: userData.email,

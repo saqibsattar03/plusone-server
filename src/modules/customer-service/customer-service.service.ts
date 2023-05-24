@@ -6,18 +6,38 @@ import {
 } from '../../data/schemas/customerService.schema';
 import { Model } from 'mongoose';
 import { CustomerServiceDto } from '../../data/dtos/customerService.dto';
+import { AwsMailUtil } from '../../common/utils/aws-mail-util';
+import { ProfilesService } from '../profiles/profiles.service';
 
 @Injectable()
 export class CustomerServiceService {
   constructor(
     @InjectModel(CustomerService.name)
     private readonly customerModel: Model<CustomerServiceDocument>,
+    private readonly profileService: ProfilesService,
   ) {}
 
   async createCustomerQuery(
     customerServiceDto: CustomerServiceDto,
   ): Promise<CustomerServiceDocument> {
-    return this.customerModel.create(customerServiceDto);
+    const res = await this.customerModel.create(customerServiceDto);
+    console.log(res);
+    const user = await this.profileService.getUserFields(res.userId);
+    //*** send email for low balance ***//
+    const templateData = {
+      subject: res.subject,
+      type: 'this is test type',
+      name: user.email,
+      message: res.message,
+    };
+
+    console.log(templateData);
+    await new AwsMailUtil().sendEmail(
+      'saqibsattar710@gmail.com',
+      templateData,
+      'CustomerSupport',
+    );
+    return res;
   }
 
   async getAllQueries(): Promise<CustomerServiceDocument[]> {

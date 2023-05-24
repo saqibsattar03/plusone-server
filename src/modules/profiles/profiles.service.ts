@@ -20,7 +20,6 @@ import {
   comparePassword,
   hashPassword,
 } from '../../common/utils/passwordHashing.util';
-import { CommentsService } from '../social-posts/comments/comments.service';
 
 @Injectable()
 export class ProfilesService {
@@ -42,8 +41,6 @@ export class ProfilesService {
     estimatedSavings = null,
     rewardPoints = null,
   ): Promise<any> {
-    console.log('data = ', data);
-
     //*** uncomment it when integrating real subscription ***//
     // const userEarnings = await this.getUserEarnings(data.userId);
 
@@ -98,34 +95,11 @@ export class ProfilesService {
     );
   }
 
-  async verifyUser(confirmationCode: string, id: string): Promise<any> {
-    const user = await this.profileModel
-      .findById(id)
-      .select('confirmationCode');
-
-    if (user.confirmationCode == confirmationCode) {
-      await this.profileModel.findOneAndUpdate(
-        { _id: id },
-        {
-          $set: {
-            status: Constants.ACTIVE,
-            confirmationCode: null,
-          },
-        },
-      );
-      throw new HttpException('Account Activated Successfully', HttpStatus.OK);
-    } else
-      throw new HttpException(
-        'confirmation code expired or invalid',
-        HttpStatus.BAD_REQUEST,
-      );
-  }
-
-  async getUserEarnings(userId): Promise<ProfileDocument> {
+  async getUserFields(userId): Promise<ProfileDocument> {
     return this.profileModel
-      .findById({ _id: userId })
+      .findById(userId)
       .select(
-        'rewardPoints estimatedSavings email firstname surname profileImage productId purchasedAt expirationAt isPremium',
+        'rewardPoints estimatedSavings email firstname surname profileImage productId purchasedAt expirationAt isPremium accountType',
       );
   }
   async getSingleProfile(userId): Promise<any> {
@@ -219,7 +193,6 @@ export class ProfilesService {
     ]);
   }
   async getUser(email) {
-    console.log('in get user = ', email);
     return this.profileModel
       .findOne({
         $or: [{ email: email }, { username: email }],
@@ -290,6 +263,7 @@ export class ProfilesService {
       .select(['-createdAt', '-updatedAt', '-rewardPoints']);
   }
   async restaurantFilters(data, paginationQuery): Promise<any> {
+    console.log('data = ', data);
     return this.restaurantService.restaurantFilters(data, paginationQuery);
   }
   async resetPassword(user, enteredPassword) {
@@ -299,7 +273,6 @@ export class ProfilesService {
       { password: encryptedPassword },
     );
   }
-
   async changePassword(data): Promise<any> {
     const user = await this.profileModel
       .findOne({ _id: data.userId })
@@ -329,7 +302,6 @@ export class ProfilesService {
         HttpStatus.FORBIDDEN,
       );
   }
-
   /*** temporary route ***/
   async changeUserStatus(userId): Promise<any> {
     return this.profileModel.findOneAndUpdate(

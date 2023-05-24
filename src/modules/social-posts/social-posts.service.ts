@@ -50,6 +50,7 @@ export class SocialPostsService {
       throw new HttpException(e.toString(), HttpStatus.BAD_REQUEST);
     }
   }
+
   async getAllPost(paginationDto, data): Promise<any> {
     const { limit, offset } = paginationDto;
     const pipeLine = await this.getPostPipeline(data.loggedInUser);
@@ -96,7 +97,6 @@ export class SocialPostsService {
     }
     switch (data.postAudiencePreference) {
       case Constants.PUBLIC: {
-        console.log('public');
         try {
           const match = {
             $match: {
@@ -116,7 +116,6 @@ export class SocialPostsService {
         }
       }
       case Constants.FOLLOWING: {
-        console.log('in following');
         try {
           const match = {
             $match: {
@@ -141,26 +140,6 @@ export class SocialPostsService {
             { $limit: limit },
           ];
           return this.socialPostModel.aggregate(p);
-          // return this.socialPostModel
-          //   .aggregate([
-          //     {
-          //       $match: {
-          //         userId: {
-          //           $in: r,
-          //         },
-          //       },
-          //     },
-          //     {
-          //       $match: {
-          //         postAudiencePreference: {
-          //           $ne: 'ONLY-ME',
-          //         },
-          //       },
-          //     },
-          //     ...pipeLine,
-          //   ])
-          //   .skip(offset)
-          //   .limit(limit);
         } catch (e) {
           throw new HttpException(e.toString(), HttpStatus.BAD_REQUEST);
         }
@@ -181,9 +160,11 @@ export class SocialPostsService {
       }
     }
   }
+
   async getSinglePost(postId): Promise<PostDocument> {
     return this.socialPostModel.findById(postId);
   }
+
   async updatePost(
     userId,
     updatePostDto: UpdateSocialPost,
@@ -251,7 +232,7 @@ export class SocialPostsService {
     //*** send like post notification ***//
 
     const id = await this.getPostUserId(res.postId);
-    const userData = await this.profileService.getUserEarnings(userId);
+    const userData = await this.profileService.getUserFields(userId);
     const notification = {
       email: id.email,
       title: 'New Like! 👍',
@@ -263,6 +244,7 @@ export class SocialPostsService {
       await this.fcmService.sendSingleNotification(notification);
     throw new HttpException('post liked successfully', HttpStatus.OK);
   }
+
   async removeLike(userId, postId): Promise<any> {
     console.log('like remove function');
     const res = await this.postLikedModel.findOne({ postId: postId });
@@ -282,26 +264,31 @@ export class SocialPostsService {
     }
     throw new HttpException('like already removed', HttpStatus.BAD_REQUEST);
   }
+
   async removeUserLikes(userId): Promise<any> {
     await this.postLikedModel.updateMany(
       { active: true },
       { $pull: { userId: userId } },
     );
   }
+
   async getCommentCount(postId): Promise<any> {
     return this.socialPostModel
       .findOne({ _id: postId })
       .select('commentCount -_id');
   }
+
   async updateCommentCount(postId, count): Promise<any> {
     return this.socialPostModel.findOneAndUpdate(
       { _id: postId },
       { commentCount: count },
     );
   }
+
   async filterPostBasedOnCaption(keyword: string): Promise<any> {
     return this.socialPostModel.find({ $text: { $search: keyword } });
   }
+
   async getPostPipeline(userId) {
     return [
       {
@@ -362,6 +349,25 @@ export class SocialPostsService {
         },
       },
       {
+        $lookup: {
+          from: 'followrequests',
+          let: {
+            // uId: ObjectId('644a4c7d1913f5e2b20fd596'),
+            rTo: '$userId',
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$requestedTo', '$$rTo'],
+                },
+              },
+            },
+          ],
+          as: 'requested',
+        },
+      },
+      {
         $project: {
           _id: 1,
           userId: 1,
@@ -386,6 +392,20 @@ export class SocialPostsService {
               },
               then: [],
               else: '$followed',
+            },
+          },
+          requested: {
+            $cond: {
+              if: {
+                $eq: [
+                  {
+                    $size: '$requested',
+                  },
+                  0,
+                ],
+              },
+              then: null,
+              else: '$requested',
             },
           },
         },
@@ -422,6 +442,7 @@ export class SocialPostsService {
           __v: 1,
           user: 1,
           followed: 1,
+          requested: 1,
           liked: {
             $cond: {
               if: {
@@ -460,6 +481,15 @@ export class SocialPostsService {
               },
               then: true,
               else: false,
+            },
+          },
+          isRequested: {
+            $cond: {
+              if: {
+                $eq: ['$requested', null],
+              },
+              then: false,
+              else: true,
             },
           },
           voucherId: 1,
@@ -530,6 +560,7 @@ export class SocialPostsService {
       },
     ];
   }
+
   async searchPostByLocation(data): Promise<PostDocument[]> {
     if (!data.longitude && !data.latitude)
       throw new HttpException('no location selected', HttpStatus.BAD_REQUEST);
@@ -550,6 +581,7 @@ export class SocialPostsService {
       },
     ]);
   }
+
   async getPostUserId(postId): Promise<any> {
     const postedUserId = await this.socialPostModel
       .findOne({
@@ -557,6 +589,6 @@ export class SocialPostsService {
       })
       .select('userId -_id');
 
-    return this.profileService.getUserEarnings(postedUserId.userId);
+    return this.profileService.getUserFields(postedUserId.userId);
   }
 }

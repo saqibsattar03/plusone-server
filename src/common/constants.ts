@@ -22,4 +22,7 @@ export enum Constants {
   WEEK = 'WEEK',
   MONTH = 'MONTH',
   YEAR = 'YEAR',
+  ACCEPTED = 'ACCEPTED',
+  REJECTED = 'REJECTED',
+  PRIVATE = 'PRIVATE',
 }

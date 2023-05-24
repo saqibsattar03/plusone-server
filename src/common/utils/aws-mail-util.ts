@@ -8,8 +8,10 @@ export class AwsMailUtil {
     AWS.config.update({
       region: 'eu-north-1',
       credentials: {
-        accessKeyId: 'AKIAZR4CXEL2IAPM4S7P',
-        secretAccessKey: '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',
+        accessKeyId: process.env.ACCESS_KEY_ID,
+        // accessKeyId: 'AKIAZR4CXEL2IAPM4S7P',
+        secretAccessKey: process.env.SECRET_ACCESS_KEY,
+        // secretAccessKey: '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',
       },
     });
     this.ses = new AWS.SES({ apiVersion: '2010-12-01' });

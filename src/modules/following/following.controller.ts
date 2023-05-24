@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   HttpException,
   HttpStatus,
@@ -11,11 +12,13 @@ import { Get, Request } from '@nestjs/common/decorators';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiBody,
+  ApiCreatedResponse,
   ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { FollowResponse } from '../../data/dtos/following.dto';
+import { FollowRequest, FollowResponse } from '../../data/dtos/following.dto';
 import { JwtAuthGuard } from '../../common/auth/guards/jwt-auth.guard';
 
 @ApiTags('Followings')
@@ -78,5 +81,64 @@ export class FollowingController {
   // @UseGuards(JwtAuthGuard)
   getAllFollowings(@Query('userId') userId) {
     return this.followingService.getAllFollowings(userId);
+  }
+
+  @Post('request')
+  @ApiBearerAuth()
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        requestedTo: { type: 'string' },
+      },
+    },
+  })
+  @UseGuards(JwtAuthGuard)
+  followRequest(@Body() data, @Request() request) {
+    data.requestedFrom = request.user.userId;
+    return this.followingService.followRequest(data);
+  }
+  @Post('change-request-status')
+  @ApiBearerAuth()
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        requestedTo: { type: 'string' },
+        status: { type: 'string' },
+      },
+    },
+  })
+  @UseGuards(JwtAuthGuard)
+  followRequestStatus(@Body() data, @Request() request) {
+    console.log(data);
+    data.requestedFrom = request.user.userId;
+    return this.followingService.followRequestStatus(data);
+  }
+
+  @Get('get-all-request')
+  @ApiBearerAuth()
+  @ApiCreatedResponse({ type: [FollowRequest] })
+  @UseGuards(JwtAuthGuard)
+  getAllFollowRequest(@Request() request) {
+    console.log('called');
+    console.log(request.user.userId);
+    return this.followingService.getAllFollowRequest(request.user.userId);
+  }
+
+  @Post('check-request')
+  @ApiBearerAuth()
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        requestedTo: { type: 'string' },
+      },
+    },
+  })
+  @UseGuards(JwtAuthGuard)
+  checkFollowRequest(@Body() data, @Request() request) {
+    data.requestedFrom = request.user.userId;
+    return this.followingService.checkFollowRequest(data);
   }
 }

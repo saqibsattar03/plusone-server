@@ -61,7 +61,7 @@ export class SubscriptionService {
       }
       case 'TRANSFER': {
         console.log('TRANSFER');
-        const transferredFrom = await this.profileService.getUserEarnings(
+        const transferredFrom = await this.profileService.getUserFields(
           'hdjkfhjkhfdjhfjkdh',
         );
         const d = {
@@ -73,7 +73,7 @@ export class SubscriptionService {
         };
         await this.profileService.updateProfile(d);
 
-        const transferredTo = await this.profileService.getUserEarnings(
+        const transferredTo = await this.profileService.getUserFields(
           'dfhjhfkdhfjkhkd',
         );
         const d1 = {

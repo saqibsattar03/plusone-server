@@ -14,8 +14,7 @@ import {
   ForgotPassword,
   ForgotPasswordDocument,
 } from '../../data/schemas/forgotPassword.schema';
-import { Model } from 'mongoose';
-import { generateToken } from '../utils/generateToken.util';
+import mongoose, { Model } from 'mongoose';
 import { Constants } from '../constants';
 import { comparePassword, hashPassword } from '../utils/passwordHashing.util';
 import { Profile, ProfileDocument } from '../../data/schemas/profile.schema';
@@ -38,6 +37,7 @@ export class AuthService {
     userDto.password = await hashPassword(userDto.password);
     if (userDto.role == Constants.ADMIN || userDto.role == Constants.MERCHANT)
       userDto.accountHolderType = null;
+
     const existingUser = await this.profileModel.findOne({
       $or: [
         { username: userDto.username.toLowerCase() },
@@ -73,29 +73,70 @@ export class AuthService {
     await newUser.save();
     if (newUser.role == Constants.MERCHANT) return newUser;
 
-    /*** email verification ***/
-    // todo: uncomment these line to activate email system
-    // const templateData = {
-    //   title:
-    //     userDto.firstname.slice(0, 1).toUpperCase() +
-    //     userDto.firstname.slice(1).toLowerCase(),
-    //   code: confirmationCode,
-    // };
-    //
-    // await new AwsMailUtil().sendEmail(
-    //   'saqibsattar710@gmail.com',
-    //   templateData,
-    //   'AccountVerification',
-    // );
+    //*** email verification ***//
+
+    const templateData = {
+      title:
+        userDto.firstname.slice(0, 1).toUpperCase() +
+        userDto.firstname.slice(1).toLowerCase(),
+      code: confirmationCode,
+    };
+    await new AwsMailUtil().sendEmail(
+      userDto.email.toLowerCase(),
+      templateData,
+      'AccountVerification',
+    );
 
     throw new HttpException(
       'Account Created Successfully. Please Confirm Your Email to Active Your Account. Check Your Email for Confirmation',
       HttpStatus.OK,
     );
   }
+  async verifyUser(data): Promise<any> {
+    console.log(data);
+    const oid = new mongoose.Types.ObjectId(data._id);
+    const user = await this.profileModel
+      .findById({ _id: oid })
+      .select('confirmationCode');
+    if (user.confirmationCode == data.confirmationCode) {
+      await this.profileModel.findOneAndUpdate(
+        { _id: oid },
+        {
+          $set: {
+            status: Constants.ACTIVE,
+            confirmationCode: null,
+          },
+        },
+      );
+      throw new HttpException('Account Activated Successfully', HttpStatus.OK);
+    } else
+      throw new HttpException(
+        'token expired or invalid',
+        HttpStatus.BAD_REQUEST,
+      );
+  }
+  async resendVerificationCode(email: string): Promise<any> {
+    const confirmationCode = await getRandomNumber(1045, 8917);
+    const user = await this.profileModel.findOneAndUpdate(
+      { email: email.toLowerCase() },
+      { confirmationCode: confirmationCode },
+    );
+    //*** email verification ***//
+
+    const templateData = {
+      title:
+        user.firstname.slice(0, 1).toUpperCase() +
+        user.firstname.slice(1).toLowerCase(),
+      code: confirmationCode,
+    };
+    await new AwsMailUtil().sendEmail(
+      user.email.toLowerCase(),
+      templateData,
+      'AccountVerification',
+    );
+  }
   async validateUser(email: string, enteredPassword: string): Promise<any> {
     const user = await this.profileService.getUser(email.toLowerCase());
-    // await this.profileService.getUserByEmailAndPassword(email, password);
     if (!user) {
       throw new NotAcceptableException(
         'An account with these credentials does not exist, Please create your account first.',
@@ -113,7 +154,6 @@ export class AuthService {
     return null;
   }
   async login(user: any) {
-    console.log('user = ', user);
     const fetchedUser = await this.profileService.getUser(
       user.email.toLowerCase(),
     );
@@ -123,12 +163,12 @@ export class AuthService {
         HttpStatus.UNAUTHORIZED,
       );
     }
-    if (
-      fetchedUser.role != Constants.ADMIN &&
-      fetchedUser.status != Constants.ACTIVE
-    ) {
-      throw new UnauthorizedException('Account is in pending state');
-    }
+    // if (
+    //   fetchedUser.role != Constants.ADMIN &&
+    //   fetchedUser.status != Constants.ACTIVE
+    // ) {
+    //   throw new UnauthorizedException('Account is in pending state');
+    // }
     return {
       access_token: await this.jwtService.signAsync({
         email: fetchedUser.email,
@@ -152,27 +192,57 @@ export class AuthService {
       }).save();
     }
     // *** Send Email for to get code to reset password ***//
-    // todo: uncomment these lines to active forgot password email
-    // const templateData = {
-    //   title:
-    //     user.firstname.slice(0, 1).toUpperCase() +
-    //     user.firstname.slice(1).toLowerCase(),
-    //   code: token.token,
-    // };
-    // await new AwsMailUtil().sendEmail(email, templateData, 'ForgotPassword');
+
+    const templateData = {
+      title:
+        user.firstname.slice(0, 1).toUpperCase() +
+        user.firstname.slice(1).toLowerCase(),
+      code: token.token,
+    };
+    await new AwsMailUtil().sendEmail(email, templateData, 'ForgotPassword');
     return token;
   }
-  async resetPassword(data) {
-    const user = await this.profileService.getUser(data.email);
+  async verifyPasswordToken(data): Promise<any> {
+    const user = await this.profileService.getUser(data.email.toLowerCase());
     if (!user) throw new HttpException('user Not Found', HttpStatus.NOT_FOUND);
     const res = await this.forgotModel.findOne({
       userId: user._id,
       token: data.token,
     });
     if (!res)
-      throw new HttpException('Invalid token or expired', HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        'token expired or invalid',
+        HttpStatus.BAD_REQUEST,
+      );
+    else {
+      // await res.delete();
+      throw new HttpException('token verified', HttpStatus.OK);
+    }
+  }
+
+  async resendPasswordToken(email: string): Promise<any> {
+    const user = await this.profileService.getUser(email);
+    if (!user) throw new HttpException('user Not Found', HttpStatus.NOT_FOUND);
+    const token = await getRandomNumber(4752, 7856);
+    await this.forgotModel.findOneAndUpdate(
+      { userId: user._id },
+      { token: token },
+    );
+    // *** Send Email for to get code to reset password ***//
+
+    const templateData = {
+      title:
+        user.firstname.slice(0, 1).toUpperCase() +
+        user.firstname.slice(1).toLowerCase(),
+      code: token,
+    };
+    await new AwsMailUtil().sendEmail(email, templateData, 'ForgotPassword');
+    return token;
+  }
+  async resetPassword(data) {
+    const user = await this.profileService.getUser(data.email.toLowerCase());
+    if (!user) throw new HttpException('user Not Found', HttpStatus.NOT_FOUND);
     await this.profileService.resetPassword(user, data.password);
-    await res.delete();
     throw new HttpException('Password Reset Successfully ', HttpStatus.OK);
   }
   // async logout(user: any) {

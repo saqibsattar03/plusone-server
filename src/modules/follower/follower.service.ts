@@ -39,6 +39,7 @@ export class FollowerService {
     return;
     //  throw new HttpException('Follower Added Successfully', HttpStatus.OK);
   }
+
   async removeFollower(userId, followerId): Promise<any> {
     const res = await this.followerModel.findOne({ userId: userId });
     if (!res) throw new HttpException('no user found', HttpStatus.NOT_FOUND);
@@ -60,16 +61,22 @@ export class FollowerService {
     const oid = new mongoose.Types.ObjectId(userId);
     return this.followerModel.aggregate([
       {
-        $match: { userId: oid },
+        $match: {
+          userId: oid,
+        },
       },
       {
         $lookup: {
           from: 'profiles',
-          let: { followerId: '$followers' },
+          let: {
+            followerId: '$followers',
+          },
           pipeline: [
             {
               $match: {
-                $expr: { $in: ['$_id', '$$followerId'] },
+                $expr: {
+                  $in: ['$_id', '$$followerId'],
+                },
               },
             },
           ],
@@ -83,7 +90,8 @@ export class FollowerService {
         $lookup: {
           from: 'followings',
           let: {
-            uId: new mongoose.Types.ObjectId(userId),
+            // uId: ObjectId('644a4c7d1913f5e2b20fd596'),
+            uId: oid,
           },
           pipeline: [
             {
@@ -101,6 +109,26 @@ export class FollowerService {
         $unwind: {
           path: '$followed',
           preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'followrequests',
+          let: {
+            // // uId: ObjectId('644a4c7d1913f5e2b20fd596'),
+            // uId: oid,
+            rTo: '$followers._id',
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$requestedTo', '$$rTo'],
+                },
+              },
+            },
+          ],
+          as: 'requested',
         },
       },
       {
@@ -127,10 +155,44 @@ export class FollowerService {
               },
             },
           },
+          requested: {
+            $cond: {
+              if: {
+                $eq: [
+                  {
+                    $size: '$requested',
+                  },
+                  0,
+                ],
+              },
+              then: null,
+              else: '$requested',
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          firstname: 1,
+          surname: 1,
+          username: 1,
+          profileImage: 1,
+          userFollowed: 1,
+          isRequested: {
+            $cond: {
+              if: {
+                $eq: ['$requested', null],
+              },
+              then: false,
+              else: true,
+            },
+          },
         },
       },
     ]);
   }
+
   async deleteAllFollowers(userId): Promise<any> {
     return this.followerModel.findOneAndDelete({ userId: userId });
   }
