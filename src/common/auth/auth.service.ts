@@ -64,12 +64,8 @@ export class AuthService {
     }
     const confirmationCode = await getRandomNumber(1254, 3517);
     const newUser = new this.profileModel({
-      firstname:
-        userDto.firstname.slice(0, 1).toUpperCase() +
-        userDto.firstname.slice(1).toLowerCase(),
-      surname:
-        userDto.surname.slice(0, 1).toUpperCase() +
-        userDto.surname.slice(1).toLowerCase(),
+      firstname: userDto.firstname,
+      surname: userDto.surname,
       username: lowerCaseUserName,
       email: lowerCaseEmail,
       password: userDto.password,
