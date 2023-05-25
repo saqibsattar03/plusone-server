@@ -603,17 +603,4 @@ export class SocialPostsService {
 
     return this.profileService.getUserFields(postedUserId.userId);
   }
-  async updateManyPosts(): Promise<any> {
-    const posts = await this.socialPostModel.find({});
-    const updatedPosts = posts.map((post) => {
-      const randomValue = Math.random() < 0.5 ? 'STUDENT' : 'NON-STUDENT';
-      return { _id: post._id, postToShow: randomValue };
-    });
-    const updatePromises = updatedPosts.map((updatedPost) => {
-      return this.socialPostModel.findByIdAndUpdate(updatedPost._id, {
-        postToShow: updatedPost.postToShow,
-      });
-    });
-    await Promise.all(updatePromises);
-  }
 }
