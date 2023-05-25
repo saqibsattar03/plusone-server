@@ -8,6 +8,7 @@ import { Model } from 'mongoose';
 import { CustomerServiceDto } from '../../data/dtos/customerService.dto';
 import { AwsMailUtil } from '../../common/utils/aws-mail-util';
 import { ProfilesService } from '../profiles/profiles.service';
+import * as notifier from 'node-notifier';
 
 @Injectable()
 export class CustomerServiceService {

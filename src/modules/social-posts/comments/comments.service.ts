@@ -73,10 +73,7 @@ export class CommentsService {
     const userData = await this.profileService.getUserFields(
       commentDto.commentObject.userId,
     );
-    console.log('postedUser = ', postedUser);
-    console.log('userData = ', userData);
     if (postedUser._id.toString() !== userData._id.toString()) {
-      console.log('inside condition');
       const notification = {
         email: postedUser.email,
         title: `${userData.firstname} ${userData.surname}`,
