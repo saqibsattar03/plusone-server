@@ -20,8 +20,8 @@ export class CustomerServiceService {
   async createCustomerQuery(
     customerServiceDto: CustomerServiceDto,
   ): Promise<CustomerServiceDocument> {
+    console.log(customerServiceDto);
     const res = await this.customerModel.create(customerServiceDto);
-    console.log(res);
     const user = await this.profileService.getUserFields(res.userId);
     //*** send email for low balance ***//
     const templateData = {
@@ -30,8 +30,6 @@ export class CustomerServiceService {
       name: user.email,
       message: res.message,
     };
-
-    console.log(templateData);
     await new AwsMailUtil().sendEmail(
       'saqibsattar710@gmail.com',
       templateData,
@@ -43,14 +41,14 @@ export class CustomerServiceService {
   async getAllQueries(): Promise<CustomerServiceDocument[]> {
     return this.customerModel.find().populate({
       path: 'userId',
-      select: 'email firstname surname -_id',
+      select: 'email firstname surname contactNumber -_id',
     });
   }
 
   async getSingleQuery(queryId): Promise<CustomerServiceDocument> {
     return this.customerModel.findById({ _id: queryId }).populate({
       path: 'userId',
-      select: 'email firstname surname -_id',
+      select: 'email firstname surname contactNumber -_id',
     });
   }
 
@@ -60,6 +58,7 @@ export class CustomerServiceService {
       {
         $set: {
           message: data.message,
+          contactNumber: data.contactNumber,
         },
       },
     );

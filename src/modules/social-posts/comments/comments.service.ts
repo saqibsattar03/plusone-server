@@ -73,14 +73,20 @@ export class CommentsService {
     const userData = await this.profileService.getUserFields(
       commentDto.commentObject.userId,
     );
-    const notification = {
-      email: postedUser.email,
-      title: `${userData.firstname} ${userData.surname}`,
-      body: ' Commented On Your Post 💬',
-      profileImage: userData.profileImage,
-    };
-    // //*** sending comment notification ***/
-    await this.fcmService.sendSingleNotification(notification);
+    console.log('postedUser = ', postedUser);
+    console.log('userData = ', userData);
+    if (postedUser._id.toString() !== userData._id.toString()) {
+      console.log('inside condition');
+      const notification = {
+        email: postedUser.email,
+        title: `${userData.firstname} ${userData.surname}`,
+        body: ' Commented On Your Post 💬',
+        profileImage: userData.profileImage,
+      };
+      // //*** sending comment notification ***/
+      await this.fcmService.sendSingleNotification(notification);
+    }
+
     throw new HttpException('comment posted successfully ', HttpStatus.OK);
   }
   async editComment(postId, data): Promise<any> {

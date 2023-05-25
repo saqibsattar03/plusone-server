@@ -24,6 +24,9 @@ export class CustomerService {
   @Prop({ type: String, required: true })
   message: string;
 
+  @Prop({ type: String, required: true })
+  contactNumber: string;
+
   @Prop({ type: String })
   file: string;
 }

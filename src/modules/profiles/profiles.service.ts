@@ -202,11 +202,11 @@ export class ProfilesService {
       );
   }
   async fetchProfileUsingToken(user): Promise<any> {
-    const fetchedUser = await this.profileModel
-      .findOne({
-        $or: [{ email: user }, { username: user }],
-      })
-      .select(['-password', '-confirmationCode', '-createdAt', '-updatedAt']);
+    const fetchedUser = await this.profileModel.findOne({
+      $or: [{ email: user }, { username: user }],
+    });
+    // .select(['-password', '-confirmationCode', '-createdAt', '-updatedAt']);
+    console.log('user = ', fetchedUser);
     if (!fetchedUser)
       throw new HttpException(
         'no user with entered username or email found',
