@@ -130,7 +130,7 @@ export class RestaurantReviewService {
     });
     if (!res)
       throw new HttpException(
-        'no such restaurantssss found',
+        'no such restaurant found',
         HttpStatus.BAD_REQUEST,
       );
     else if (res) {

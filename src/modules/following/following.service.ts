@@ -167,14 +167,6 @@ export class FollowingService {
           userId: oi,
         },
       },
-      // {
-      //   $unwind: '$followings',
-      // },
-      // {
-      //   $project: {
-      //     followingId: { $arrayElemAt: ['$followings', 0] },
-      //   },
-      // },
     ]);
   }
   async followRequest(data) {

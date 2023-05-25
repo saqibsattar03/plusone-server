@@ -49,6 +49,5 @@ export class InvitationService {
 
   async checkInviteLimit(sharedBy: string): Promise<any> {
     return this.invitationModel.find({ sharedBy }).count();
-    // return { count ;
   }
 }

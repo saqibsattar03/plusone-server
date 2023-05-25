@@ -34,7 +34,7 @@ export class ProfilesService {
     @Inject(forwardRef(() => RestaurantReviewService))
     private readonly reviewService: RestaurantReviewService,
     @Inject(forwardRef(() => RestaurantService))
-    private readonly restaurantService: RestaurantService, // @Inject(forwardRef(() => CommentsService)) // private readonly commentService: CommentsService,
+    private readonly restaurantService: RestaurantService,
   ) {}
   async updateProfile(
     data,
@@ -205,8 +205,6 @@ export class ProfilesService {
     const fetchedUser = await this.profileModel.findOne({
       $or: [{ email: user }, { username: user }],
     });
-    // .select(['-password', '-confirmationCode', '-createdAt', '-updatedAt']);
-    console.log('user = ', fetchedUser);
     if (!fetchedUser)
       throw new HttpException(
         'no user with entered username or email found',

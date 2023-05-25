@@ -27,7 +27,6 @@ export class DepositMoneyService {
   ) {}
 
   async deposit(depositDto: DepositMoneyDto, restaurantId): Promise<any> {
-    // const oid = new mongoose.Types.ObjectId(restaurantId);
     const update = {
       $push: {
         depositObject: {
@@ -74,24 +73,6 @@ export class DepositMoneyService {
         }, 0);
       });
     return { totalDebit: totalDebit };
-    // return this.depositMoneyModel.aggregate([
-    //   {
-    //     $match: {
-    //       restaurantId: oid,
-    //     },
-    //   },
-    //   {
-    //     $unwind: '$depositObject',
-    //   },
-    //   {
-    //     $group: {
-    //       _id: restaurantId,
-    //       totalAmount: {
-    //         $sum: { $sum: '$depositObject.amount' },
-    //       },
-    //     },
-    //   },
-    // ]);
   }
 
   async sumOfDepositedAmountByAllRestaurant(): Promise<any> {
