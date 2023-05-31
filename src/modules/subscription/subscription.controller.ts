@@ -8,6 +8,7 @@ export class SubscriptionController {
 
   @Post()
   subscribe(@Body() data) {
+    console.log('here in subscription');
     return this.subscriptionService.subscribe(data);
   }
 }

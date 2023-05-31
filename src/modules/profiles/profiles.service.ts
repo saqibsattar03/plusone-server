@@ -214,7 +214,12 @@ export class ProfilesService {
   }
   async getAllUsers(role: string): Promise<any> {
     if (role == Constants.USER || role == Constants.ADMIN)
-      return this.profileModel.find({ role });
+      return this.profileModel
+        .find({
+          role: role,
+          accountType: { $ne: 'ONLY-ME' },
+        })
+        .sort({ createdAt: -1 });
     return this.restaurantService.getAllUsers(role);
   }
   async deleteProfile(profileId): Promise<ProfileDocument> {
@@ -297,6 +302,7 @@ export class ProfilesService {
         username: regex,
         accountHolderType: userType,
         status: Constants.ACTIVE,
+        accountType: { $ne: 'ONLY-ME' },
       })
       .where({ role: Constants.USER })
       .select('_id username firstname surname profileImage');

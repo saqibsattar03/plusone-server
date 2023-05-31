@@ -18,7 +18,7 @@ export class TransactionHistoryController {
     @Query('restaurantId') restaurantId,
     @Query('type') type,
   ) {
-    console.log(type);
+    console.log('type = ', type);
     return this.transactionHistoryService.getRestaurantTransactionHistory(
       restaurantId,
       type,
