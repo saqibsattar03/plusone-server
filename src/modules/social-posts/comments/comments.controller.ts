@@ -24,6 +24,7 @@ import { CommentsService } from './comments.service';
 import { Get } from '@nestjs/common/decorators';
 import { CommentDto } from '../../../data/dtos/socialPost.dto';
 import { JwtAuthGuard } from '../../../common/auth/guards/jwt-auth.guard';
+import { ViewAuthFilter } from '../../../common/configs/redirect-route.config';
 
 @ApiTags('Comments')
 @Controller('comment')

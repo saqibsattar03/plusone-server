@@ -35,17 +35,23 @@ export class AuthService {
 
   async createUser(userDto: any) {
     userDto.password = await hashPassword(userDto.password);
+    const lowerCaseUserName = userDto.username.toLowerCase();
+    const lowerCaseEmail = userDto.email.toLowerCase();
     if (userDto.role == Constants.ADMIN || userDto.role == Constants.MERCHANT)
       userDto.accountHolderType = null;
 
     const existingUser = await this.profileModel.findOne({
       $or: [
-        { username: userDto.username.toLowerCase() },
-        { email: userDto.email.toLowerCase() },
+        { username: lowerCaseUserName },
+        { email: lowerCaseEmail },
+        { username: lowerCaseEmail },
       ],
     });
     if (existingUser) {
-      if (existingUser.username === userDto.username.toLowerCase())
+      if (
+        existingUser.username === lowerCaseUserName ||
+        existingUser.email === lowerCaseEmail
+      )
         throw new HttpException(
           'A user with this Username already exists',
           HttpStatus.UNAUTHORIZED,
@@ -60,8 +66,8 @@ export class AuthService {
     const newUser = new this.profileModel({
       firstname: userDto.firstname,
       surname: userDto.surname,
-      username: userDto.username.toLowerCase(),
-      email: userDto.email.toLowerCase(),
+      username: lowerCaseUserName,
+      email: lowerCaseEmail,
       password: userDto.password,
       accountHolderType: userDto.accountHolderType,
       role: userDto.role,
@@ -82,7 +88,7 @@ export class AuthService {
       code: confirmationCode,
     };
     await new AwsMailUtil().sendEmail(
-      userDto.email.toLowerCase(),
+      lowerCaseEmail,
       templateData,
       'AccountVerification',
     );

@@ -3,4 +3,5 @@ export class CustomerServiceDto {
   subject: string;
   message: string;
   file: string;
+  contactNumber: string;
 }

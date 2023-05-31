@@ -25,6 +25,7 @@ export class CommentsService {
     protected readonly fcmService: FcmService,
   ) {}
   async postComment(commentDto: CommentDto): Promise<Comment> {
+    console.log();
     commentDto.commentObject._id = new mongoose.Types.ObjectId(
       commentDto.commentObject._id,
     );
@@ -66,18 +67,23 @@ export class CommentsService {
     }
 
     //*** send comment notification ***/
-    const id = await this.socialPostService.getPostUserId(commentDto.postId);
+    const postedUser = await this.socialPostService.getPostUserId(
+      commentDto.postId,
+    );
     const userData = await this.profileService.getUserFields(
       commentDto.commentObject.userId,
     );
-    const notification = {
-      email: id.email,
-      title: `${userData.firstname} ${userData.surname}`,
-      body: ' Commented On Your Post 💬',
-      profileImage: userData.profileImage,
-    };
-    //*** sending comment notification ***/
-    await this.fcmService.sendSingleNotification(notification);
+    if (postedUser._id.toString() !== userData._id.toString()) {
+      const notification = {
+        email: postedUser.email,
+        title: `${userData.firstname} ${userData.surname}`,
+        body: ' Commented On Your Post 💬',
+        profileImage: userData.profileImage,
+      };
+      // //*** sending comment notification ***/
+      await this.fcmService.sendSingleNotification(notification);
+    }
+
     throw new HttpException('comment posted successfully ', HttpStatus.OK);
   }
   async editComment(postId, data): Promise<any> {
@@ -127,7 +133,7 @@ export class CommentsService {
           postId: 1,
           'users.surname': 1,
           'users.firstname': 1,
-          'user.profileImage': 1,
+          'users.profileImage': 1,
           commentObject: 1,
         },
       },

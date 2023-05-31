@@ -34,7 +34,7 @@ export class ProfilesService {
     @Inject(forwardRef(() => RestaurantReviewService))
     private readonly reviewService: RestaurantReviewService,
     @Inject(forwardRef(() => RestaurantService))
-    private readonly restaurantService: RestaurantService, // @Inject(forwardRef(() => CommentsService)) // private readonly commentService: CommentsService,
+    private readonly restaurantService: RestaurantService,
   ) {}
   async updateProfile(
     data,
@@ -99,7 +99,7 @@ export class ProfilesService {
     return this.profileModel
       .findById(userId)
       .select(
-        'rewardPoints estimatedSavings email firstname surname profileImage productId purchasedAt expirationAt isPremium accountType',
+        'rewardPoints estimatedSavings email firstname surname profileImage productId purchasedAt expirationAt isPremium accountType accountHolderType',
       );
   }
   async getSingleProfile(userId): Promise<any> {
@@ -202,11 +202,9 @@ export class ProfilesService {
       );
   }
   async fetchProfileUsingToken(user): Promise<any> {
-    const fetchedUser = await this.profileModel
-      .findOne({
-        $or: [{ email: user }, { username: user }],
-      })
-      .select(['-password', '-confirmationCode', '-createdAt', '-updatedAt']);
+    const fetchedUser = await this.profileModel.findOne({
+      $or: [{ email: user }, { username: user }],
+    });
     if (!fetchedUser)
       throw new HttpException(
         'no user with entered username or email found',
@@ -216,25 +214,13 @@ export class ProfilesService {
   }
   async getAllUsers(role: string): Promise<any> {
     if (role == Constants.USER || role == Constants.ADMIN)
-      return this.profileModel.find({ role });
+      return this.profileModel
+        .find({
+          role: role,
+          accountType: { $ne: 'ONLY-ME' },
+        })
+        .sort({ createdAt: -1 });
     return this.restaurantService.getAllUsers(role);
-    // return this.profileModel.find({ role }).populate('userId');
-    // return this.profileModel.aggregate([
-    //   {
-    //     $match: { role: role },
-    //   },
-    //   {
-    //     $lookup: {
-    //       from: 'restaurants',
-    //       localField: '_id',
-    //       foreignField: 'userId',
-    //       as: 'restaurantData',
-    //     },
-    //   },
-    //   {
-    //     $unset: ['password', 'confirmationCode'],
-    //   },
-    // ]);
   }
   async deleteProfile(profileId): Promise<ProfileDocument> {
     const oid = new mongoose.Types.ObjectId(profileId);
@@ -263,7 +249,6 @@ export class ProfilesService {
       .select(['-createdAt', '-updatedAt', '-rewardPoints']);
   }
   async restaurantFilters(data, paginationQuery): Promise<any> {
-    console.log('data = ', data);
     return this.restaurantService.restaurantFilters(data, paginationQuery);
   }
   async resetPassword(user, enteredPassword) {
@@ -310,10 +295,15 @@ export class ProfilesService {
       { new: true },
     );
   }
-  async filterUserByName(username): Promise<any> {
+  async filterUserByName(username, userType): Promise<any> {
     const regex = new RegExp(username, 'i');
     return this.profileModel
-      .find({ username: regex, status: Constants.ACTIVE })
+      .find({
+        username: regex,
+        accountHolderType: userType,
+        status: Constants.ACTIVE,
+        accountType: { $ne: 'ONLY-ME' },
+      })
       .where({ role: Constants.USER })
       .select('_id username firstname surname profileImage');
   }

@@ -53,7 +53,6 @@ export class ProfilesController {
   @ApiBadRequestResponse({ description: 'could not update Profile' })
   async updateProfile(@Request() request, @Body() data) {
     data.userId = request.user.userId;
-    console.log('data 1 = ', data);
     return this.profileService.updateProfile(data);
   }
 
@@ -127,7 +126,7 @@ export class ProfilesController {
       },
     },
   })
-  filterUserByName(@Query('username') username) {
-    return this.profileService.filterUserByName(username);
+  filterUserByName(@Query('username') username, @Query('userType') userType) {
+    return this.profileService.filterUserByName(username, userType);
   }
 }

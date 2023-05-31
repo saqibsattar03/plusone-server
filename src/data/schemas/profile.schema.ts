@@ -41,7 +41,11 @@ export class Profile extends User {
   @Prop()
   bio: string;
 
-  @Prop({ type: String, enum: ['PUBLIC', 'PRIVATE'], default: 'PUBLIC' })
+  @Prop({
+    type: String,
+    enum: ['PUBLIC', 'PRIVATE', 'ONLY-ME'],
+    default: 'PUBLIC',
+  })
   accountType: string;
 
   @Prop()

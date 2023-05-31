@@ -37,7 +37,6 @@ export class FollowerService {
       }
     }
     return;
-    //  throw new HttpException('Follower Added Successfully', HttpStatus.OK);
   }
 
   async removeFollower(userId, followerId): Promise<any> {
@@ -91,7 +90,6 @@ export class FollowerService {
         $lookup: {
           from: 'followings',
           let: {
-            // uId: ObjectId('644a4c7d1913f5e2b20fd596'),
             uId: new mongoose.Types.ObjectId(userId),
           },
           pipeline: [
@@ -117,7 +115,6 @@ export class FollowerService {
           from: 'followrequests',
           let: {
             uId: oid,
-            // uId: oid,
             rTo: '$followers._id',
           },
           pipeline: [
@@ -155,7 +152,6 @@ export class FollowerService {
               else: {
                 $cond: {
                   if: {
-                    // $eq: ['$followers._id', '$followed.followings'],
                     $in: ['$followers._id', '$followed.followings'],
                   },
                   then: true,
