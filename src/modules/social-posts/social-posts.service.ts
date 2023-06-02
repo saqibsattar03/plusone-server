@@ -34,19 +34,27 @@ export class SocialPostsService {
     protected readonly profileService: ProfilesService,
   ) {}
   async createPost(postDto: any): Promise<PostDocument> {
+    console.log(postDto);
     try {
-      const userType = await this.profileService.getUserFields(postDto.userId);
       if (postDto.postType == Constants.FEED) {
+        const userType = await this.profileService.getUserFields(
+          postDto.userId,
+        );
+
         postDto.voucherId = null;
         postDto.postToShow = userType.accountHolderType;
         return this.socialPostModel.create(postDto);
       } else {
+        const userType = await this.profileService.getUserFields(
+          postDto.reviewObject.userId,
+        );
         return this.socialPostModel.create({
           userId: postDto.reviewObject.userId,
           voucherId: postDto.reviewObject.voucherId,
           caption: postDto.reviewObject.reviewText,
           accountHolderType: userType.accountHolderType,
           postType: Constants.REVIEW,
+          postToShow: userType.accountHolderType,
         });
       }
     } catch (e) {
