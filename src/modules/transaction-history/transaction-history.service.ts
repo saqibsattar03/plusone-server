@@ -5,7 +5,7 @@ import {
   TransactionHistoryDocument,
 } from '../../data/schemas/transactionHistory.schema';
 import { Model } from 'mongoose';
-// import { PdfReportUtil } from '../../common/utils/pdf-report.util';
+import { PdfReportUtil } from '../../common/utils/pdf-report.util';
 
 @Injectable()
 export class TransactionHistoryService {
@@ -36,7 +36,7 @@ export class TransactionHistoryService {
           select:
             'restaurantName phoneNumber locationName availableDeposit totalDeposit totalDeductions createdAt',
         });
-      // await new PdfReportUtil().createInvoice(res, 'invoice.pdf');
+      await new PdfReportUtil().createInvoice(res, 'invoice.pdf');
       return res;
     } else return this.transactionHistoryModel.find();
   }

@@ -64,53 +64,53 @@ export class AwsMailUtil {
     }
   }
 
-  //   public async sendEmailWithAttachment(file: any) {
-  //     // const fileContent = fs.readFileSync(join(process.cwd(), 'invoice.pdf')); // Replace with the actual file path of the PDF );
-  //     // const base64Data = fileContent.toString('base64');
-  //     const params = {
-  //       RawMessage: {
-  //         Data: `From: rkhabeer84@gmail.com
-  // To: saqibsattar710@gmail.com
-  // Subject: Monthly Account Statement
-  // MIME-Version: 1.0
-  // Content-Type: multipart/mixed; boundary="boundary-example"
-  //
-  // --boundary-example
-  // Content-Type: text/plain
-  //
-  // Your Monthly Report is Attached
-  //
-  // --boundary-example
-  // Content-Type: application/pdf
-  // Content-Disposition: attachment; filename="invoice.pdf"
-  // Content-Transfer-Encoding: base64
-  //
-  // ${file}
-  //
-  // --boundary-example--`,
-  //       },
-  //     };
-  //
-  //     // const params = {
-  //     //   RawMessage: {
-  //     //     Data:
-  //     //       'From: saqibsattar710@gmail.com\n' +
-  //     //       'To: saqibsattar710@gmail.com\n' +
-  //     //       'Subject: Example Raw Email\n' +
-  //     //       'MIME-Version: 1.0\n' +
-  //     //       'Content-Type: text/plain\n\n' +
-  //     //       'This is the body of the email.',
-  //     //   },
-  //     //
-  //     // };
-  //     try {
-  //       // await this.ses.sendTemplatedEmail(params).promise();
-  //       await this.ses.sendRawEmail(params).promise();
-  //       console.log('Email sent successfully.');
-  //     } catch (error) {
-  //       console.error('Error sending email:', error);
-  //     }
-  //   }
+  public async sendEmailWithAttachment(file: any) {
+    // const fileContent = fs.readFileSync(join(process.cwd(), 'invoice.pdf')); // Replace with the actual file path of the PDF );
+    // const base64Data = fileContent.toString('base64');
+    const params = {
+      RawMessage: {
+        Data: `From: rkhabeer84@gmail.com
+To: saqibsattar710@gmail.com
+Subject: Monthly Account Statement
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="boundary-example"
+
+--boundary-example
+Content-Type: text/plain
+
+Your Monthly Report is Attached
+
+--boundary-example
+Content-Type: application/pdf
+Content-Disposition: attachment; filename="invoice.pdf"
+Content-Transfer-Encoding: base64
+
+${file}
+
+--boundary-example--`,
+      },
+    };
+
+    // const params = {
+    //   RawMessage: {
+    //     Data:
+    //       'From: saqibsattar710@gmail.com\n' +
+    //       'To: saqibsattar710@gmail.com\n' +
+    //       'Subject: Example Raw Email\n' +
+    //       'MIME-Version: 1.0\n' +
+    //       'Content-Type: text/plain\n\n' +
+    //       'This is the body of the email.',
+    //   },
+    //
+    // };
+    try {
+      // await this.ses.sendTemplatedEmail(params).promise();
+      await this.ses.sendRawEmail(params).promise();
+      console.log('Email sent successfully.');
+    } catch (error) {
+      console.error('Error sending email:', error);
+    }
+  }
 
   public async deleteTemplate(template_name: string) {
     const params = {
