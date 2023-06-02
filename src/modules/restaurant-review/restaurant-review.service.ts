@@ -30,9 +30,6 @@ export class RestaurantReviewService {
     restaurantReviewDto.reviewObject._id = new mongoose.Types.ObjectId(
       restaurantReviewDto.reviewObject._id,
     );
-    restaurantReviewDto.reviewObject.userId = new mongoose.Types.ObjectId(
-      restaurantReviewDto.reviewObject.userId,
-    );
     restaurantReviewDto.reviewObject.voucherId = new mongoose.Types.ObjectId(
       restaurantReviewDto.reviewObject.voucherId,
     );

@@ -266,6 +266,7 @@ export class RestaurantReviewDto {
     voucherId: any;
     reviewText: string;
     rating: number;
+    accountHolderType: string;
   };
 }
 

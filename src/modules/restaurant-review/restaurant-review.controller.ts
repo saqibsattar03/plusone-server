@@ -6,6 +6,7 @@ import {
   Post,
   Query,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { RestaurantReviewService } from './restaurant-review.service';
 import {
@@ -43,7 +44,8 @@ export class RestaurantReviewController {
   })
   @ApiBadRequestResponse({ description: 'can not create review' })
   @UseGuards(JwtAuthGuard)
-  createReview(@Body() data) {
+  createReview(@Body() data, @Request() request) {
+    data.reviewObject.userId = request.user.userId;
     return this.restaurantReviewService.createReview(data);
   }
 

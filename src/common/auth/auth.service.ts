@@ -48,10 +48,7 @@ export class AuthService {
       ],
     });
     if (existingUser) {
-      if (
-        existingUser.username === lowerCaseUserName ||
-        existingUser.email === lowerCaseEmail
-      )
+      if (existingUser.username === lowerCaseUserName)
         throw new HttpException(
           'A user with this Username already exists',
           HttpStatus.UNAUTHORIZED,

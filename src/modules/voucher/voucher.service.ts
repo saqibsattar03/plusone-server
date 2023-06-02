@@ -300,8 +300,8 @@ export class VoucherService {
             amount_title: 'Current Balance',
             amount: restaurantStats.availableDeposit,
           };
-          console.log(templateData);
           // todo: send email to recharge //
+          // await new AwsMailUtil().sendEmailWithAttachment();
           await new AwsMailUtil().sendEmail(
             restaurantEmail.email,
             templateData,
