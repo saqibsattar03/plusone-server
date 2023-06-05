@@ -14,7 +14,7 @@ export class PdfReportUtil {
     await this.generateInvoiceHeader(doc);
     await this.generateDetails(doc, invoice);
     this.generateInvoiceTable(doc, invoice);
-    // await this.generateInvoiceFooter(doc);
+    await this.generateInvoiceFooter(doc);
     const stream = doc.pipe(blobStream());
     doc.end();
     // const pdfBlob = stream.toBlob();
@@ -63,6 +63,9 @@ export class PdfReportUtil {
           align: 'center',
         },
       );
+    // doc.fontSize(7).text('Developed By SparkoSol', 55, 782, {
+    //   align: 'right',
+    // });
   }
 
   async generateDetails(doc, invoice) {
@@ -83,7 +86,11 @@ export class PdfReportUtil {
       .text('Invoice Date:', 50, customerInformationTop + 15)
       .text(this.formatDate(new Date()), 150, customerInformationTop + 15)
       .text('Contact Number:', 50, customerInformationTop + 30)
-      .text(invoice.phoneNumber, 150, customerInformationTop + 30)
+      .text(
+        invoice[0].restaurantId.phoneNumber,
+        150,
+        customerInformationTop + 30,
+      )
 
       .font('Helvetica-Bold')
       .text(invoice[0].restaurantId.restaurantName, 300, customerInformationTop)
@@ -139,20 +146,25 @@ export class PdfReportUtil {
 
     for (i = 0; i < invoice.length - 1; i++) {
       const item = invoice[i];
+      console.log('index = ', index);
       //check here tomorrow
-      const position = invoiceTableTop + index * 30;
+      let position = invoiceTableTop + index * 30;
       console.log('position = ', position);
       // const position = invoiceTableTop + (i + 1) * 30;
       index++;
-      if (position > 775) {
-        index = 0;
+      if (position >= 755) {
+        console.log('inside if condition');
+        index = 1;
+        position = 30;
         invoiceTableTop = 30;
-        doc.addPage({ size: 'A4', margin: 40 });
+        doc.addPage({
+          size: 'A4',
+          margin: 50,
+        });
       }
       this.generateTableRowData(
         doc,
         position,
-        // invoiceTableTop,
         item.voucherType ? item.voucherType : '-',
         this.formatCurrency(item.amount),
         item.deductedAmount ? this.formatCurrency(item.deductedAmount) : '-',
@@ -164,85 +176,85 @@ export class PdfReportUtil {
       // Check if the content exceeds the page boundaries
     }
 
+    console.log('total page count = ', doc.bufferedPageRange().count);
     // uncomment lines below to get subtotal, and grand total fields
 
-    // if (doc._pageBuffer.length - 1 || doc.bufferedPageRange().count == 1) {
-    //   console.log('last page');
+    // if (doc._pageBuffer.length - 1) {
     //   const subtotalPosition = invoiceTableTop + index * 30;
     //   console.log('sub total position = ', subtotalPosition);
-    //   this.generateTableRow(
-    //     doc,
-    //     subtotalPosition,
-    //     '',
-    //     '',
-    //     '',
-    //     'Subtotal',
-    //     '',
-    //     '€ ' + parseFloat(invoice[0].availableDeposit).toFixed(2),
-    //   );
-    //   const paidToDatePosition = subtotalPosition + 20;
-    //   this.generateTableRow(
-    //     doc,
-    //     paidToDatePosition,
-    //     '',
-    //     '',
-    //     '',
-    //     'Paid To Date',
-    //     '',
-    //     '€ ' + parseFloat(invoice[0].restaurantId.totalDeposit).toFixed(2),
-    //   );
+    //   // this.generateTableRowData(
+    //   //   doc,
+    //   //   subtotalPosition,
+    //   //   '',
+    //   //   '',
+    //   //   '',
+    //   //   'Subtotal',
+    //   //   '',
+    //   //   '€ ' + parseFloat(invoice[0].availableDeposit).toFixed(2),
+    //   // );
+    //   // const paidToDatePosition = subtotalPosition + 20;
+    //   // this.generateTableRowData(
+    //   //   doc,
+    //   //   paidToDatePosition,
+    //   //   '',
+    //   //   '',
+    //   //   '',
+    //   //   'Paid To Date',
+    //   //   '',
+    //   //   '€ ' + parseFloat(invoice[0].restaurantId.totalDeposit).toFixed(2),
+    //   // );
     //
-    //   const grandTotalPosition = paidToDatePosition + 25;
-    //   doc.font('Helvetica-Bold');
-    //   this.generateTableRow(
-    //     doc,
-    //     grandTotalPosition,
-    //     '',
-    //     '',
-    //     '',
-    //     'Grand Total After Deductions',
-    //     '',
-    //     '€ ' + this.calculateGrandTotal(invoice),
-    //   );
-    //   doc.font('Helvetica');
+    //   // const grandTotalPosition = paidToDatePosition + 25;
+    //   // doc.font('Helvetica-Bold');
+    //   // this.generateTableRowData(
+    //   //   doc,
+    //   //   grandTotalPosition,
+    //   //   '',
+    //   //   '',
+    //   //   '',
+    //   //   'Grand Total After Deductions',
+    //   //   '',
+    //   //   '€ ' + this.calculateGrandTotal(invoice),
+    //   // );
+    //   // doc.font('Helvetica');
     //   // this.generateInvoiceFooter(doc);
     // }
-    // const subtotalPosition = invoiceTableTop + (i + 1) * 30;
-    // this.generateTableRow(
-    //   doc,
-    //   subtotalPosition,
-    //   '',
-    //   '',
-    //   '',
-    //   'Subtotal',
-    //   '',
-    //   '€ ' + parseFloat(invoice[0].availableDeposit).toFixed(2),
-    // );
-    // const paidToDatePosition = subtotalPosition + 20;
-    // this.generateTableRow(
-    //   doc,
-    //   paidToDatePosition,
-    //   '',
-    //   '',
-    //   '',
-    //   'Paid To Date',
-    //   '',
-    //   '€ ' + parseFloat(invoice[0].restaurantId.totalDeposit).toFixed(2),
-    // );
-    //
-    // const grandTotalPosition = paidToDatePosition + 25;
-    // doc.font('Helvetica-Bold');
-    // this.generateTableRow(
-    //   doc,
-    //   grandTotalPosition,
-    //   '',
-    //   '',
-    //   '',
-    //   'Grand Total After Deductions',
-    //   '',
-    //   '€ ' + this.calculateGrandTotal(invoice),
-    // );
-    // doc.font('Helvetica');
+    const subtotalPosition = invoiceTableTop + index * 30;
+    this.generateTableRowData(
+      doc,
+      subtotalPosition,
+      '',
+      '',
+      '',
+      'Subtotal',
+      '',
+      '€ ' + parseFloat(invoice[0].availableDeposit).toFixed(2),
+    );
+    const paidToDatePosition = subtotalPosition + 20;
+    this.generateTableRowData(
+      doc,
+      paidToDatePosition,
+      '',
+      '',
+      '',
+      'Paid To Date',
+      '',
+      '€ ' + parseFloat(invoice[0].restaurantId.totalDeposit).toFixed(2),
+    );
+
+    const grandTotalPosition = paidToDatePosition + 25;
+    doc.font('Helvetica-Bold');
+    this.generateTableRowData(
+      doc,
+      grandTotalPosition,
+      '',
+      '',
+      '',
+      'Grand Total After Deductions',
+      '',
+      '€ ' + this.calculateGrandTotal(invoice),
+    );
+    doc.font('Helvetica');
   }
 
   calculateGrandTotal(invoice) {

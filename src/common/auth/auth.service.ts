@@ -5,7 +5,6 @@ import {
   Inject,
   Injectable,
   NotAcceptableException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ProfilesService } from '../../modules/profiles/profiles.service';
@@ -96,7 +95,6 @@ export class AuthService {
     );
   }
   async verifyUser(data): Promise<any> {
-    console.log(data);
     const oid = new mongoose.Types.ObjectId(data._id);
     const user = await this.profileModel
       .findById({ _id: oid })

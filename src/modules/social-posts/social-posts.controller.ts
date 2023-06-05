@@ -123,7 +123,6 @@ export class SocialPostsController {
   @ApiBadRequestResponse({ description: 'could not update post' })
   @UseGuards(JwtAuthGuard)
   async updatePost(@Request() request, @Body() data) {
-    console.log(data);
     const post = await this.socialPostService.updatePost(
       request.user.userId,
       data,

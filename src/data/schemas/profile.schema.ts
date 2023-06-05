@@ -79,9 +79,6 @@ export class Profile extends User {
   @Prop({ type: Number, default: 0 })
   rewardPoints: number;
 
-  @Prop({ type: Boolean, default: false })
-  isPremium: boolean;
-
   @Prop({ type: Boolean, default: null })
   isSkip: boolean;
 
@@ -100,6 +97,11 @@ export class Profile extends User {
 
   @Prop({ type: String, default: '' })
   fcmToken: string;
+
+  // subscription fields
+
+  @Prop({ type: Boolean, default: false })
+  isPremium: boolean;
 
   @Prop({ type: String, select: false })
   productId: string;

@@ -22,8 +22,6 @@ export class CustomerServiceController {
   @ApiResponse({ type: CustomerServiceDto })
   @UseGuards(JwtAuthGuard)
   createCustomerQuery(@Request() request, @Body() data) {
-    console.log('here customer service post');
-    console.log(data);
     data.userId = request.user.userId;
     return this.customerService.createCustomerQuery(data);
   }

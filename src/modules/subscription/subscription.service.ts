@@ -8,8 +8,7 @@ export class SubscriptionService {
     const cases = data.event.type;
     switch (cases) {
       case 'TEST': {
-        console.log(data.event.subscriber_attributes.$email.value);
-        const email = 'saqib@gmail.com';
+        const email = 'saqibsattar710@gmail.com';
         const res = await this.updateSubscription(
           email,
           data.event.product_id,
@@ -17,73 +16,69 @@ export class SubscriptionService {
           data.event.expiration_at_ms,
           true,
         );
-        console.log('data updated');
+
         break;
       }
-      case 'INITIAL': {
-        console.log('in initial stage');
-        const email = 'saqib@gmail.com';
-        const res = await this.updateSubscription(
-          email,
+      case 'INITIAL_PURCHASE': {
+        await this.updateSubscription(
+          data.event.app_user_id,
           data.event.product_id,
           data.event.purchased_at_ms,
           data.event.expiration_at_ms,
           true,
         );
-        console.log('data updated');
+
         break;
       }
-      case 'CANCELLATION': {
-        console.log('in CANCELLATION stage');
-        const email = 'saqib@gmail.com';
-        const res = await this.updateSubscription(
-          email,
+
+      case 'RENEWAL': {
+        await this.updateSubscription(
+          data.event.app_user_id,
+          data.event.product_id,
+          data.event.purchased_at_ms,
+          data.event.expiration_at_ms,
+          true,
+        );
+
+        break;
+      }
+
+      case 'EXPIRATION': {
+        await this.updateSubscription(
+          data.event.app_user_id,
           data.event.product_id,
           data.event.purchased_at_ms,
           data.event.expiration_at_ms,
           false,
         );
-        console.log('data updated');
+
         break;
       }
-      case 'SUBSCRIPTION_PAUSED': {
-        console.log('in SUBSCRIPTION_PAUSED stage');
-        const email = 'saqib@gmail.com';
-        const res = await this.updateSubscription(
-          email,
-          null,
-          null,
-          null,
-          false,
-        );
-        console.log('data updated');
-        break;
-      }
+
       case 'TRANSFER': {
-        console.log('TRANSFER');
-        const transferredFrom = await this.profileService.getUserFields(
-          'hdjkfhjkhfdjhfjkdh',
+        const user1 = await this.profileService.getUserFields(
+          data.event.transferred_from,
         );
-        const d = {
+        const transferredFrom = {
           isPremium: false,
           purchasedAt: null,
           expirationAt: null,
           productId: null,
-          email: transferredFrom.email,
+          email: user1.email,
         };
-        await this.profileService.updateProfile(d);
+        await this.profileService.updateProfile(transferredFrom);
 
-        const transferredTo = await this.profileService.getUserFields(
-          'dfhjhfkdhfjkhkd',
+        const user2 = await this.profileService.getUserFields(
+          data.event.transferred_to,
         );
-        const d1 = {
+        const transferredTo = {
           isPremium: true,
           purchasedAt: data.event.purchasedAt,
           expirationAt: data.event.expirationAt,
           productId: data.event.productId,
-          email: transferredFrom.email,
+          email: user2.email,
         };
-        await this.profileService.updateProfile(d1);
+        await this.profileService.updateProfile(transferredTo);
         break;
       }
     }

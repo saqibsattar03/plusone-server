@@ -33,6 +33,9 @@ export class Post {
   @Prop({ type: String, enum: ['STUDENT', 'NON-STUDENT'], index: true })
   postToShow: string;
 
+  @Prop({ type: String, index: true })
+  country: string;
+
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: Voucher.name,

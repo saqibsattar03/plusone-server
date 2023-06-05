@@ -36,6 +36,7 @@ export class TransactionHistoryService {
           select:
             'restaurantName phoneNumber locationName availableDeposit totalDeposit totalDeductions createdAt',
         });
+      console.log(res);
       await new PdfReportUtil().createInvoice(res, 'invoice.pdf');
       return res;
     } else return this.transactionHistoryModel.find();

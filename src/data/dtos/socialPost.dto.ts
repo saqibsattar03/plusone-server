@@ -121,6 +121,12 @@ export class UpdateSocialPost {
   postAudiencePreference: string;
 
   @ApiProperty({
+    type: String,
+    name: 'country',
+  })
+  country: string;
+
+  @ApiProperty({
     name: 'media',
     type: [String],
   })
