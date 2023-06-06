@@ -21,6 +21,7 @@ import {
 import { UpdateVoucherDto, VoucherDto } from '../../data/dtos/voucher.dto';
 import { Constants } from '../../common/constants';
 import { JwtAuthGuard } from '../../common/auth/guards/jwt-auth.guard';
+import mongoose from 'mongoose';
 
 @ApiTags('Voucher')
 @Controller('voucher')
@@ -38,6 +39,7 @@ export class VoucherController {
   })
   @ApiBadRequestResponse({ description: 'can not create voucher' })
   createStudentVoucher(@Body() data) {
+    // data.restaurantId = new mongoose.Types.ObjectId
     switch (data.voucherObject.voucherPreference) {
       case Constants.STUDENT:
         if (data.voucherObject.voucherImage) {

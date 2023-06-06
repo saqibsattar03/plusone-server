@@ -27,7 +27,6 @@ export class AuthController {
   })
   @ApiBadRequestResponse({ description: 'can not create user' })
   async createUser(@Body() data) {
-    console.log('sign up route', data);
     return this.authService.createUser(data);
   }
 
@@ -67,7 +66,6 @@ export class AuthController {
   @ApiUnauthorizedResponse({ description: 'email or password is incorrect' })
   @UseGuards(LocalAuthGuard)
   login(@Request() request: any): Promise<any> {
-    console.log('login route called');
     return this.authService.login(request.body);
   }
 

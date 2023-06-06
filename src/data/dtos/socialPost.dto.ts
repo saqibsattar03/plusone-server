@@ -6,6 +6,7 @@ export class SocialPostDto {
   @ApiProperty({ type: String, name: 'userId' })
   @IsNotEmpty()
   userId: string;
+
   @ApiProperty({ type: String, name: 'voucherId' })
   voucherId: string;
 
@@ -118,6 +119,18 @@ export class UpdateSocialPost {
     name: 'postAudiencePreference',
   })
   postAudiencePreference: string;
+
+  @ApiProperty({
+    type: String,
+    name: 'country',
+  })
+  country: string;
+
+  @ApiProperty({
+    name: 'media',
+    type: [String],
+  })
+  media: string[];
 }
 
 export class PostLikedDto {

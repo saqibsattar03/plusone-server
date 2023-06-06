@@ -41,6 +41,7 @@ export class ProfilesService {
     estimatedSavings = null,
     rewardPoints = null,
   ): Promise<any> {
+    console.log('data = ', data);
     //*** uncomment it when integrating real subscription ***//
     // const userEarnings = await this.getUserEarnings(data.userId);
 
@@ -97,7 +98,9 @@ export class ProfilesService {
 
   async getUserFields(userId): Promise<ProfileDocument> {
     return this.profileModel
-      .findById(userId)
+      .findOne({
+        $or: [{ _id: userId }, { email: userId }],
+      })
       .select(
         'rewardPoints estimatedSavings email firstname surname profileImage productId purchasedAt expirationAt isPremium accountType accountHolderType',
       );

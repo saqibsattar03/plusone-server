@@ -42,7 +42,6 @@ export const multerConfig: MulterOptions = {
       // Allow storage of file
       cb(null, true);
     } else if (file.mimetype.match(/\/(mp4)$/)) {
-      console.log(fileSize);
       if (fileSize > 60 * 1024 * 1024) {
         cb(
           new HttpException(

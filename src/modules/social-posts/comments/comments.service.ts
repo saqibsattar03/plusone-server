@@ -25,7 +25,6 @@ export class CommentsService {
     protected readonly fcmService: FcmService,
   ) {}
   async postComment(commentDto: CommentDto): Promise<Comment> {
-    console.log();
     commentDto.commentObject._id = new mongoose.Types.ObjectId(
       commentDto.commentObject._id,
     );

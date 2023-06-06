@@ -78,7 +78,6 @@ export class DepositMoneyService {
   async sumOfDepositedAmountByAllRestaurant(): Promise<any> {
     return this.depositMoneyModel.find({}).then((deposits) => {
       const totalDebit = deposits.reduce((total, deposit) => {
-        console.log(total);
         return (
           total +
           deposit.depositObject.reduce((sum, depositObj) => {

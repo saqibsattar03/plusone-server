@@ -34,7 +34,6 @@ export class SocialPostsService {
     protected readonly profileService: ProfilesService,
   ) {}
   async createPost(postDto: any): Promise<PostDocument> {
-    console.log(postDto);
     try {
       if (postDto.postType == Constants.FEED) {
         const userType = await this.profileService.getUserFields(
@@ -256,7 +255,6 @@ export class SocialPostsService {
   }
 
   async removeLike(userId, postId): Promise<any> {
-    console.log('like remove function');
     const res = await this.postLikedModel.findOne({ postId: postId });
     if (!res) throw new HttpException('no post found', HttpStatus.NOT_FOUND);
     if (res) {
@@ -389,6 +387,7 @@ export class SocialPostsService {
           userId: 1,
           user: 1,
           location: 1,
+          country: 1,
           caption: 1,
           postToShow: 1,
           postAudiencePreference: 1,
@@ -446,6 +445,7 @@ export class SocialPostsService {
           _id: 1,
           userId: 1,
           location: 1,
+          country: 1,
           caption: 1,
           postToShow: 1,
           postAudiencePreference: 1,
@@ -481,6 +481,7 @@ export class SocialPostsService {
           profileImage: '$user.profileImage',
           caption: 1,
           location: 1,
+          country: 1,
           postToShow: 1,
           postAudiencePreference: 1,
           postType: 1,

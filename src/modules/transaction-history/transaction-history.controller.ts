@@ -1,6 +1,6 @@
 import { Controller, Query } from '@nestjs/common';
 import { TransactionHistoryService } from './transaction-history.service';
-import { Get } from '@nestjs/common/decorators';
+import { Get, Post } from '@nestjs/common/decorators';
 import { ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TransactionHistoryDto } from '../../data/dtos/transactionHistory.dto';
 
@@ -18,10 +18,27 @@ export class TransactionHistoryController {
     @Query('restaurantId') restaurantId,
     @Query('type') type,
   ) {
-    console.log('type = ', type);
     return this.transactionHistoryService.getRestaurantTransactionHistory(
       restaurantId,
       type,
+    );
+  }
+
+  @Post('generate-invoice')
+  @ApiQuery({ type: String, name: 'restaurantId' })
+  @ApiQuery({ type: String, name: 'startDate' })
+  @ApiQuery({ type: String, name: 'endDate' })
+  generateInvoice(
+    @Query('restaurantId') restaurantId,
+    @Query('startDate') startDate,
+    @Query('endDate') endDate,
+  ) {
+    console.log(startDate);
+    console.log(endDate);
+    return this.transactionHistoryService.generateInvoice(
+      restaurantId,
+      startDate,
+      endDate,
     );
   }
 }
