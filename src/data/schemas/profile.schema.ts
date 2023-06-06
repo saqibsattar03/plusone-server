@@ -98,6 +98,9 @@ export class Profile extends User {
   @Prop({ type: String, default: '' })
   fcmToken: string;
 
+  @Prop({ type: Number, default: 0 })
+  freeVoucherCount: number;
+
   // subscription fields
 
   @Prop({ type: Boolean, default: false })

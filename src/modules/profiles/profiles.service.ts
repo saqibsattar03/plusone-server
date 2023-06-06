@@ -40,6 +40,7 @@ export class ProfilesService {
     data,
     estimatedSavings = null,
     rewardPoints = null,
+    freeVoucherCount = null,
   ): Promise<any> {
     console.log('data = ', data);
     //*** uncomment it when integrating real subscription ***//
@@ -75,6 +76,7 @@ export class ProfilesService {
 
           // rewardPoints: rewardPoints ?? userEarnings.rewardPoints,
           rewardPoints: rewardPoints,
+          freeVoucherCount: freeVoucherCount,
           // estimatedSavings: estimatedSavings ?? userEarnings.estimatedSavings,
           estimatedSavings: estimatedSavings,
           isSkip: data.isSkip,
@@ -102,7 +104,7 @@ export class ProfilesService {
         $or: [{ _id: userId }, { email: userId }],
       })
       .select(
-        'rewardPoints estimatedSavings email firstname surname profileImage productId purchasedAt expirationAt isPremium accountType accountHolderType',
+        'rewardPoints estimatedSavings email firstname surname profileImage productId purchasedAt expirationAt isPremium freeVoucherCount accountType accountHolderType',
       );
   }
   async getSingleProfile(userId): Promise<any> {
