@@ -71,7 +71,7 @@ export class AwsMailUtil {
       RawMessage: {
         Data: `From: rkhabeer84@gmail.com
 To: saqibsattar710@gmail.com
-Subject: Monthly Account Statement
+Subject: Financial Report
 MIME-Version: 1.0
 Content-Type: multipart/mixed; boundary="boundary-example"
 
@@ -90,38 +90,24 @@ ${file}
 --boundary-example--`,
       },
     };
-
-    // const params = {
-    //   RawMessage: {
-    //     Data:
-    //       'From: saqibsattar710@gmail.com\n' +
-    //       'To: saqibsattar710@gmail.com\n' +
-    //       'Subject: Example Raw Email\n' +
-    //       'MIME-Version: 1.0\n' +
-    //       'Content-Type: text/plain\n\n' +
-    //       'This is the body of the email.',
-    //   },
-    //
-    // };
     try {
-      // await this.ses.sendTemplatedEmail(params).promise();
-      await this.ses.sendRawEmail(params).promise();
       console.log('Email sent successfully.');
+      await this.ses.sendRawEmail(params).promise();
     } catch (error) {
       console.error('Error sending email:', error);
     }
   }
 
-  public async deleteTemplate(template_name: string) {
+  public async deleteTemplate(templateName: string) {
     const params = {
-      TemplateName: template_name,
+      TemplateName: templateName,
     };
 
     try {
       await this.ses.deleteTemplate(params).promise();
-      console.log('Email Delete successfully.');
+      console.log('Email Template Deleted successfully.');
     } catch (error) {
-      console.error('Error Delete email:', error);
+      console.error('Error Deleting Template:', error);
     }
   }
 }

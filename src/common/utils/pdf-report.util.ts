@@ -1,23 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { createWriteStream } from 'fs';
 import * as PDFDocument from 'pdfkit';
 import { AwsMailUtil } from './aws-mail-util';
-import * as fs from 'fs';
 import * as blobStream from 'blob-stream';
 import { getRandomNumber } from './generateRandomNumber.util';
+import { Constants } from '../constants';
 @Injectable()
 export class PdfReportUtil {
-  async createInvoice(invoice: any, path: string): Promise<any> {
+  async createInvoice(invoice: any): Promise<any> {
     const doc = new PDFDocument({ size: 'A4', margin: 50, bufferPages: true });
-    // const range = doc.bufferedPageRange();
-    // console.log('range = ', range);
     await this.generateInvoiceHeader(doc);
     await this.generateDetails(doc, invoice);
-    this.generateInvoiceTable(doc, invoice);
+    await this.generateInvoiceTable(doc, invoice);
     await this.generateInvoiceFooter(doc);
-    const stream = doc.pipe(blobStream());
+    doc.pipe(blobStream());
     doc.end();
-    // const pdfBlob = stream.toBlob();
+
     const chunks: Uint8Array[] = [];
     // Read the PDF blob
     doc.on('data', (chunk) => chunks.push(chunk));
@@ -35,10 +32,10 @@ export class PdfReportUtil {
   //*** header for PDF file ***//
   async generateInvoiceHeader(doc: any): Promise<any> {
     doc
-      .image('logo.png', 50, 45, { width: 50, height: 50 })
+      .image('logo.png', 50, 45, { width: 50, height: 30 })
       .fillColor('#444444')
       .fontSize(20)
-      .text('PlusOne Worldwide.', 110, 65)
+      .text('PlusOne Worldwide.', 110, 52)
       .fontSize(10)
       .text('PlusOne Worldwide.', 200, 50, { align: 'right' })
       .text('123 Main Street', 200, 65, { align: 'right' })
@@ -68,6 +65,7 @@ export class PdfReportUtil {
     // });
   }
 
+  //*** generating details of invoice section ***//
   async generateDetails(doc, invoice) {
     // *** Reference Code ***//
     doc.fillColor('#444444').fontSize(20).text('Invoice', 50, 160);
@@ -105,6 +103,7 @@ export class PdfReportUtil {
     this.generateHr(doc, 252);
   }
 
+  //*** generating details of pdf file data ***//
   generateTableRowData(
     doc,
     y,
@@ -126,7 +125,7 @@ export class PdfReportUtil {
       .text(currentBalance, 0, y, { align: 'right' });
   }
 
-  generateInvoiceTable(doc, invoice) {
+  async generateInvoiceTable(doc, invoice) {
     let i;
     let index = 1;
     let invoiceTableTop = 335;
@@ -146,14 +145,10 @@ export class PdfReportUtil {
 
     for (i = 0; i < invoice.length - 1; i++) {
       const item = invoice[i];
-      console.log('index = ', index);
       //check here tomorrow
       let position = invoiceTableTop + index * 30;
-      console.log('position = ', position);
-      // const position = invoiceTableTop + (i + 1) * 30;
       index++;
       if (position >= 755) {
-        console.log('inside if condition');
         index = 1;
         position = 30;
         invoiceTableTop = 30;
@@ -173,52 +168,7 @@ export class PdfReportUtil {
         this.formatCurrency(item.availableDeposit),
       );
       this.generateHr(doc, position + 20);
-      // Check if the content exceeds the page boundaries
     }
-
-    console.log('total page count = ', doc.bufferedPageRange().count);
-    // uncomment lines below to get subtotal, and grand total fields
-
-    // if (doc._pageBuffer.length - 1) {
-    //   const subtotalPosition = invoiceTableTop + index * 30;
-    //   console.log('sub total position = ', subtotalPosition);
-    //   // this.generateTableRowData(
-    //   //   doc,
-    //   //   subtotalPosition,
-    //   //   '',
-    //   //   '',
-    //   //   '',
-    //   //   'Subtotal',
-    //   //   '',
-    //   //   '€ ' + parseFloat(invoice[0].availableDeposit).toFixed(2),
-    //   // );
-    //   // const paidToDatePosition = subtotalPosition + 20;
-    //   // this.generateTableRowData(
-    //   //   doc,
-    //   //   paidToDatePosition,
-    //   //   '',
-    //   //   '',
-    //   //   '',
-    //   //   'Paid To Date',
-    //   //   '',
-    //   //   '€ ' + parseFloat(invoice[0].restaurantId.totalDeposit).toFixed(2),
-    //   // );
-    //
-    //   // const grandTotalPosition = paidToDatePosition + 25;
-    //   // doc.font('Helvetica-Bold');
-    //   // this.generateTableRowData(
-    //   //   doc,
-    //   //   grandTotalPosition,
-    //   //   '',
-    //   //   '',
-    //   //   '',
-    //   //   'Grand Total After Deductions',
-    //   //   '',
-    //   //   '€ ' + this.calculateGrandTotal(invoice),
-    //   // );
-    //   // doc.font('Helvetica');
-    //   // this.generateInvoiceFooter(doc);
-    // }
     const subtotalPosition = invoiceTableTop + index * 30;
     this.generateTableRowData(
       doc,
@@ -228,21 +178,33 @@ export class PdfReportUtil {
       '',
       'Subtotal',
       '',
-      '€ ' + parseFloat(invoice[0].availableDeposit).toFixed(2),
+      '€ ' + (await this.calculateSubtotalAmount(invoice)),
     );
-    const paidToDatePosition = subtotalPosition + 20;
+    const availableBalancePosition = subtotalPosition + 20;
     this.generateTableRowData(
       doc,
-      paidToDatePosition,
+      availableBalancePosition,
       '',
       '',
       '',
-      'Paid To Date',
+      'Available Balance',
       '',
-      '€ ' + parseFloat(invoice[0].restaurantId.totalDeposit).toFixed(2),
+      '€ ' + parseFloat(invoice[0].restaurantId.availableDeposit).toFixed(2),
+    );
+    const amountToDeductPosition = availableBalancePosition + 20;
+    this.generateTableRowData(
+      doc,
+      amountToDeductPosition,
+      '',
+      '',
+      '',
+      'Amount to Deduct',
+      '',
+      // '€ ' + parseFloat(invoice[0].restaurantId.availableDeposit).toFixed(2),
+      '€ ' + this.calculateDebitAmount(invoice),
     );
 
-    const grandTotalPosition = paidToDatePosition + 25;
+    const grandTotalPosition = amountToDeductPosition + 20;
     doc.font('Helvetica-Bold');
     this.generateTableRowData(
       doc,
@@ -250,22 +212,13 @@ export class PdfReportUtil {
       '',
       '',
       '',
-      'Grand Total After Deductions',
+      'Grand Total',
       '',
       '€ ' + this.calculateGrandTotal(invoice),
     );
     doc.font('Helvetica');
   }
 
-  calculateGrandTotal(invoice) {
-    if (invoice[0].availableDeposit < 0) {
-      return '-' + parseFloat(invoice[0].availableDeposit).toFixed(2);
-    } else {
-      return (
-        invoice[0].availableDeposit - invoice[0].restaurantId.totalDeductions
-      ).toFixed(2);
-    }
-  }
   generateHr(doc, y) {
     doc
       .strokeColor('#aaaaaa')
@@ -277,7 +230,42 @@ export class PdfReportUtil {
   formatCurrency(amount) {
     return '€ ' + parseFloat(amount).toFixed(2);
   }
+  calculateGrandTotal(invoice) {
+    const { DEBIT, CREDIT } = Constants;
+    let debitSum = 0;
+    let creditSum = 0;
 
+    for (let i = 0; i < invoice.length; i++) {
+      const { transactionType, amount } = invoice[i];
+      if (transactionType === DEBIT) {
+        debitSum += amount;
+      } else if (transactionType === CREDIT) {
+        creditSum += amount;
+      }
+    }
+
+    const grandTotal = creditSum - debitSum;
+    return grandTotal.toFixed(2);
+  }
+
+  calculateDebitAmount(invoice) {
+    console.log('invoice = ', invoice);
+    let sum = 0;
+    for (let i = 0; i < invoice.length; i++) {
+      if (invoice[i].transactionType === Constants.DEBIT) {
+        sum += invoice[i].amount;
+        console.log('sum = ', sum);
+      }
+    }
+    return sum.toFixed(2);
+  }
+  async calculateSubtotalAmount(invoice) {
+    let sum = 0;
+    for (let i = 0; i < invoice.length; i++) {
+      sum = sum + invoice[i].amount;
+    }
+    return sum.toFixed(2);
+  }
   formatDate(date) {
     const day = date.getDate();
     const month = date.getMonth() + 1;

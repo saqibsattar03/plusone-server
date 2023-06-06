@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   TransactionHistory,
   TransactionHistoryDocument,
 } from '../../data/schemas/transactionHistory.schema';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { PdfReportUtil } from '../../common/utils/pdf-report.util';
 
 @Injectable()
@@ -36,9 +36,31 @@ export class TransactionHistoryService {
           select:
             'restaurantName phoneNumber locationName availableDeposit totalDeposit totalDeductions createdAt',
         });
-      console.log(res);
-      await new PdfReportUtil().createInvoice(res, 'invoice.pdf');
       return res;
     } else return this.transactionHistoryModel.find();
+  }
+
+  async generateInvoice(
+    restaurantId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<any> {
+    const res = await this.transactionHistoryModel
+      .find({
+        restaurantId: new mongoose.Types.ObjectId(restaurantId),
+        createdAt: { $gte: startDate, $lte: endDate },
+      })
+      .populate({
+        path: 'restaurantId',
+        select:
+          'restaurantName phoneNumber locationName availableDeposit totalDeposit totalDeductions createdAt',
+      });
+    if (!res.length)
+      throw new HttpException(
+        'No Data Between Chosen Dates Found',
+        HttpStatus.BAD_REQUEST,
+      );
+    await new PdfReportUtil().createInvoice(res);
+    return res;
   }
 }
