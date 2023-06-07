@@ -42,9 +42,8 @@ export class ProfilesService {
     rewardPoints = null,
     freeVoucherCount = null,
   ): Promise<any> {
-    console.log('data = ', data);
     //*** uncomment it when integrating real subscription ***//
-    // const userEarnings = await this.getUserEarnings(data.userId);
+    const userFields = await this.getUserFields(data.userId);
 
     const profile = await this.profileModel.findOne({
       $or: [{ _id: data.userId }, { email: data.email }],
@@ -72,13 +71,11 @@ export class ProfilesService {
           dietRequirements: data.dietRequirements,
           scopes: data.scopes,
 
-          //*** uncomment these when integrating real subscription ***//
+          //todo:: uncomment these when integrating real subscription
 
-          // rewardPoints: rewardPoints ?? userEarnings.rewardPoints,
-          rewardPoints: rewardPoints,
-          freeVoucherCount: freeVoucherCount,
-          // estimatedSavings: estimatedSavings ?? userEarnings.estimatedSavings,
-          estimatedSavings: estimatedSavings,
+          rewardPoints: rewardPoints ?? userFields.rewardPoints,
+          freeVoucherCount: freeVoucherCount ?? userFields.freeVoucherCount,
+          estimatedSavings: estimatedSavings ?? userFields.estimatedSavings,
           isSkip: data.isSkip,
           accountType: data.accountType,
           postAudiencePreference: data.postAudiencePreference,
@@ -169,6 +166,7 @@ export class ProfilesService {
           favoriteRestaurants: 1,
           favoriteCuisines: 1,
           favoriteChefs: 1,
+          freeVoucherCount: 1,
           rewardPoints: 1,
           isPremium: 1,
           accountHolderType: 1,

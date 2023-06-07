@@ -120,6 +120,7 @@ export class VoucherController {
         userId: { type: 'string' },
         restaurantCode: { type: 'number' },
         voucherId: { type: 'string' },
+        isFreeVoucher: { type: 'boolean' },
       },
     },
   })
