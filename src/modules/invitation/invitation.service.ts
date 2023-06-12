@@ -22,7 +22,6 @@ export class InvitationService {
     const link = await this.invitationModel.create(invitationDto);
     console.log('link outside = ', link);
     if (link) {
-      console.log('link = ', link);
       //*** shared by data ***//
 
       const rewardPoints = await this.profileService.getUserFields(

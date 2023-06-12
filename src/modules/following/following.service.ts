@@ -31,8 +31,10 @@ export class FollowingService {
 
     @Inject(forwardRef(() => FollowerService))
     private readonly followerService: FollowerService,
+
     @Inject(forwardRef(() => FcmService))
     protected readonly fcmService: FcmService,
+
     @Inject(forwardRef(() => ProfilesService))
     protected readonly profileService: ProfilesService,
   ) {}
@@ -85,14 +87,12 @@ export class FollowingService {
     return followed ? { followed: true } : { followed: false };
   }
   async removeFollowee(userId, followeeId): Promise<any> {
-    console.log('here remove followee');
     const res = await this.followingModel.findOne({ userId: userId });
     if (!res)
       throw new HttpException('no such user found', HttpStatus.NOT_FOUND);
     else if (res) {
       const fId = new mongoose.Types.ObjectId(followeeId);
       if (res.followings.includes(followeeId)) {
-        console.log('here res found');
         await this.followingModel.findOneAndUpdate(
           { userId: userId },
           {

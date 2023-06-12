@@ -49,12 +49,12 @@ export class AuthService {
     if (existingUser) {
       if (existingUser.username === lowerCaseUserName)
         throw new HttpException(
-          'A user with this Username already exists',
+          'An account with this username already exists.',
           HttpStatus.UNAUTHORIZED,
         );
       else
         throw new HttpException(
-          'A user with this Email already exists',
+          'An account with this email already exists.',
           HttpStatus.UNAUTHORIZED,
         );
     }
@@ -90,7 +90,7 @@ export class AuthService {
     );
 
     throw new HttpException(
-      'Account Created Successfully. Please Confirm Your Email to Active Your Account. Check Your Email for Confirmation',
+      'Account Created Successfully. Please Confirm Your Email to Active Your Account. Check Your Email for Confirmation.',
       HttpStatus.OK,
     );
   }
@@ -109,7 +109,7 @@ export class AuthService {
           },
         },
       );
-      throw new HttpException('Account Activated Successfully', HttpStatus.OK);
+      throw new HttpException('Account Activated Successfully.', HttpStatus.OK);
     } else
       throw new HttpException(
         'token expired or invalid',
@@ -140,7 +140,7 @@ export class AuthService {
     const user = await this.profileService.getUser(email.toLowerCase());
     if (!user) {
       throw new NotAcceptableException(
-        'An account with these credentials does not exist, Please create your account first.',
+        'An Account With These Credentials Does Not Exist. Please Create Your Account First.',
       );
     }
     const isValidPassword = await comparePassword(
@@ -158,9 +158,14 @@ export class AuthService {
     const fetchedUser = await this.profileService.getUser(
       user.email.toLowerCase(),
     );
+    if (fetchedUser.status == Constants.DELETED)
+      throw new HttpException(
+        'Account does not exist.You should create an account first.',
+        HttpStatus.NOT_FOUND,
+      );
     if (fetchedUser.accountHolderType != user.accountHolderType) {
       throw new HttpException(
-        'user Account Type Does Not Match',
+        'User Account Type Does Not Match.',
         HttpStatus.UNAUTHORIZED,
       );
     }
@@ -184,7 +189,11 @@ export class AuthService {
   }
   async forgotPassword(email: string): Promise<any> {
     const user = await this.profileService.getUser(email);
-    if (!user) throw new HttpException('user Not Found', HttpStatus.NOT_FOUND);
+    if (!user)
+      throw new HttpException(
+        "Account with this email doesn't exist.",
+        HttpStatus.NOT_FOUND,
+      );
     let token = await this.forgotModel.findOne({ userId: user._id });
     if (!token) {
       token = await new this.forgotModel({
@@ -205,7 +214,7 @@ export class AuthService {
   }
   async verifyPasswordToken(data): Promise<any> {
     const user = await this.profileService.getUser(data.email.toLowerCase());
-    if (!user) throw new HttpException('user Not Found', HttpStatus.NOT_FOUND);
+    if (!user) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
     const res = await this.forgotModel.findOne({
       userId: user._id,
       token: data.token,
@@ -223,7 +232,7 @@ export class AuthService {
 
   async resendPasswordToken(email: string): Promise<any> {
     const user = await this.profileService.getUser(email);
-    if (!user) throw new HttpException('user Not Found', HttpStatus.NOT_FOUND);
+    if (!user) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
     const token = await getRandomNumber(4752, 7856);
     await this.forgotModel.findOneAndUpdate(
       { userId: user._id },
@@ -242,9 +251,9 @@ export class AuthService {
   }
   async resetPassword(data) {
     const user = await this.profileService.getUser(data.email.toLowerCase());
-    if (!user) throw new HttpException('user Not Found', HttpStatus.NOT_FOUND);
+    if (!user) throw new HttpException('user not found.', HttpStatus.NOT_FOUND);
     await this.profileService.resetPassword(user, data.password);
-    throw new HttpException('Password Reset Successfully ', HttpStatus.OK);
+    throw new HttpException('Password Reset Successfully.', HttpStatus.OK);
   }
   // async logout(user: any) {
   //   return await this.userService.logout(user.userId);

@@ -26,13 +26,18 @@ export class ProfilesService {
   constructor(
     @InjectModel(Profile.name)
     private readonly profileModel: Model<ProfileDocument>,
+
     @Inject(forwardRef(() => FollowingService))
     private readonly followeeService: FollowingService,
+
     private readonly followerService: FollowerService,
+
     @Inject(forwardRef(() => SocialPostsService))
     private readonly socialPostService: SocialPostsService,
+
     @Inject(forwardRef(() => RestaurantReviewService))
     private readonly reviewService: RestaurantReviewService,
+
     @Inject(forwardRef(() => RestaurantService))
     private readonly restaurantService: RestaurantService,
   ) {}
@@ -51,7 +56,7 @@ export class ProfilesService {
     if (!profile) throw new NotFoundException(' Profile does not exist');
     if (profile.role == Constants.USER && profile.status == Constants.PENDING)
       throw new HttpException(
-        'Account is still not verified yet',
+        'account is still not verified yet.',
         HttpStatus.UNAUTHORIZED,
       );
 
@@ -265,14 +270,14 @@ export class ProfilesService {
     const user = await this.profileModel
       .findOne({ _id: data.userId })
       .select('password');
-    if (!user) throw new HttpException('use not found', HttpStatus.NOT_FOUND);
+    if (!user) throw new HttpException('user not found.', HttpStatus.NOT_FOUND);
     const isValidPassword = await comparePassword(
       data.oldPassword,
       user.password,
     );
     if (!isValidPassword)
       throw new HttpException(
-        'Old Password is incorrect',
+        'old password is incorrect.',
         HttpStatus.FORBIDDEN,
       );
     const hashedPassword = await hashPassword(data.newPassword);
@@ -283,14 +288,14 @@ export class ProfilesService {
     if (!differentPassword) {
       user.password = hashedPassword;
       await user.save();
-      throw new HttpException('Password Changed Successfully', HttpStatus.OK);
+      throw new HttpException('password changed successfully.', HttpStatus.OK);
     } else
       throw new HttpException(
-        'old password and new password can not be same',
+        'old password and new password can not be same.',
         HttpStatus.FORBIDDEN,
       );
   }
-  /*** temporary route ***/
+  //*** temporary route ***//
   async changeUserStatus(userId): Promise<any> {
     return this.profileModel.findOneAndUpdate(
       { _id: userId },

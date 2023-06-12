@@ -21,7 +21,6 @@ import {
 import { UpdateVoucherDto, VoucherDto } from '../../data/dtos/voucher.dto';
 import { Constants } from '../../common/constants';
 import { JwtAuthGuard } from '../../common/auth/guards/jwt-auth.guard';
-import mongoose from 'mongoose';
 
 @ApiTags('Voucher')
 @Controller('voucher')

@@ -13,7 +13,6 @@ import { Constants } from '../../common/constants';
 import { uniqueCodeUtil } from '../../common/utils/uniqueCode.util';
 import { FcmService } from '../fcm/fcm.service';
 import { TransactionHistoryService } from '../transaction-history/transaction-history.service';
-import { AwsMailUtil } from '../../common/utils/aws-mail-util';
 import {
   FreeVoucherRedeemed,
   FreeVoucherDocument,
@@ -38,9 +37,9 @@ export class VoucherService {
     restaurantId,
     voucherCount,
   ): Promise<any> {
-    const r = await this.restaurantService.getRestaurantProfile(restaurantId);
-    const sum = r.totalVoucherCount + voucherCount;
-    await r.updateOne({ totalVoucherCount: sum });
+    const res = await this.restaurantService.getRestaurantProfile(restaurantId);
+    const sum = res.totalVoucherCount + voucherCount;
+    await res.updateOne({ totalVoucherCount: sum });
   }
   async createStudentVoucher(voucherDto: VoucherDto): Promise<any> {
     const oid = new mongoose.Types.ObjectId(voucherDto.voucherObject._id);
@@ -436,6 +435,7 @@ export class VoucherService {
   }
   async userSavingsStats(userId, parameter): Promise<any> {
     const oid = new mongoose.Types.ObjectId(userId);
+    console.log('user object Id = ', oid);
     let value = null;
     const { WEEK, MONTH, YEAR } = Constants;
     if (parameter == WEEK) value = 7;
@@ -445,6 +445,7 @@ export class VoucherService {
     pipeline.push({
       $match: { userId: oid },
     });
+    console.log('pipline = ', pipeline);
     if (value) {
       pipeline.push({
         $match: {

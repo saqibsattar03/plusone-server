@@ -33,8 +33,6 @@ export class TransactionHistoryController {
     @Query('startDate') startDate,
     @Query('endDate') endDate,
   ) {
-    console.log(startDate);
-    console.log(endDate);
     return this.transactionHistoryService.generateInvoice(
       restaurantId,
       startDate,
