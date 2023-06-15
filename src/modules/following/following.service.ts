@@ -73,7 +73,7 @@ export class FollowingService {
         body: `🎉 Alert! ${userData.firstname} ${userData.surname} Accepted Your Follow Request 👀`,
         profileImage: userData.profileImage,
       };
-      await this.fcmService.sendSingleNotification(notification);
+      await this.fcmService.sendSingleNotification(notification, userId);
     }
     return { isRequested: false };
   }
@@ -185,7 +185,10 @@ export class FollowingService {
           body: `🎉 Alert! ${user1.firstname} ${user1.surname} Requested To Follow You 👀`,
           profileImage: user.profileImage,
         };
-        await this.fcmService.sendSingleNotification(notification);
+        await this.fcmService.sendSingleNotification(
+          notification,
+          data.requestedFrom,
+        );
         return { isRequested: true };
       } else {
         const notification = {
@@ -194,7 +197,10 @@ export class FollowingService {
           body: `🎉 Alert! ${user1.firstname} ${user1.surname} Started To Follow You 👀`,
           profileImage: user.profileImage,
         };
-        await this.fcmService.sendSingleNotification(notification);
+        await this.fcmService.sendSingleNotification(
+          notification,
+          data.requestedFrom,
+        );
         return await this.addFollowee(
           data.requestedFrom,
           data.requestedTo,

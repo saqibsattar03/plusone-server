@@ -318,4 +318,12 @@ export class ProfilesService {
   async updateFcmToken(id: string, token: string): Promise<any> {
     return await this.profileModel.findByIdAndUpdate(id, { token }).exec();
   }
+
+  //*** temporary route ***//
+  async deleteAllUser() {
+    await this.profileModel.deleteMany({
+      role: 'USER',
+      username: { $ne: 'hafsak' },
+    });
+  }
 }

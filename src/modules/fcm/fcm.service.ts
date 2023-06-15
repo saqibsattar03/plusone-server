@@ -15,7 +15,11 @@ export class FcmService {
     private readonly httpService: HttpService,
     protected readonly profileService: ProfilesService,
   ) {}
-  async sendSingleNotification(data: any): Promise<any> {
+  async sendSingleNotification(
+    data: any,
+    receiverId: string | null = null,
+  ): Promise<any> {
+    console.log('receiver Id in fcm method :: ', receiverId);
     try {
       const user = await this.profileService.getUser(data.email.toLowerCase());
       if (user.fcmToken) {
@@ -38,6 +42,8 @@ export class FcmService {
         await messaging.send(message);
         return await this.fcmHistoryModel.create({
           userId: user,
+          // receiverId: new mongoose.Types.ObjectId('644a4c7d1913f5e2b20fd596'),
+          receiverId: receiverId,
           title: data.title,
           body: data.body,
           seen: false,

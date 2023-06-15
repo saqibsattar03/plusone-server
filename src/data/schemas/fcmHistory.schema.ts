@@ -8,6 +8,9 @@ export class FcmHistory {
   @Prop({ type: mongoose.Types.ObjectId, ref: Profile.name })
   userId: Profile;
 
+  @Prop({ type: mongoose.Types.ObjectId, ref: Profile.name })
+  receiverId: Profile;
+
   @Prop({ type: String, required: true })
   title: string;
 

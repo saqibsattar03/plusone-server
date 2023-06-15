@@ -321,6 +321,14 @@ export class VoucherService {
           'voucher.restaurantId',
         ],
       },
+      // {
+      //   $unwind: '$voucher', // Unwind the voucher array
+      // },
+      // {
+      //   $sort: {
+      //     'voucher.createdAt': -1, // Sort based on the createdAt field within the voucher object
+      //   },
+      // },
     ]);
   }
   async getTotalVoucherRedeemedCount(restaurantId): Promise<any> {

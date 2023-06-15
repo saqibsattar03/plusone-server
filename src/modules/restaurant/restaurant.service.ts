@@ -61,6 +61,7 @@ export class RestaurantService {
       .limit(limit);
   }
   async getSingleRestaurantDetails(restaurantId): Promise<any> {
+    console.log('restaurantId :: ', restaurantId);
     const oid = new mongoose.Types.ObjectId(restaurantId);
     const pipeline = [
       {

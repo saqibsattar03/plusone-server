@@ -140,7 +140,7 @@ export class AuthService {
     const user = await this.profileService.getUser(email.toLowerCase());
     if (!user) {
       throw new NotAcceptableException(
-        'An Account With These Credentials Does Not Exist. Please Create Your Account First.',
+        'An account with these credentials does not exist. Please create your account first.',
       );
     }
     const isValidPassword = await comparePassword(
