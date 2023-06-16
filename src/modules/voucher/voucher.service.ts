@@ -13,7 +13,10 @@ import { Constants } from '../../common/constants';
 import { uniqueCodeUtil } from '../../common/utils/uniqueCode.util';
 import { FcmService } from '../fcm/fcm.service';
 import { TransactionHistoryService } from '../transaction-history/transaction-history.service';
-import { AwsMailUtil } from '../../common/utils/aws-mail-util';
+import {
+  FreeVoucherRedeemed,
+  FreeVoucherDocument,
+} from '../../data/schemas/freeVoucherRedeemed.schema';
 
 @Injectable()
 export class VoucherService {
@@ -22,6 +25,9 @@ export class VoucherService {
     private readonly voucherModel: Model<VoucherDocument>,
     @InjectModel(RedeemVoucher.name)
     private readonly redeemVoucherModel: Model<RedeemVoucherDocument>,
+    @InjectModel(FreeVoucherRedeemed.name)
+    private readonly freeVoucherModel: Model<FreeVoucherDocument>,
+
     private readonly restaurantService: RestaurantService,
     private readonly profileService: ProfilesService,
     private readonly fcmService: FcmService,
@@ -31,9 +37,9 @@ export class VoucherService {
     restaurantId,
     voucherCount,
   ): Promise<any> {
-    const r = await this.restaurantService.getRestaurantProfile(restaurantId);
-    const sum = r.totalVoucherCount + voucherCount;
-    await r.updateOne({ totalVoucherCount: sum });
+    const res = await this.restaurantService.getRestaurantProfile(restaurantId);
+    const sum = res.totalVoucherCount + voucherCount;
+    await res.updateOne({ totalVoucherCount: sum });
   }
   async createStudentVoucher(voucherDto: VoucherDto): Promise<any> {
     const oid = new mongoose.Types.ObjectId(voucherDto.voucherObject._id);
@@ -237,98 +243,27 @@ export class VoucherService {
       throw new HttpException(e.toString(), HttpStatus.BAD_REQUEST);
     }
   }
+
   async verifyRestaurantCode(data): Promise<any> {
-    const res = await this.restaurantService.getRestaurantVerificationCode(
-      data.restaurantId,
-      data.restaurantCode,
-    );
-    if (res) {
-      if (res.uniqueCode == data.restaurantCode) {
-        // const verificationCode = await this.fourDigitCode(4);
-        const verificationCode = await uniqueCodeUtil(4);
-        const res = await this.redeemVoucherModel.create({
-          userId: data.userId,
-          voucherId: data.voucherId,
-          restaurantId: data.restaurantId,
-          verificationCode: verificationCode,
-        });
-        const oid = new mongoose.Types.ObjectId(data.voucherId);
-        const rPoints = await this.profileService.getUserFields(data.userId);
-        const voucher = await this.voucherModel.findOne(
-          { 'voucherObject._id': oid },
-          {
-            voucherObject: {
-              $elemMatch: { _id: oid },
-            },
-          },
-        );
-        const restaurantStats =
-          await this.restaurantService.addTotalSalesAndDeductions(
-            voucher.voucherObject[0].estimatedCost,
-            data.restaurantId,
-          );
-
-        const user = await this.profileService.updateProfile(
-          data,
-          rPoints.estimatedSavings +
-            parseInt(voucher.voucherObject[0].estimatedSavings),
-          rPoints.rewardPoints + 1,
-        );
-        const transactionData = {
-          restaurantId: data.restaurantId,
-          transactionType: Constants.DEBIT,
-          voucherType: voucher.voucherObject[0].voucherType,
-          amount: voucher.voucherObject[0].estimatedCost,
-          deductedAmount: voucher.voucherObject[0].estimatedCost * 0.1,
-          availableDeposit: restaurantStats.availableDeposit,
-        };
-        await this.transactionHistoryService.createTransactionHistory(
-          transactionData,
-        );
-
-        if (restaurantStats.availableDeposit < 50) {
-          const restaurantEmail = await this.profileService.getUserFields(
-            restaurantStats.userId,
-          );
-
-          //*** send email for low balance ***//
-          const templateData = {
-            title: 'Low Balance Alert!',
-            merchant: restaurantStats.restaurantName,
-            description:
-              'Low balance, urgently need to deposit funds to cover expenses.',
-            amount_title: 'Current Balance',
-            amount: restaurantStats.availableDeposit,
-          };
-          // todo: send email to recharge //
-          // await new AwsMailUtil().sendEmailWithAttachment();
-          await new AwsMailUtil().sendEmail(
-            restaurantEmail.email,
-            templateData,
-            'RestaurantBalance',
-          );
-        }
-
-        //*** sending voucher redemption notification to user ***//
-
-        // const notification = {
-        //   email: rPoints.email,
-        //   title: 'Score! Your Voucher Has Been Redeemed 🎉🛍️💰',
-        //   body: '🎁 Surprise! Voucher redeemed, and the savings are all yours to enjoy 🎉🛍️💰',
-        // };
-        // await this.fcmService.sendSingleNotification(notification);
-
-        return res.verificationCode;
-      } else
+    // checking if user is redeeming free voucher
+    if (data.isFreeVoucher) {
+      const response = await this.freeVoucherModel.findOne({
+        userId: data.userId,
+        restaurantId: data.restaurantId,
+      });
+      if (response)
         throw new HttpException(
-          'Please Enter Correct Restaurant Code',
-          HttpStatus.NOT_ACCEPTABLE,
+          'You can not redeem more than 1 free voucher at same restaurant',
+          HttpStatus.BAD_REQUEST,
         );
-    } else
-      throw new HttpException(
-        'Please Enter Correct Restaurant Code',
-        HttpStatus.NOT_ACCEPTABLE,
-      );
+      else {
+        return this.redeemVoucher(data);
+      }
+    }
+    // checking user is premium and redeeming premium vouchers
+    else {
+      return this.redeemVoucher(data);
+    }
   }
   async getAllVoucherRedeemedByUser(userId) {
     const oid = new mongoose.Types.ObjectId(userId);
@@ -386,6 +321,14 @@ export class VoucherService {
           'voucher.restaurantId',
         ],
       },
+      // {
+      //   $unwind: '$voucher', // Unwind the voucher array
+      // },
+      // {
+      //   $sort: {
+      //     'voucher.createdAt': -1, // Sort based on the createdAt field within the voucher object
+      //   },
+      // },
     ]);
   }
   async getTotalVoucherRedeemedCount(restaurantId): Promise<any> {
@@ -499,8 +442,8 @@ export class VoucherService {
       ]);
   }
   async userSavingsStats(userId, parameter): Promise<any> {
-    console.log(new Date());
     const oid = new mongoose.Types.ObjectId(userId);
+    console.log('user object Id = ', oid);
     let value = null;
     const { WEEK, MONTH, YEAR } = Constants;
     if (parameter == WEEK) value = 7;
@@ -510,6 +453,7 @@ export class VoucherService {
     pipeline.push({
       $match: { userId: oid },
     });
+    console.log('pipline = ', pipeline);
     if (value) {
       pipeline.push({
         $match: {
@@ -618,5 +562,156 @@ export class VoucherService {
       );
     }
     return this.redeemVoucherModel.aggregate(pipeline);
+  }
+
+  async sendRewardNotification(rPoints) {
+    const notification = {
+      email: rPoints.email,
+      title: "🎉 Congratulations! You've Earned a Free Voucher! 🎁",
+      body: '🎁 Surprise! Enjoy your reward and happy redeeming! 🎉🎁✨',
+    };
+    await this.fcmService.sendSingleNotification(notification);
+  }
+
+  async freeVoucherRedeemed(data, rPoints) {
+    await this.freeVoucherModel.create({
+      restaurantId: data.restaurantId,
+      userId: data.userId,
+    });
+    await this.profileService.updateProfile(
+      data,
+      null,
+      null,
+      rPoints.freeVoucherCount - 1,
+    );
+    return;
+  }
+
+  async redeemVoucher(data) {
+    const count = 0;
+    const res = await this.restaurantService.getRestaurantVerificationCode(
+      data.restaurantId,
+      data.restaurantCode,
+    );
+    if (res) {
+      if (res.uniqueCode == data.restaurantCode) {
+        const verificationCode = await uniqueCodeUtil(4);
+        const res = await this.redeemVoucherModel.create({
+          userId: data.userId,
+          voucherId: data.voucherId,
+          restaurantId: data.restaurantId,
+          verificationCode: verificationCode,
+        });
+        const oid = new mongoose.Types.ObjectId(data.voucherId);
+        const rPoints = await this.profileService.getUserFields(data.userId);
+        const voucher = await this.voucherModel.findOne(
+          { 'voucherObject._id': oid },
+          {
+            voucherObject: {
+              $elemMatch: { _id: oid },
+            },
+          },
+        );
+
+        // getting restaurant stats
+        const restaurantStats =
+          await this.restaurantService.addTotalSalesAndDeductions(
+            voucher.voucherObject[0].estimatedCost,
+            data.restaurantId,
+          );
+
+        // update user data
+        const user = await this.profileService.updateProfile(
+          data,
+          rPoints.estimatedSavings +
+            parseInt(voucher.voucherObject[0].estimatedSavings),
+          rPoints.rewardPoints + 1,
+          rPoints.freeVoucherCount + count,
+        );
+
+        // calculating and awarding free voucher on reward points count 10
+        if (user.rewardPoints >= 10) {
+          const remainder = user.rewardPoints % 10;
+          const count = Math.floor(user.rewardPoints / 10);
+          const newEstimatedSavings =
+            rPoints.estimatedSavings +
+            parseInt(voucher.voucherObject[0].estimatedSavings);
+          const newFreeVoucherCount =
+            rPoints.freeVoucherCount + count + (remainder === 0 ? 0 : 1);
+
+          await this.profileService.updateProfile(
+            data,
+            newEstimatedSavings,
+            remainder,
+            newFreeVoucherCount,
+          );
+          await this.sendRewardNotification(rPoints);
+
+          console.log(remainder === 0 ? 'in if' : 'in else');
+        }
+
+        // calculating data to create transaction history
+        const transactionData = {
+          restaurantId: data.restaurantId,
+          transactionType: Constants.DEBIT,
+          voucherType: voucher.voucherObject[0].voucherType,
+          amount: voucher.voucherObject[0].estimatedCost,
+          deductedAmount: voucher.voucherObject[0].estimatedCost * 0.1,
+          availableDeposit: restaurantStats.availableDeposit,
+        };
+        await this.transactionHistoryService.createTransactionHistory(
+          transactionData,
+        );
+
+        // restaurant low balance check //
+
+        // if (restaurantStats.availableDeposit < 50) {
+        //   const restaurantEmail = await this.profileService.getUserFields(
+        //     restaurantStats.userId,
+        //   );
+        //
+        //   //*** send email for low balance ***//
+        //   const templateData = {
+        //     title: 'Low Balance Alert!',
+        //     merchant: restaurantStats.restaurantName,
+        //     description:
+        //       'Low balance, urgently need to deposit funds to cover expenses.',
+        //     amount_title: 'Current Balance',
+        //     amount: restaurantStats.availableDeposit,
+        //   };
+        //   // todo: send email to recharge //
+        //   // await new AwsMailUtil().sendEmailWithAttachment();
+        //   await new AwsMailUtil().sendEmail(
+        //     restaurantEmail.email,
+        //     templateData,
+        //     'RestaurantBalance',
+        //   );
+        // }
+
+        //*** sending voucher redemption notification to user ***//
+
+        // const notification = {
+        //   email: rPoints.email,
+        //   title: 'Score! Your Voucher Has Been Redeemed 🎉🛍️💰',
+        //   body: '🎁 Surprise! Voucher redeemed, and the savings are all yours to enjoy 🎉🛍️💰',
+        // };
+        // await this.fcmService.sendSingleNotification(notification);
+
+        if (data.isFreeVoucher) {
+          //todo:: add logic here
+          await this.freeVoucherRedeemed(data, rPoints);
+        }
+
+        return res.verificationCode;
+      } else
+        throw new HttpException(
+          'Please Enter Correct Restaurant Code',
+          HttpStatus.NOT_ACCEPTABLE,
+        );
+    } else
+      throw new HttpException(
+        'Please Enter Correct Restaurant Code',
+        HttpStatus.NOT_ACCEPTABLE,
+      );
   }
 }

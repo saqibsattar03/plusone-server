@@ -44,7 +44,9 @@ export class RestaurantReviewService {
         $push: {
           reviewObject: {
             _id: restaurantReviewDto.reviewObject._id,
-            userId: restaurantReviewDto.reviewObject.userId,
+            userId: new mongoose.Types.ObjectId(
+              restaurantReviewDto.reviewObject.userId,
+            ),
             voucherId: restaurantReviewDto.reviewObject.voucherId,
             reviewText: restaurantReviewDto.reviewObject.reviewText,
             rating: restaurantReviewDto.reviewObject.rating,
@@ -65,7 +67,9 @@ export class RestaurantReviewService {
         $push: {
           reviewObject: {
             _id: restaurantReviewDto.reviewObject._id,
-            userId: restaurantReviewDto.reviewObject.userId,
+            userId: new mongoose.Types.ObjectId(
+              restaurantReviewDto.reviewObject.userId,
+            ),
             voucherId: restaurantReviewDto.reviewObject.voucherId,
             reviewText: restaurantReviewDto.reviewObject.reviewText,
             rating: restaurantReviewDto.reviewObject.rating,

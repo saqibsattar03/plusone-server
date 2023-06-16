@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ProfilesService } from '../profiles/profiles.service';
+import { Constants } from '../../common/constants';
 
 @Injectable()
 export class SubscriptionService {
@@ -19,7 +20,7 @@ export class SubscriptionService {
 
         break;
       }
-      case 'INITIAL_PURCHASE': {
+      case Constants.INITIAL_PURCHASE: {
         await this.updateSubscription(
           data.event.app_user_id,
           data.event.product_id,
@@ -31,7 +32,7 @@ export class SubscriptionService {
         break;
       }
 
-      case 'RENEWAL': {
+      case Constants.RENEWAL: {
         await this.updateSubscription(
           data.event.app_user_id,
           data.event.product_id,
@@ -43,7 +44,7 @@ export class SubscriptionService {
         break;
       }
 
-      case 'EXPIRATION': {
+      case Constants.EXPIRATION: {
         await this.updateSubscription(
           data.event.app_user_id,
           data.event.product_id,
@@ -55,7 +56,7 @@ export class SubscriptionService {
         break;
       }
 
-      case 'TRANSFER': {
+      case Constants.TRANSFER: {
         const user1 = await this.profileService.getUserFields(
           data.event.transferred_from,
         );
@@ -102,7 +103,7 @@ export class SubscriptionService {
       await this.profileService.updateProfile(data);
       return true;
     } catch (e) {
-      throw new HttpException('subscription failed', HttpStatus.BAD_REQUEST);
+      throw new HttpException('subscription failed.', HttpStatus.BAD_REQUEST);
     }
   }
 }

@@ -26,13 +26,18 @@ export class ProfilesService {
   constructor(
     @InjectModel(Profile.name)
     private readonly profileModel: Model<ProfileDocument>,
+
     @Inject(forwardRef(() => FollowingService))
     private readonly followeeService: FollowingService,
+
     private readonly followerService: FollowerService,
+
     @Inject(forwardRef(() => SocialPostsService))
     private readonly socialPostService: SocialPostsService,
+
     @Inject(forwardRef(() => RestaurantReviewService))
     private readonly reviewService: RestaurantReviewService,
+
     @Inject(forwardRef(() => RestaurantService))
     private readonly restaurantService: RestaurantService,
   ) {}
@@ -40,10 +45,10 @@ export class ProfilesService {
     data,
     estimatedSavings = null,
     rewardPoints = null,
+    freeVoucherCount = null,
   ): Promise<any> {
-    console.log('data = ', data);
     //*** uncomment it when integrating real subscription ***//
-    // const userEarnings = await this.getUserEarnings(data.userId);
+    const userFields = await this.getUserFields(data.userId);
 
     const profile = await this.profileModel.findOne({
       $or: [{ _id: data.userId }, { email: data.email }],
@@ -51,7 +56,7 @@ export class ProfilesService {
     if (!profile) throw new NotFoundException(' Profile does not exist');
     if (profile.role == Constants.USER && profile.status == Constants.PENDING)
       throw new HttpException(
-        'Account is still not verified yet',
+        'account is still not verified yet.',
         HttpStatus.UNAUTHORIZED,
       );
 
@@ -71,12 +76,11 @@ export class ProfilesService {
           dietRequirements: data.dietRequirements,
           scopes: data.scopes,
 
-          //*** uncomment these when integrating real subscription ***//
+          //todo:: uncomment these when integrating real subscription
 
-          // rewardPoints: rewardPoints ?? userEarnings.rewardPoints,
-          rewardPoints: rewardPoints,
-          // estimatedSavings: estimatedSavings ?? userEarnings.estimatedSavings,
-          estimatedSavings: estimatedSavings,
+          rewardPoints: rewardPoints ?? userFields.rewardPoints,
+          freeVoucherCount: freeVoucherCount ?? userFields.freeVoucherCount,
+          estimatedSavings: estimatedSavings ?? userFields.estimatedSavings,
           isSkip: data.isSkip,
           accountType: data.accountType,
           postAudiencePreference: data.postAudiencePreference,
@@ -102,7 +106,7 @@ export class ProfilesService {
         $or: [{ _id: userId }, { email: userId }],
       })
       .select(
-        'rewardPoints estimatedSavings email firstname surname profileImage productId purchasedAt expirationAt isPremium accountType accountHolderType',
+        'rewardPoints estimatedSavings email firstname surname profileImage productId purchasedAt expirationAt isPremium freeVoucherCount accountType accountHolderType',
       );
   }
   async getSingleProfile(userId): Promise<any> {
@@ -167,6 +171,7 @@ export class ProfilesService {
           favoriteRestaurants: 1,
           favoriteCuisines: 1,
           favoriteChefs: 1,
+          freeVoucherCount: 1,
           rewardPoints: 1,
           isPremium: 1,
           accountHolderType: 1,
@@ -265,14 +270,14 @@ export class ProfilesService {
     const user = await this.profileModel
       .findOne({ _id: data.userId })
       .select('password');
-    if (!user) throw new HttpException('use not found', HttpStatus.NOT_FOUND);
+    if (!user) throw new HttpException('user not found.', HttpStatus.NOT_FOUND);
     const isValidPassword = await comparePassword(
       data.oldPassword,
       user.password,
     );
     if (!isValidPassword)
       throw new HttpException(
-        'Old Password is incorrect',
+        'old password is incorrect.',
         HttpStatus.FORBIDDEN,
       );
     const hashedPassword = await hashPassword(data.newPassword);
@@ -283,14 +288,14 @@ export class ProfilesService {
     if (!differentPassword) {
       user.password = hashedPassword;
       await user.save();
-      throw new HttpException('Password Changed Successfully', HttpStatus.OK);
+      throw new HttpException('password changed successfully.', HttpStatus.OK);
     } else
       throw new HttpException(
-        'old password and new password can not be same',
+        'old password and new password can not be same.',
         HttpStatus.FORBIDDEN,
       );
   }
-  /*** temporary route ***/
+  //*** temporary route ***//
   async changeUserStatus(userId): Promise<any> {
     return this.profileModel.findOneAndUpdate(
       { _id: userId },
@@ -312,5 +317,13 @@ export class ProfilesService {
   }
   async updateFcmToken(id: string, token: string): Promise<any> {
     return await this.profileModel.findByIdAndUpdate(id, { token }).exec();
+  }
+
+  //*** temporary route ***//
+  async deleteAllUser() {
+    await this.profileModel.deleteMany({
+      role: 'USER',
+      username: { $ne: 'hafsak' },
+    });
   }
 }

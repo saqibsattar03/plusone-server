@@ -15,10 +15,17 @@ export class FcmService {
     private readonly httpService: HttpService,
     protected readonly profileService: ProfilesService,
   ) {}
-  async sendSingleNotification(data: any): Promise<any> {
+  async sendSingleNotification(
+    data: any,
+    receiverId: string | null = null,
+  ): Promise<any> {
+    console.log('receiver Id in fcm method :: ', receiverId);
+    console.log('data in fcm method :: ', data);
     try {
       const user = await this.profileService.getUser(data.email.toLowerCase());
+      console.log('user in fcm method :: ', user);
       if (user.fcmToken) {
+        console.log('fcm token found ::');
         const message = {
           notification: {
             title: data.title,
@@ -38,6 +45,8 @@ export class FcmService {
         await messaging.send(message);
         return await this.fcmHistoryModel.create({
           userId: user,
+          // receiverId: new mongoose.Types.ObjectId('644a4c7d1913f5e2b20fd596'),
+          receiverId: new mongoose.Types.ObjectId(receiverId),
           title: data.title,
           body: data.body,
           seen: false,
@@ -45,7 +54,7 @@ export class FcmService {
         });
       }
     } catch (e) {
-      throw new HttpException(e.toString(), HttpStatus.BAD_REQUEST);
+      // throw new HttpException(e.toString(), HttpStatus.BAD_REQUEST);
     }
   }
 

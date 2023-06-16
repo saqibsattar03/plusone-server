@@ -7,6 +7,9 @@ export class FcmDto {
   @ApiProperty()
   userId: string;
 
+  // @ApiProperty()
+  // userId: string;
+
   @ApiProperty()
   title: string;
 

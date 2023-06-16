@@ -33,8 +33,11 @@ export class CommentsService {
       commentDto.commentObject.userId,
     );
     let c;
-    const res = await this.commentModel.findOne({ postId: commentDto.postId });
+    const res = await this.commentModel.findOne({
+      postId: new mongoose.Types.ObjectId(commentDto.postId),
+    });
     if (!res) {
+      console.log('in if condition');
       const r = await this.commentModel.create({ postId: commentDto.postId });
       await r.updateOne({
         $push: {
@@ -50,6 +53,7 @@ export class CommentsService {
       c = c.commentCount + 1;
       await this.socialPostService.updateCommentCount(commentDto.postId, c);
     } else if (res) {
+      console.log('res in else if = ', res);
       await res.updateOne({
         $push: {
           commentObject: {
@@ -80,7 +84,10 @@ export class CommentsService {
         profileImage: userData.profileImage,
       };
       // //*** sending comment notification ***/
-      await this.fcmService.sendSingleNotification(notification);
+      await this.fcmService.sendSingleNotification(
+        notification,
+        commentDto.commentObject.userId,
+      );
     }
 
     throw new HttpException('comment posted successfully ', HttpStatus.OK);

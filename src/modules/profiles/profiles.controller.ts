@@ -129,4 +129,9 @@ export class ProfilesController {
   filterUserByName(@Query('username') username, @Query('userType') userType) {
     return this.profileService.filterUserByName(username, userType);
   }
+  @Delete('delete-all')
+  delete() {
+    console.log('here');
+    return this.profileService.deleteAllUser();
+  }
 }
