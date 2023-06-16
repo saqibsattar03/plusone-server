@@ -84,7 +84,10 @@ export class CommentsService {
         profileImage: userData.profileImage,
       };
       // //*** sending comment notification ***/
-      await this.fcmService.sendSingleNotification(notification);
+      await this.fcmService.sendSingleNotification(
+        notification,
+        commentDto.commentObject.userId,
+      );
     }
 
     throw new HttpException('comment posted successfully ', HttpStatus.OK);

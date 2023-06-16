@@ -249,8 +249,9 @@ export class SocialPostsService {
       profileImage: userData.profileImage,
     };
     //*** like post notification ***//
-    if (postedUser._id.toString() != userData._id.toString())
-      await this.fcmService.sendSingleNotification(notification);
+    if (postedUser._id.toString() != userData._id.toString()) {
+      await this.fcmService.sendSingleNotification(notification, userId);
+    }
     throw new HttpException('post liked successfully', HttpStatus.OK);
   }
 

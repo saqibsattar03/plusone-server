@@ -38,45 +38,7 @@ export class FollowingService {
     @Inject(forwardRef(() => ProfilesService))
     protected readonly profileService: ProfilesService,
   ) {}
-  async addFollowee(userId, followeeId, isPrivate = false): Promise<any> {
-    const res = await this.followingModel.findOne({ userId: userId });
-    if (!res) {
-      const user = await this.followingModel.create({ userId: userId });
-      await user.updateOne({ $push: { followings: followeeId } });
-      await this.followRequestModel.findOneAndDelete({
-        requestedFrom: new mongoose.Types.ObjectId(userId),
-        requestedTo: new mongoose.Types.ObjectId(followeeId),
-      });
-      await this.followerService.addFollower(followeeId, userId);
-    } else if (res) {
-      if (!res.followings.includes(followeeId)) {
-        await this.followingModel.updateOne(
-          { userId: userId },
-          {
-            $push: { followings: followeeId },
-          },
-        );
-        await this.followerService.addFollower(followeeId, userId);
-        await this.followRequestModel.findOneAndDelete({
-          requestedFrom: new mongoose.Types.ObjectId(userId),
-          requestedTo: new mongoose.Types.ObjectId(followeeId),
-        });
-      }
-    }
-    //*** sending follow added notification ***//
-    if (isPrivate) {
-      const id = await this.profileService.getUserFields(userId);
-      const userData = await this.profileService.getUserFields(followeeId);
-      const notification = {
-        email: id.email,
-        title: 'New Follow Request! 👋',
-        body: `🎉 Alert! ${userData.firstname} ${userData.surname} Accepted Your Follow Request 👀`,
-        profileImage: userData.profileImage,
-      };
-      await this.fcmService.sendSingleNotification(notification, userId);
-    }
-    return { isRequested: false };
-  }
+
   async SingleUserFollowCheck(currentUser, searchedUser): Promise<any> {
     console.log('currentUser = ', currentUser);
     console.log('searchedUser = ', searchedUser);
@@ -169,6 +131,47 @@ export class FollowingService {
       },
     ]);
   }
+
+  //*** add following routes below ***//
+  async addFollowee(userId, followeeId, isPrivate = false): Promise<any> {
+    const res = await this.followingModel.findOne({ userId: userId });
+    if (!res) {
+      const user = await this.followingModel.create({ userId: userId });
+      await user.updateOne({ $push: { followings: followeeId } });
+      await this.followRequestModel.findOneAndDelete({
+        requestedFrom: new mongoose.Types.ObjectId(userId),
+        requestedTo: new mongoose.Types.ObjectId(followeeId),
+      });
+      await this.followerService.addFollower(followeeId, userId);
+    } else if (res) {
+      if (!res.followings.includes(followeeId)) {
+        await this.followingModel.updateOne(
+          { userId: userId },
+          {
+            $push: { followings: followeeId },
+          },
+        );
+        await this.followerService.addFollower(followeeId, userId);
+        await this.followRequestModel.findOneAndDelete({
+          requestedFrom: new mongoose.Types.ObjectId(userId),
+          requestedTo: new mongoose.Types.ObjectId(followeeId),
+        });
+      }
+    }
+    //*** sending follow request accepted notification ***//
+    if (isPrivate) {
+      const id = await this.profileService.getUserFields(userId);
+      const userData = await this.profileService.getUserFields(followeeId);
+      const notification = {
+        email: id.email,
+        title: 'New Follow Request! 👋',
+        body: `🎉 Alert! ${userData.firstname} ${userData.surname} Accepted Your Follow Request 👀`,
+        profileImage: userData.profileImage,
+      };
+      await this.fcmService.sendSingleNotification(notification, userId);
+    }
+    return { isRequested: false };
+  }
   async followRequest(data) {
     const user = await this.profileService.getUserFields(data.requestedTo);
     const user1 = await this.profileService.getUserFields(data.requestedFrom);
@@ -178,12 +181,13 @@ export class FollowingService {
     });
     if (!res) {
       if (user.accountType == Constants.PRIVATE) {
+        console.log('here in private account type ::');
         await this.followRequestModel.create(data);
         const notification = {
           email: user.email,
           title: 'New Follow Request! 👋',
           body: `🎉 Alert! ${user1.firstname} ${user1.surname} Requested To Follow You 👀`,
-          profileImage: user.profileImage,
+          profileImage: user1.profileImage,
         };
         await this.fcmService.sendSingleNotification(
           notification,
@@ -195,12 +199,13 @@ export class FollowingService {
           email: user.email,
           title: 'New Follow Request! 👋',
           body: `🎉 Alert! ${user1.firstname} ${user1.surname} Started To Follow You 👀`,
-          profileImage: user.profileImage,
+          profileImage: user1.profileImage,
         };
         await this.fcmService.sendSingleNotification(
           notification,
           data.requestedFrom,
         );
+        //*** calling addFollowee method to complete the request ***//
         return await this.addFollowee(
           data.requestedFrom,
           data.requestedTo,
