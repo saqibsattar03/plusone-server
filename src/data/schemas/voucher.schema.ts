@@ -59,5 +59,8 @@ export class VoucherStructure {
     type: () => [Date],
   })
   voucherDisableDates: [Date];
+
+  // @Prop({ default: Date.now })
+  // createdAt: Date;
 }
 export const VoucherSchema = SchemaFactory.createForClass(Voucher);
