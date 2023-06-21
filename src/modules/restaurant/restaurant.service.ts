@@ -41,6 +41,15 @@ export class RestaurantService {
 
     return await this.restaurantModel.create(restaurantDto);
   }
+
+  async getAllActiveRestaurants(paginationDto: PaginationDto): Promise<any> {
+    const { limit, offset } = paginationDto;
+    return this.restaurantModel
+      .find({ status: Constants.ACTIVE })
+      .select('restaurantName')
+      .skip(offset)
+      .limit(limit);
+  }
   async getAllUsers(role: string): Promise<any> {
     return this.restaurantModel.find().populate({
       path: 'userId',

@@ -36,6 +36,23 @@ export class RestaurantController {
     return this.restaurantService.createRestaurant(data);
   }
 
+  @Get('all-active')
+  @ApiCreatedResponse({
+    schema: {
+      type: 'object',
+      properties: {
+        _id: { type: 'string' },
+        restaurantName: { type: 'string' },
+      },
+    },
+  })
+  @ApiQuery({ name: 'limit', type: 'number' })
+  @ApiQuery({ name: 'offset', type: 'number' })
+  @ApiBadRequestResponse({ description: 'can not get Restaurants' })
+  getAllActiveRestaurants(@Query() paginationQuery: PaginationDto) {
+    return this.restaurantService.getAllActiveRestaurants(paginationQuery);
+  }
+
   @Get('all-tags')
   @ApiCreatedResponse({
     schema: {
