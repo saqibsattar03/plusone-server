@@ -35,7 +35,15 @@ export class UserStampCardService {
           userStampCardDto.restaurantId,
         ),
       });
-      return this.userStampCardModel.create(userStampCardDto);
+      return this.userStampCardModel.create({
+        cardId: new mongoose.Types.ObjectId(userStampCardDto.cardId),
+        userId: new mongoose.Types.ObjectId(userStampCardDto.userId),
+        restaurantId: new mongoose.Types.ObjectId(
+          userStampCardDto.restaurantId,
+        ),
+        redeemedPoints: userStampCardDto.redeemedPoints,
+        startDate: userStampCardDto.startDate,
+      });
     } else {
       await this.stampCardHistoryModel.create({
         cardId: new mongoose.Types.ObjectId(userStampCardDto.cardId),
