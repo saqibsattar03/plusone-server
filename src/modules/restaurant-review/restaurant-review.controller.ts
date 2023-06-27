@@ -7,6 +7,7 @@ import {
   Query,
   UseGuards,
   Request,
+  Param,
 } from '@nestjs/common';
 import { RestaurantReviewService } from './restaurant-review.service';
 import {
@@ -89,11 +90,12 @@ export class RestaurantReviewController {
   @ApiBadRequestResponse({
     description: 'can not fetch all review',
   })
-  @Get('all')
+  @Get('all/:restaurantId')
   getRestaurantReviews(
-    @Query('restaurantId') restaurantId,
+    @Param('restaurantId') restaurantId,
     @Query() paginationDto: PaginationDto,
   ) {
+    console.log(restaurantId);
     return this.restaurantReviewService.getRestaurantReviews(
       restaurantId,
       paginationDto,

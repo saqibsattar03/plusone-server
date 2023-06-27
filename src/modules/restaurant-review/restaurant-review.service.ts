@@ -158,6 +158,7 @@ export class RestaurantReviewService {
       .skip(offset)
       .limit(limit);
   }
+
   async deleteAllReviewsOfUser(userId): Promise<any> {
     await this.restaurantReviewModel.updateMany(
       { active: true },
