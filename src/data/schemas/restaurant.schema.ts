@@ -43,6 +43,7 @@ export class Restaurant {
 
   @Prop({ index: true })
   tags: [string];
+
   @Prop({ index: true })
   dietaryRestrictions: [string];
 
@@ -55,6 +56,13 @@ export class Restaurant {
     index: { unique: true },
   })
   uniqueCode: number;
+
+  @Prop({
+    type: Number,
+    required: true,
+    index: { unique: true },
+  })
+  stampCardUniqueCode: number;
 
   @Prop({ type: Number, default: null })
   verificationCode: number;
@@ -71,6 +79,7 @@ export class Restaurant {
 
   @Prop({ type: Number, default: 0 })
   reviewCount: number;
+
   @Prop({ type: Number, default: 0 })
   totalVoucherCount: number;
 

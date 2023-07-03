@@ -41,6 +41,15 @@ export class RestaurantService {
 
     return await this.restaurantModel.create(restaurantDto);
   }
+
+  async getAllActiveRestaurants(paginationDto: PaginationDto): Promise<any> {
+    const { limit, offset } = paginationDto;
+    return this.restaurantModel
+      .find({ status: Constants.ACTIVE })
+      .select('restaurantName')
+      .skip(offset)
+      .limit(limit);
+  }
   async getAllUsers(role: string): Promise<any> {
     return this.restaurantModel.find().populate({
       path: 'userId',
@@ -60,8 +69,7 @@ export class RestaurantService {
       .skip(offset)
       .limit(limit);
   }
-  async getSingleRestaurantDetails(restaurantId): Promise<any> {
-    console.log('restaurantId :: ', restaurantId);
+  async getSingleRestaurantDetails(restaurantId, userId): Promise<any> {
     const oid = new mongoose.Types.ObjectId(restaurantId);
     const pipeline = [
       {
@@ -97,8 +105,23 @@ export class RestaurantService {
       {
         $lookup: {
           from: 'redeemvouchers',
-          localField: '_id',
-          foreignField: 'restaurantId',
+          let: { restaurantId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$restaurantId', '$$restaurantId'] },
+              },
+            },
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$userId', new mongoose.Types.ObjectId(userId)],
+                },
+              },
+            },
+          ],
+          // localField: '_id',
+          // foreignField: 'restaurantId',
           as: 'redeemedVoucher',
         },
       },
@@ -452,7 +475,7 @@ export class RestaurantService {
   }
   /*** accounts module routes below ***/
 
-  /*** according to ChatGPT below query is more optimized then mongoose ***/
+  //*** according to ChatGPT below aggregation query is more optimized then mongoose ***//
   async adminStats(): Promise<any> {
     return this.restaurantModel.aggregate([
       {

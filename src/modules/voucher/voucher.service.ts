@@ -349,6 +349,7 @@ export class VoucherService {
           estimatedSavings: voucherDto.voucherObject.estimatedSavings,
           estimatedCost: voucherDto.voucherObject.estimatedCost,
           voucherDisableDates: [],
+          // createdAt: new Date(),
         },
       },
     };

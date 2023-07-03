@@ -24,6 +24,8 @@ import { SubscriptionModule } from './modules/subscription/subscription.module';
 import { AwsSdkModule } from 'nest-aws-sdk';
 import { MailModule } from './modules/mail/mail.module';
 import * as process from 'process';
+import { StampCardModule } from './modules/restaurant-stamp-card/stamp-card.module';
+import { UserStampCardModule } from './modules/user-stamp-card/user-stamp-card.module';
 
 @Module({
   imports: [
@@ -52,6 +54,8 @@ import * as process from 'process';
     TransactionHistoryModule,
     SubscriptionModule,
     MailModule,
+    StampCardModule,
+    UserStampCardModule,
   ],
   controllers: [AppController],
   providers: [AppService],

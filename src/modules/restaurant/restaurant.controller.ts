@@ -1,4 +1,4 @@
-import { Controller, Patch, Query } from '@nestjs/common';
+import { Controller, Patch, Query, UseGuards, Request } from '@nestjs/common';
 import { RestaurantService } from './restaurant.service';
 import { Body, Get, Post } from '@nestjs/common/decorators';
 import {
@@ -15,6 +15,7 @@ import {
 } from '../../data/dtos/restaurant.dto';
 import { ProfileDto } from '../../data/dtos/profile.dto';
 import { PaginationDto } from '../../common/auth/dto/pagination.dto';
+import { JwtAuthGuard } from '../../common/auth/guards/jwt-auth.guard';
 
 @ApiTags('Restaurants')
 @Controller('restaurant')
@@ -33,6 +34,23 @@ export class RestaurantController {
   @ApiBadRequestResponse({ description: 'can not create Restaurant' })
   createRestaurant(@Body() data) {
     return this.restaurantService.createRestaurant(data);
+  }
+
+  @Get('all-active')
+  @ApiCreatedResponse({
+    schema: {
+      type: 'object',
+      properties: {
+        _id: { type: 'string' },
+        restaurantName: { type: 'string' },
+      },
+    },
+  })
+  @ApiQuery({ name: 'limit', type: 'number' })
+  @ApiQuery({ name: 'offset', type: 'number' })
+  @ApiBadRequestResponse({ description: 'can not get Restaurants' })
+  getAllActiveRestaurants(@Query() paginationQuery: PaginationDto) {
+    return this.restaurantService.getAllActiveRestaurants(paginationQuery);
   }
 
   @Get('all-tags')
@@ -68,8 +86,16 @@ export class RestaurantController {
   })
   @ApiQuery({ name: 'restaurantId', type: 'string' })
   @ApiBadRequestResponse({ description: 'can not get Restaurant' })
-  getSingleRestaurantDetails(@Query('restaurantId') restaurantId) {
-    return this.restaurantService.getSingleRestaurantDetails(restaurantId);
+  @UseGuards(JwtAuthGuard)
+  getSingleRestaurantDetails(
+    @Query('restaurantId') restaurantId,
+    @Request() request,
+  ) {
+    const userId = request.user.userId;
+    return this.restaurantService.getSingleRestaurantDetails(
+      restaurantId,
+      userId,
+    );
   }
 
   @Get('profile')
