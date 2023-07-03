@@ -52,7 +52,7 @@ export const multerConfig: MulterOptions = {
       }
       cb(null, true);
     } else if (file.mimetype.match(/\/(pdf)$/)) {
-      if (fileSize > 6 * 1024 * 1024) {
+      if (fileSize > 60 * 1024 * 1024) {
         cb(
           new HttpException(
             'file size is too large',
