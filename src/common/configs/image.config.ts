@@ -31,7 +31,7 @@ export const multerConfig: MulterOptions = {
   fileFilter: (req: any, file: any, cb: any) => {
     const fileSize = parseInt(req.headers['content-length']);
     if (file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
-      if (fileSize > 30 * 1024 * 1024) {
+      if (fileSize > 60 * 1024 * 1024) {
         cb(
           new HttpException(
             'Image size is too large',
@@ -52,7 +52,7 @@ export const multerConfig: MulterOptions = {
       }
       cb(null, true);
     } else if (file.mimetype.match(/\/(pdf)$/)) {
-      if (fileSize > 30 * 1024 * 1024) {
+      if (fileSize > 6 * 1024 * 1024) {
         cb(
           new HttpException(
             'file size is too large',
