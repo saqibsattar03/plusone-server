@@ -21,7 +21,10 @@ export class PdfReportUtil {
     doc.on('end', async () => {
       const pdfBuffer = Buffer.concat(chunks);
       const pdfContent = pdfBuffer.toString('base64');
-      await new AwsMailUtil().sendEmailWithAttachment(pdfContent);
+      await new AwsMailUtil().sendEmailWithAttachment(
+        pdfContent,
+        invoice[0].restaurantId.userId.email,
+      );
     });
 
     doc.on('error', (error) => {

@@ -64,12 +64,12 @@ export class AwsMailUtil {
     }
   }
 
-  public async sendEmailWithAttachment(file: any) {
+  public async sendEmailWithAttachment(file: any, email: string) {
     // const fileContent = fs.readFileSync(join(process.cwd(), 'invoice.pdf')); // Replace with the actual file path of the PDF );
     // const base64Data = fileContent.toString('base64');
     const params = {
       RawMessage: {
-        Data: `From: rkhabeer84@gmail.com
+        Data: `From: ${process.env.SENDER_EMAIL}
 To: saqibsattar710@gmail.com
 Subject: Financial Report
 MIME-Version: 1.0

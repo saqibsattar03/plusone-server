@@ -54,7 +54,9 @@ export class TransactionHistoryService {
         path: 'restaurantId',
         select:
           'restaurantName phoneNumber locationName availableDeposit totalDeposit totalDeductions createdAt',
+        populate: { path: 'userId', select: 'email' }, // Use `populate` inside the `populate` method
       });
+    // .populate({ path: 'userId', select: 'email' });
     if (!res.length)
       throw new HttpException(
         'No Data Between Chosen Dates Found',
