@@ -24,7 +24,7 @@ export class UserStampCardService {
   async createStampCard(
     userStampCardDto: UserStampCardDto,
   ): Promise<UserStampCardDocument> {
-    const { userId, cardId, restaurantId, redeemedPoints } = userStampCardDto;
+    const { userId, cardId, restaurantId } = userStampCardDto;
     const userIdObj = new mongoose.Types.ObjectId(userId);
     const cardIdObj = new mongoose.Types.ObjectId(cardId);
     const restaurantIdObj = new mongoose.Types.ObjectId(restaurantId);
@@ -33,7 +33,7 @@ export class UserStampCardService {
       cardId: cardIdObj,
     });
 
-    //*** stampcard history ***//
+    //*** stamp card history ***//
 
     await this.stampCardHistoryModel.create({
       cardId: cardIdObj,
