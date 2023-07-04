@@ -16,6 +16,9 @@ export class UserStampCard {
   @Prop({ type: mongoose.Types.ObjectId, ref: Restaurant.name })
   restaurantId: Restaurant;
 
+  @Prop({ type: String, enum: ['ACTIVE', 'DISABLED'], default: 'ACTIVE' })
+  status: string;
+
   @Prop({ type: Number })
   redeemedPoints: number;
 

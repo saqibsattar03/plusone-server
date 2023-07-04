@@ -5,7 +5,7 @@ import { Profile } from './profile.schema';
 import { Restaurant } from './restaurant.schema';
 
 export type StampCardHistoryDocument = HydratedDocument<StampCardHistory>;
-@Schema()
+@Schema({ timestamps: true })
 export class StampCardHistory {
   @Prop({ type: mongoose.Types.ObjectId, ref: StampCard.name })
   cardId: StampCard;

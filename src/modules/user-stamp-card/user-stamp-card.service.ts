@@ -10,6 +10,7 @@ import {
   StampCardHistory,
   StampCardHistoryDocument,
 } from '../../data/schemas/stamp-card-history.schema';
+import { PaginationDto } from '../../common/auth/dto/pagination.dto';
 
 @Injectable()
 export class UserStampCardService {
@@ -24,10 +25,15 @@ export class UserStampCardService {
     userStampCardDto: UserStampCardDto,
   ): Promise<UserStampCardDocument> {
     const res = await this.userStampCardModel.findOne({
-      userId: userStampCardDto.userId,
-      cardId: userStampCardDto.cardId,
+      userId: new mongoose.Types.ObjectId(userStampCardDto.userId),
+      cardId: new mongoose.Types.ObjectId(userStampCardDto.cardId),
     });
+
+    console.log('user stamp card :: ', res);
+
     if (!res) {
+      //*** create user new stamp card ***//
+
       await this.stampCardHistoryModel.create({
         cardId: new mongoose.Types.ObjectId(userStampCardDto.cardId),
         userId: new mongoose.Types.ObjectId(userStampCardDto.userId),
@@ -42,7 +48,8 @@ export class UserStampCardService {
           userStampCardDto.restaurantId,
         ),
         redeemedPoints: userStampCardDto.redeemedPoints,
-        startDate: userStampCardDto.startDate,
+        // startDate: userStampCardDto.startDate,
+        startDate: Date.now(),
       });
     } else {
       await this.stampCardHistoryModel.create({
@@ -52,17 +59,74 @@ export class UserStampCardService {
           userStampCardDto.restaurantId,
         ),
       });
-      return this.userStampCardModel.findOneAndUpdate(
-        {
-          cardId: userStampCardDto.cardId,
-          userId: userStampCardDto.userId,
-        },
-        {
-          redeemedPoints: userStampCardDto.redeemedPoints,
-          startDate: userStampCardDto.startDate,
-        },
-        { new: true },
-      );
+      //*** resetting the start date  ***//
+      if (res.redeemedPoints === 0) {
+        return this.userStampCardModel.findOneAndUpdate(
+          {
+            cardId: new mongoose.Types.ObjectId(userStampCardDto.cardId),
+            userId: new mongoose.Types.ObjectId(userStampCardDto.userId),
+          },
+          {
+            redeemedPoints: res.redeemedPoints + 1,
+            startDate: Date.now(),
+          },
+          { new: true },
+        );
+      } else
+        return this.userStampCardModel.findOneAndUpdate(
+          {
+            cardId: new mongoose.Types.ObjectId(userStampCardDto.cardId),
+            userId: new mongoose.Types.ObjectId(userStampCardDto.userId),
+          },
+          {
+            redeemedPoints: res.redeemedPoints + 1,
+            // startDate: userStampCardDto.startDate,
+          },
+          { new: true },
+        );
     }
+  }
+
+  async getUserStampCards(
+    userId: string,
+    paginationDto: PaginationDto,
+  ): Promise<UserStampCardDocument[]> {
+    const { limit, offset } = paginationDto;
+    return this.userStampCardModel
+      .find({
+        userId: new mongoose.Types.ObjectId(userId),
+      })
+      .skip(offset)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+  }
+
+  async userStampCardStatus(
+    userId: string,
+    cardId: string,
+    status: string,
+  ): Promise<UserStampCardDocument> {
+    return this.userStampCardModel.findOneAndUpdate(
+      {
+        userId: new mongoose.Types.ObjectId(userId),
+        cardId: new mongoose.Types.ObjectId(cardId),
+      },
+      { status: status },
+      { new: true },
+    );
+  }
+
+  async redeemStampCard(
+    userId: string,
+    cardId: string,
+  ): Promise<UserStampCardDocument> {
+    return this.userStampCardModel.findOneAndUpdate(
+      {
+        useId: new mongoose.Types.ObjectId(userId),
+        cardId: new mongoose.Types.ObjectId(cardId),
+      },
+      { redeemedPoints: 0 },
+      { new: true },
+    );
   }
 }

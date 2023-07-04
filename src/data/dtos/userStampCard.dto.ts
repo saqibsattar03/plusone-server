@@ -7,18 +7,20 @@ export class UserStampCardDto {
   restaurantId: string;
 
   @ApiProperty({ type: String, name: 'userId' })
-  @IsNotEmpty()
+  // @IsNotEmpty()
   userId: string;
 
   @ApiProperty({ type: String, name: 'cardId' })
   @IsNotEmpty()
   cardId: string;
 
+  @ApiProperty({ type: String, name: 'status' })
+  status: string;
+
   @ApiProperty({ type: Number, name: 'redeemedPoints' })
   @IsNotEmpty()
   redeemedPoints: number;
 
   @ApiProperty({ type: Date, name: 'startDate' })
-  @IsNotEmpty()
   startDate: Date;
 }

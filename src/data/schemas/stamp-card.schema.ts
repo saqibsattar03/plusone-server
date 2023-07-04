@@ -9,6 +9,9 @@ export class StampCard {
   @Prop({ type: mongoose.Types.ObjectId, ref: Restaurant.name })
   restaurantId: Restaurant;
 
+  @Prop({ type: String })
+  title: string;
+
   @Prop({ type: Number, default: 0 })
   totalPoints: number;
 
