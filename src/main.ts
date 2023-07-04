@@ -8,6 +8,8 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { json, urlencoded } from 'express';
 import * as process from 'process';
 import * as admin from 'firebase-admin';
+
+//*** firebase configuration for FCM *** //
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const serviceAccount = require('../src/fcm-config.json');
 admin.initializeApp({

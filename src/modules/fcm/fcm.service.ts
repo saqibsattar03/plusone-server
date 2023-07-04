@@ -19,13 +19,10 @@ export class FcmService {
     data: any,
     receiverId: string | null = null,
   ): Promise<any> {
-    console.log('receiver Id in fcm method :: ', receiverId);
-    console.log('data in fcm method :: ', data);
     try {
       const user = await this.profileService.getUser(data.email.toLowerCase());
-      console.log('user in fcm method :: ', user);
+
       if (user.fcmToken) {
-        console.log('fcm token found ::');
         const message = {
           notification: {
             title: data.title,

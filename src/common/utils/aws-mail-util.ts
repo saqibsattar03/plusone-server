@@ -78,7 +78,7 @@ Content-Type: multipart/mixed; boundary="boundary-example"
 --boundary-example
 Content-Type: text/plain
 
-Your Monthly Report is Attached
+Your Monthly Report is Ready
 
 --boundary-example
 Content-Type: application/pdf

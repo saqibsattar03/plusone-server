@@ -15,7 +15,6 @@ import {
   ForgotPasswordSchema,
 } from '../../data/schemas/forgotPassword.schema';
 import { Profile, ProfileSchema } from '../../data/schemas/profile.schema';
-import * as process from 'process';
 
 @Module({
   imports: [

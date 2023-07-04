@@ -27,7 +27,7 @@ export class TransactionHistoryService {
         transactionType: type,
       });
     } else if (restaurantId && !type) {
-      const res = await this.transactionHistoryModel
+      return this.transactionHistoryModel
         .find({
           restaurantId: restaurantId,
         })
@@ -36,7 +36,6 @@ export class TransactionHistoryService {
           select:
             'restaurantName phoneNumber locationName availableDeposit totalDeposit totalDeductions createdAt',
         });
-      return res;
     } else return this.transactionHistoryModel.find();
   }
 
