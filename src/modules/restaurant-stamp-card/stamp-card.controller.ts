@@ -32,26 +32,29 @@ export class StampCardController {
     return this.stampCardService.createStampCard(data);
   }
 
-  @Get('/:restaurantId')
-  @ApiParam({ type: String, name: 'restaurantId' })
+  @Get('/:cardId')
+  @ApiParam({ type: String, name: 'cardId' })
   @ApiCreatedResponse({
     type: RestaurantStampCardDto,
     description: 'return single Stamp Card object as response',
   })
   @ApiBadRequestResponse({ description: 'can not return Stamp Card' })
-  getSingleStampCard(@Param('restaurantId') restaurantId) {
-    return this.stampCardService.getSingleStampCard(restaurantId);
+  getSingleStampCard(@Param('cardId') cardId) {
+    return this.stampCardService.getSingleStampCard(cardId);
   }
 
-  @Get()
+  @Get('/all/:restaurantId')
   @ApiParam({ type: String, name: 'restaurantId' })
   @ApiCreatedResponse({
     type: [RestaurantStampCardDto],
     description: 'return Array of Stamp Card object as response',
   })
   @ApiBadRequestResponse({ description: 'can not return Stamp Card' })
-  getAllStampCards(@Query() paginationDto: PaginationDto) {
-    return this.stampCardService.getAllStampCards(paginationDto);
+  getAllStampCards(
+    @Query() paginationDto: PaginationDto,
+    @Param('restaurantId') restaurantId,
+  ) {
+    return this.stampCardService.getAllStampCards(paginationDto, restaurantId);
   }
 
   @Patch()

@@ -19,15 +19,17 @@ export class StampCardService {
   ): Promise<StampCard> {
     return this.stampCardModel.create(stampCardDto);
   }
-  async getSingleStampCard(restaurantId): Promise<StampCard> {
-    return this.stampCardModel.findOne({
-      restaurantId: new mongoose.Types.ObjectId(restaurantId),
-    });
+  async getSingleStampCard(cardId): Promise<StampCard> {
+    return this.stampCardModel.findById(cardId);
   }
-  async getAllStampCards(paginationDto: PaginationDto): Promise<StampCard[]> {
+  async getAllStampCards(
+    paginationDto: PaginationDto,
+    restaurantId: string,
+  ): Promise<StampCard[]> {
+    console.log(restaurantId);
     const { limit, offset } = paginationDto;
     return this.stampCardModel
-      .find()
+      .find({ restaurantId: new mongoose.Types.ObjectId(restaurantId) })
       .skip(offset)
       .limit(limit)
       .sort({ createdAt: -1 });
