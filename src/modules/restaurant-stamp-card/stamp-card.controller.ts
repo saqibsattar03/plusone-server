@@ -13,7 +13,7 @@ import mongoose from 'mongoose';
 import { PaginationDto } from '../../common/auth/dto/pagination.dto';
 
 @ApiTags('Restaurant Stamp Card')
-@Controller('restaurant-stamp-card')
+@Controller('stampcard')
 export class StampCardController {
   constructor(private readonly stampCardService: StampCardService) {}
 
@@ -43,18 +43,15 @@ export class StampCardController {
     return this.stampCardService.getSingleStampCard(cardId);
   }
 
-  @Get('/all/:restaurantId')
+  @Get('/all-by-restaurant/:restaurantId')
   @ApiParam({ type: String, name: 'restaurantId' })
   @ApiCreatedResponse({
     type: [RestaurantStampCardDto],
     description: 'return Array of Stamp Card object as response',
   })
   @ApiBadRequestResponse({ description: 'can not return Stamp Card' })
-  getAllStampCards(
-    @Query() paginationDto: PaginationDto,
-    @Param('restaurantId') restaurantId,
-  ) {
-    return this.stampCardService.getAllStampCards(paginationDto, restaurantId);
+  getAllStampCards(@Param('restaurantId') restaurantId) {
+    return this.stampCardService.getAllStampCards(restaurantId);
   }
 
   @Patch()
@@ -65,6 +62,7 @@ export class StampCardController {
         cardId: { type: 'string' },
         totalPoint: { type: 'number' },
         reward: { type: 'string' },
+        title: { type: 'string' },
       },
     },
   })

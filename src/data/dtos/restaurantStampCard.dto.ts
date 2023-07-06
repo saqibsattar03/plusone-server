@@ -6,9 +6,9 @@ export class RestaurantStampCardDto {
   @IsNotEmpty()
   restaurantId: string;
 
-  @ApiProperty({ type: String, name: 'name' })
+  @ApiProperty({ type: String, name: 'title' })
   @IsNotEmpty()
-  name: string;
+  title: string;
 
   @ApiProperty({ type: Number, name: 'totalPoints' })
   @IsNotEmpty()

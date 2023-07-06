@@ -190,6 +190,7 @@ export class VoucherService {
     throw new HttpException('voucher created Successfully', HttpStatus.OK);
   }
   async getSingleVoucher(voucherId): Promise<any> {
+    console.log('voucher id :: ', voucherId);
     const oid = new mongoose.Types.ObjectId(voucherId);
     return this.voucherModel.findOne(
       { 'voucherObject._id': oid },
