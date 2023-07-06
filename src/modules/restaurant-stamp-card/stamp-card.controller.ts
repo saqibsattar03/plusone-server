@@ -60,6 +60,7 @@ export class StampCardController {
       type: 'object',
       properties: {
         cardId: { type: 'string' },
+        totalPoint: { type: 'number' },
         reward: { type: 'string' },
         title: { type: 'string' },
       },
