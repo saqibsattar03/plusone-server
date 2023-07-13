@@ -22,7 +22,17 @@ export class StampCardService {
   async getSingleStampCard(cardId): Promise<StampCard> {
     return this.stampCardModel.findById(cardId);
   }
-  async getAllStampCards(restaurantId: string): Promise<StampCard[]> {
+
+  // async getSingleRestaurantStampCard(
+  //   restaurantId: string,
+  // ): Promise<StampCardDocument[]> {
+  //   return this.stampCardModel
+  //     .find({
+  //       restaurantId: new mongoose.Types.ObjectId(restaurantId),
+  //     })
+  //     .sort({ createdAt: -1 });
+  // }
+  async getAllStampCards(restaurantId: string): Promise<StampCardDocument[]> {
     console.log(restaurantId);
     return this.stampCardModel
       .find({ restaurantId: new mongoose.Types.ObjectId(restaurantId) })

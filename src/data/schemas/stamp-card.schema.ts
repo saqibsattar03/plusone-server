@@ -12,6 +12,9 @@ export class StampCard {
   @Prop({ type: String })
   title: string;
 
+  @Prop({ type: String })
+  description: string;
+
   @Prop({ type: Number, default: 0 })
   totalPoints: number;
 

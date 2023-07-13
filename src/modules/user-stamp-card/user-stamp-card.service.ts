@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   UserStampCard,
@@ -11,6 +11,7 @@ import {
   StampCardHistoryDocument,
 } from '../../data/schemas/stamp-card-history.schema';
 import { PaginationDto } from '../../common/auth/dto/pagination.dto';
+import { RestaurantService } from '../restaurant/restaurant.service';
 
 @Injectable()
 export class UserStampCardService {
@@ -19,6 +20,7 @@ export class UserStampCardService {
     private readonly userStampCardModel: Model<UserStampCardDocument>,
     @InjectModel(StampCardHistory.name)
     private readonly stampCardHistoryModel: Model<StampCardHistoryDocument>,
+    private readonly restaurantService: RestaurantService,
   ) {}
 
   async createStampCard(
@@ -91,6 +93,14 @@ export class UserStampCardService {
       .sort({ createdAt: -1 });
   }
 
+  async getUserSingleStampCard(userId, cardId): Promise<any> {
+    const res = await this.userStampCardModel.findOne({
+      // userId: userId,
+      cardId: new mongoose.Types.ObjectId(cardId),
+    });
+    return res;
+  }
+
   async userStampCardStatus(
     userId: string,
     cardId: string,
@@ -106,7 +116,25 @@ export class UserStampCardService {
     );
   }
 
-  async redeemStampCard(
+  async redeemStampCard(userId: string, data): Promise<UserStampCardDocument> {
+    const stampCardUniqueCode =
+      await this.restaurantService.getRestaurantVerificationCode(
+        data.restaurantId,
+      );
+    if (data.uniqueCode === stampCardUniqueCode.stampCardUniqueCode) {
+      return this.userStampCardModel.findOneAndUpdate(
+        {
+          useId: new mongoose.Types.ObjectId(userId),
+          cardId: new mongoose.Types.ObjectId(data.cardId),
+        },
+        { $inc: { redeemedPoints: 1 } },
+        { new: true },
+      );
+    } else
+      throw new HttpException('Code does not match', HttpStatus.BAD_REQUEST);
+  }
+
+  async resetStampCard(
     userId: string,
     cardId: string,
   ): Promise<UserStampCardDocument> {
@@ -115,7 +143,7 @@ export class UserStampCardService {
         useId: new mongoose.Types.ObjectId(userId),
         cardId: new mongoose.Types.ObjectId(cardId),
       },
-      { redeemedPoints: 0 },
+      { redeemedPoints: 0, startDate: null },
       { new: true },
     );
   }

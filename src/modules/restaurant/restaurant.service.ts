@@ -30,14 +30,28 @@ export class RestaurantService {
   ) {}
 
   async createRestaurant(restaurantDto: any): Promise<any> {
-    let uniqueCode = await getRandomNumber(1249, 5596);
-    while (await this.restaurantModel.findOne({ uniqueCode })) {
-      uniqueCode = await getRandomNumber(1949, 8496);
+    let restaurantUniqueCode = await getRandomNumber(1249, 5596);
+    let stampCardUniqueCode = await getRandomNumber(4912, 9655);
+    while (
+      await this.restaurantModel.findOne({
+        uniqueCode: restaurantUniqueCode,
+      })
+    ) {
+      restaurantUniqueCode = await getRandomNumber(1949, 8496);
+    }
+
+    while (
+      await this.restaurantModel.findOne({
+        stampCardUniqueCode: stampCardUniqueCode,
+      })
+    ) {
+      stampCardUniqueCode = await getRandomNumber(4919, 9684);
     }
 
     const user = await this.authService.createUser(restaurantDto);
     restaurantDto.userId = user._id;
-    restaurantDto.uniqueCode = uniqueCode;
+    restaurantDto.uniqueCode = restaurantUniqueCode;
+    restaurantDto.stampCardUniqueCode = stampCardUniqueCode;
 
     return await this.restaurantModel.create(restaurantDto);
   }
@@ -286,13 +300,13 @@ export class RestaurantService {
   }
   async getRestaurantVerificationCode(
     restaurantId,
-    restaurantCode,
+    restaurantCode = null,
   ): Promise<any> {
     return this.restaurantModel
       .findOne({
-        _id: restaurantId,
+        _id: new mongoose.Types.ObjectId(restaurantId),
       })
-      .select('uniqueCode restaurantName -_id');
+      .select('uniqueCode stampCardUniqueCode restaurantName ');
   }
   async restaurantFilters(data, paginationQuery): Promise<any> {
     const fieldName = 'reviewObject';

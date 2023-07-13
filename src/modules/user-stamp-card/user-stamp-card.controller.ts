@@ -42,6 +42,19 @@ export class UserStampCardController {
     return this.userStampCardService.createStampCard(data);
   }
 
+  @Get('/single')
+  @ApiBearerAuth()
+  @ApiQuery({ type: String, name: 'cardId' })
+  @ApiCreatedResponse({
+    type: UserStampCardDto,
+    description: 'return array of Stamp Card object as response',
+  })
+  @ApiBadRequestResponse({ description: 'can not create Stamp Card' })
+  @UseGuards(JwtAuthGuard)
+  getUserSingleStampCard(@Request() request, @Query('cardId') cardId) {
+    const userId = request.user.userId;
+    return this.userStampCardService.getUserSingleStampCard(userId, cardId);
+  }
   @Get()
   @ApiBearerAuth()
   @ApiCreatedResponse({
@@ -86,6 +99,29 @@ export class UserStampCardController {
 
   @Post('/redeem')
   @ApiBearerAuth()
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        cardId: { type: 'string' },
+        restaurantId: { type: 'string' },
+        uniqueCode: { type: 'number' },
+      },
+    },
+  })
+  @ApiCreatedResponse({
+    type: UserStampCardDto,
+    description: 'return single Stamp Card object as response',
+  })
+  @ApiBadRequestResponse({ description: 'can not create Stamp Card' })
+  @UseGuards(JwtAuthGuard)
+  redeemStampCard(@Body() data, @Request() request) {
+    const userId = request.user.userId;
+    return this.userStampCardService.redeemStampCard(userId, data);
+  }
+
+  @Patch('/reset')
+  @ApiBearerAuth()
   @ApiQuery({
     type: String,
     name: 'cardId',
@@ -96,8 +132,8 @@ export class UserStampCardController {
   })
   @ApiBadRequestResponse({ description: 'can not create Stamp Card' })
   @UseGuards(JwtAuthGuard)
-  redeemStampCard(@Query('cardId') cardId, @Request() request) {
+  resetStampCard(@Query('cardId') cardId, @Request() request) {
     const userId = request.user.userId;
-    return this.userStampCardService.redeemStampCard(userId, cardId);
+    return this.userStampCardService.resetStampCard(userId, cardId);
   }
 }

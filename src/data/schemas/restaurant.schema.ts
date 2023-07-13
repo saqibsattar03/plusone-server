@@ -60,7 +60,7 @@ export class Restaurant {
   @Prop({
     type: Number,
     required: true,
-    index: { unique: true },
+    unique: true,
   })
   stampCardUniqueCode: number;
 

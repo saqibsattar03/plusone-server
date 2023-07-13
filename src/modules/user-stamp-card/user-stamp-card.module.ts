@@ -10,6 +10,7 @@ import {
   StampCardHistory,
   StampCardHistorySchema,
 } from '../../data/schemas/stamp-card-history.schema';
+import { RestaurantModule } from '../restaurant/restaurant.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import {
         schema: StampCardHistorySchema,
       },
     ]),
+    RestaurantModule,
   ],
   providers: [UserStampCardService],
   controllers: [UserStampCardController],
