@@ -29,13 +29,13 @@ export class UserStampCardController {
   @ApiBearerAuth()
   @ApiBody({
     type: UserStampCardDto,
-    description: 'Request body to create a User Stamp Card',
+    description: 'Request body to create a user stamp card',
   })
   @ApiCreatedResponse({
     type: UserStampCardDto,
-    description: 'return single Stamp Card object as response',
+    description: 'return single stamp card object as response',
   })
-  @ApiBadRequestResponse({ description: 'can not create Stamp Card' })
+  @ApiBadRequestResponse({ description: 'can not create stamp card' })
   @UseGuards(JwtAuthGuard)
   createStampCard(@Body() data: UserStampCardDto, @Request() request) {
     data.userId = request.user.userId;
@@ -47,9 +47,9 @@ export class UserStampCardController {
   @ApiQuery({ type: String, name: 'cardId' })
   @ApiCreatedResponse({
     type: UserStampCardDto,
-    description: 'return array of Stamp Card object as response',
+    description: 'return array of stamp card object as response',
   })
-  @ApiBadRequestResponse({ description: 'can not create Stamp Card' })
+  @ApiBadRequestResponse({ description: 'can not create stamp card' })
   @UseGuards(JwtAuthGuard)
   getUserSingleStampCard(@Request() request, @Query('cardId') cardId) {
     const userId = request.user.userId;
@@ -59,9 +59,9 @@ export class UserStampCardController {
   @ApiBearerAuth()
   @ApiCreatedResponse({
     type: [UserStampCardDto],
-    description: 'return array of Stamp Card object as response',
+    description: 'return array of stamp card object as response',
   })
-  @ApiBadRequestResponse({ description: 'can not create Stamp Card' })
+  @ApiBadRequestResponse({ description: 'can not create stamp card' })
   @UseGuards(JwtAuthGuard)
   getUserStampCards(@Request() request, @Query() paginationDto: PaginationDto) {
     const userId = request.user.userId;
@@ -80,9 +80,9 @@ export class UserStampCardController {
   })
   @ApiCreatedResponse({
     type: UserStampCardDto,
-    description: 'return single Stamp Card object as response',
+    description: 'return single stamp card object as response',
   })
-  @ApiBadRequestResponse({ description: 'can not create Stamp Card' })
+  @ApiBadRequestResponse({ description: 'can not create stamp card' })
   @UseGuards(JwtAuthGuard)
   disableUserStampCard(
     @Request() request,
@@ -111,9 +111,9 @@ export class UserStampCardController {
   })
   @ApiCreatedResponse({
     type: UserStampCardDto,
-    description: 'return single Stamp Card object as response',
+    description: 'return single stamp card object as response',
   })
-  @ApiBadRequestResponse({ description: 'can not create Stamp Card' })
+  @ApiBadRequestResponse({ description: 'can not create stamp card' })
   @UseGuards(JwtAuthGuard)
   redeemStampCard(@Body() data, @Request() request) {
     const userId = request.user.userId;
@@ -128,9 +128,9 @@ export class UserStampCardController {
   })
   @ApiCreatedResponse({
     type: UserStampCardDto,
-    description: 'return single Stamp Card object as response',
+    description: 'return single stamp card object as response',
   })
-  @ApiBadRequestResponse({ description: 'can not create Stamp Card' })
+  @ApiBadRequestResponse({ description: 'can not create stamp card' })
   @UseGuards(JwtAuthGuard)
   resetStampCard(@Query('cardId') cardId, @Request() request) {
     const userId = request.user.userId;

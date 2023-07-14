@@ -18,5 +18,6 @@ import {
   ],
   providers: [StampCardService],
   controllers: [StampCardController],
+  exports: [StampCardService],
 })
 export class StampCardModule {}
