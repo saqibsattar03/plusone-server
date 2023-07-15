@@ -144,4 +144,18 @@ export class UserStampCardController {
     const userId = request.user.userId;
     return this.userStampCardService.resetStampCard(userId, cardId);
   }
+
+  @Get('/history')
+  @UseGuards(JwtAuthGuard)
+  getStampCardHistory(@Query('cardId') cardId, @Request() request) {
+    return this.userStampCardService.getStampCardHistory(
+      request.user.userId,
+      cardId,
+    );
+  }
+  @Get('/all-gifts')
+  @UseGuards(JwtAuthGuard)
+  getAwardedGifts(@Request() request) {
+    return this.userStampCardService.getAwardedGifts(request.user.userId);
+  }
 }

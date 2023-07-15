@@ -6,7 +6,6 @@ import {
 } from '../../data/schemas/stamp-card.schema';
 import mongoose, { Model } from 'mongoose';
 import { RestaurantStampCardDto } from '../../data/dtos/restaurantStampCard.dto';
-import { PaginationDto } from '../../common/auth/dto/pagination.dto';
 
 @Injectable()
 export class StampCardService {
@@ -23,15 +22,6 @@ export class StampCardService {
     return this.stampCardModel.findById(cardId);
   }
 
-  // async getSingleRestaurantStampCard(
-  //   restaurantId: string,
-  // ): Promise<StampCardDocument[]> {
-  //   return this.stampCardModel
-  //     .find({
-  //       restaurantId: new mongoose.Types.ObjectId(restaurantId),
-  //     })
-  //     .sort({ createdAt: -1 });
-  // }
   async getAllStampCards(restaurantId: string): Promise<StampCardDocument[]> {
     console.log(restaurantId);
     return this.stampCardModel

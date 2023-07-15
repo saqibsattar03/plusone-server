@@ -190,7 +190,6 @@ export class VoucherService {
     throw new HttpException('voucher created Successfully', HttpStatus.OK);
   }
   async getSingleVoucher(voucherId): Promise<any> {
-    console.log('voucher id :: ', voucherId);
     const oid = new mongoose.Types.ObjectId(voucherId);
     return this.voucherModel.findOne(
       { 'voucherObject._id': oid },
@@ -445,7 +444,6 @@ export class VoucherService {
   }
   async userSavingsStats(userId, parameter): Promise<any> {
     const oid = new mongoose.Types.ObjectId(userId);
-    console.log('user object Id = ', oid);
     let value = null;
     const { WEEK, MONTH, YEAR } = Constants;
     if (parameter == WEEK) value = 7;
@@ -648,8 +646,6 @@ export class VoucherService {
             newFreeVoucherCount,
           );
           await this.sendRewardNotification(rPoints);
-
-          console.log(remainder === 0 ? 'in if' : 'in else');
         }
 
         // calculating data to create transaction history

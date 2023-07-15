@@ -136,47 +136,4 @@ export class AppController {
   //     throw new HttpException(e.toString(), HttpStatus.BAD_REQUEST);
   //   }
   // }
-
-  @Get('/number')
-  number(@Query('pair') pair, @Query('number') number) {
-    const k = pair; // Number of pairs
-    const n = number; // Desired sum
-    this.splitNumberIntoPairs(n, k);
-  }
-  splitNumberIntoPairs(number, k) {
-    const digits = Array.from(String(number), Number);
-    const pairs = [];
-
-    if (digits.length < k) {
-      console.log('Cannot split the number into the given number of pairs.');
-      return;
-    }
-
-    const remainingDigits = digits;
-
-    for (let i = 1; i < k; i++) {
-      const pairLength = Math.floor(
-        Math.random() * (remainingDigits.length - (k - i)) + 1,
-      );
-      const pair = remainingDigits.splice(0, pairLength);
-      pairs.push(pair.join(''));
-    }
-
-    pairs.push(remainingDigits.join(''));
-
-    for (const pair of pairs) {
-      if (pair.length > 1 && pair.startsWith('0')) {
-        console.log('Invalid pair:', pair);
-        return;
-      }
-    }
-
-    let sum = 0;
-    for (const pair of pairs) {
-      sum += parseInt(pair);
-    }
-
-    console.log('Pairs:', pairs);
-    console.log('Sum:', sum);
-  }
 }

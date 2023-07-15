@@ -32,17 +32,6 @@ export class StampCardController {
     return this.stampCardService.createStampCard(data);
   }
 
-  // @Get('/:restaurantId')
-  // @ApiParam({ type: String, name: 'restaurantId' })
-  // @ApiCreatedResponse({
-  //   type: RestaurantStampCardDto,
-  //   description: 'return single Stamp Card object as response',
-  // })
-  // @ApiBadRequestResponse({ description: 'can not return Stamp Card' })
-  // getSingleRestaurantStampCard(@Param('restaurantId') restaurantId) {
-  //   return this.stampCardService.getSingleRestaurantStampCard(restaurantId);
-  // }
-
   @Get('/:cardId')
   @ApiParam({ type: String, name: 'cardId' })
   @ApiCreatedResponse({
