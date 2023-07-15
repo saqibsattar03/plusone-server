@@ -36,24 +36,32 @@ export class UserStampCardController {
     description: 'return single stamp card object as response',
   })
   @ApiBadRequestResponse({ description: 'can not create stamp card' })
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   createStampCard(@Body() data: UserStampCardDto, @Request() request) {
-    data.userId = request.user.userId;
+    // data.userId = request.user.userId;
     return this.userStampCardService.createStampCard(data);
   }
 
-  @Get('/single')
+  @Post('/single')
   @ApiBearerAuth()
-  @ApiQuery({ type: String, name: 'cardId' })
+  @ApiBody({
+    type: UserStampCardDto,
+    description: 'Request body to create a user stamp card',
+  })
+  // @ApiQuery({ type: String, name: 'cardId' })
   @ApiCreatedResponse({
     type: UserStampCardDto,
     description: 'return array of stamp card object as response',
   })
   @ApiBadRequestResponse({ description: 'can not create stamp card' })
-  @UseGuards(JwtAuthGuard)
-  getUserSingleStampCard(@Request() request, @Query('cardId') cardId) {
-    const userId = request.user.userId;
-    return this.userStampCardService.getUserSingleStampCard(userId, cardId);
+  // @UseGuards(JwtAuthGuard)
+  // getUserSingleStampCard(@Request() request, @Query('cardId') cardId) {
+  //   const userId = request.user.userId;
+  //   return this.userStampCardService.getUserSingleStampCard(userId, cardId);
+  // }
+  getUserSingleStampCard(@Body() data: UserStampCardDto) {
+    // data.userId = request.user.userId;
+    return this.userStampCardService.getUserSingleStampCard(data);
   }
   @Get()
   @ApiBearerAuth()
@@ -116,8 +124,8 @@ export class UserStampCardController {
   @ApiBadRequestResponse({ description: 'can not create stamp card' })
   @UseGuards(JwtAuthGuard)
   redeemStampCard(@Body() data, @Request() request) {
-    const userId = request.user.userId;
-    return this.userStampCardService.redeemStampCard(userId, data);
+    data.userId = request.user.userId;
+    return this.userStampCardService.redeemStampCard(data);
   }
 
   @Patch('/reset')

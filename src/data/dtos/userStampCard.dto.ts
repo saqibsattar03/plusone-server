@@ -7,7 +7,7 @@ export class UserStampCardDto {
   restaurantId: string;
 
   @ApiProperty({ type: String, name: 'userId' })
-  // @IsNotEmpty()
+  @IsNotEmpty()
   userId: string;
 
   @ApiProperty({ type: String, name: 'cardId' })

@@ -13,7 +13,6 @@ import {
 import { PaginationDto } from '../../common/auth/dto/pagination.dto';
 import { RestaurantService } from '../restaurant/restaurant.service';
 import { StampCardService } from '../restaurant-stamp-card/stamp-card.service';
-import { applyIsOptionalDecorator } from '@nestjs/swagger/dist/type-helpers/type-helpers.utils';
 
 @Injectable()
 export class UserStampCardService {
@@ -38,6 +37,7 @@ export class UserStampCardService {
       cardId: cardIdObj,
     });
 
+    console.log('create method called');
     //*** stamp card history ***//
 
     await this.stampCardHistoryModel.create({
@@ -51,8 +51,12 @@ export class UserStampCardService {
         cardId: cardIdObj,
         userId: userIdObj,
         restaurantId: restaurantIdObj,
-        redeemedPoints: 1,
-        startDate: Date.now(),
+        redeemedPoints: userStampCardDto.redeemedPoints,
+        // redeemedPoints: 0,
+        // startDate: Date.now(),
+        startDate: userStampCardDto.startDate
+          ? userStampCardDto.startDate
+          : null,
       });
     } else {
       //*** resetting the start date  ***//
@@ -96,13 +100,15 @@ export class UserStampCardService {
       .sort({ createdAt: -1 });
   }
 
-  async getUserSingleStampCard(userId, cardId): Promise<any> {
-    console.log('userId :: ', userId);
+  async getUserSingleStampCard(data: UserStampCardDto): Promise<any> {
     const res = await this.userStampCardModel.findOne({
-      userId: new mongoose.Types.ObjectId(userId),
-      cardId: new mongoose.Types.ObjectId(cardId),
+      userId: new mongoose.Types.ObjectId(data.userId),
+      cardId: new mongoose.Types.ObjectId(data.cardId),
     });
-    return res;
+    data.redeemedPoints = 0;
+    console.log('res :: ', res);
+    console.log('data :: ', data);
+    return res ? res : this.createStampCard(data);
   }
 
   async userStampCardStatus(
@@ -120,52 +126,102 @@ export class UserStampCardService {
     );
   }
 
-  async redeemStampCard(userId: string, data): Promise<UserStampCardDocument> {
-    const stampCardUniqueCode =
-      await this.restaurantService.getRestaurantVerificationCode(
-        data.restaurantId,
-      );
+  // async redeemStampCard(data): Promise<UserStampCardDocument> {
+  //   const stampCardUniqueCode =
+  //     await this.restaurantService.getRestaurantVerificationCode(
+  //       data.restaurantId,
+  //     );
+  //
+  //   const restaurantStampCard = await this.stampCardService.getSingleStampCard(
+  //     data.cardId,
+  //   );
+  //   const userRedeemedPoints = await this.userStampCardModel
+  //     .findOne({
+  //       cardId: new mongoose.Types.ObjectId(data.cardId),
+  //       userId: new mongoose.Types.ObjectId(data.userId),
+  //     })
+  //     .select('redeemedPoints -_id');
+  //   if (data.uniqueCode === stampCardUniqueCode.stampCardUniqueCode) {
+  //     if (
+  //       userRedeemedPoints.redeemedPoints ===
+  //       restaurantStampCard.totalPoints - 1
+  //     ) {
+  //       console.log('inside reward condition', data.userId);
+  //       await this.getReward(
+  //         userRedeemedPoints.redeemedPoints,
+  //         restaurantStampCard,
+  //         data,
+  //       );
+  //     } else {
+  //       if (userRedeemedPoints.redeemedPoints === 0) {
+  //         return this.userStampCardModel.findOneAndUpdate(
+  //           {
+  //             userId: new mongoose.Types.ObjectId(data.userId),
+  //             cardId: new mongoose.Types.ObjectId(data.cardId),
+  //           },
+  //           { $inc: { redeemedPoints: 1 }, startDate: Date.now() },
+  //           { new: true },
+  //         );
+  //       } else {
+  //         return this.userStampCardModel.findOneAndUpdate(
+  //           {
+  //             userId: new mongoose.Types.ObjectId(data.userId),
+  //             cardId: new mongoose.Types.ObjectId(data.cardId),
+  //           },
+  //           { $inc: { redeemedPoints: 1 } },
+  //           { new: true },
+  //         );
+  //       }
+  //     }
+  //   } else
+  //     throw new HttpException('Code does not match', HttpStatus.BAD_REQUEST);
+  // }
 
-    const restaurantStampCard = await this.stampCardService.getSingleStampCard(
-      data.cardId,
-    );
-    const userRedeemedPoints = await this.userStampCardModel
-      .findOne({
-        cardId: new mongoose.Types.ObjectId(data.cardId),
-        userId: new mongoose.Types.ObjectId(userId),
-      })
-      .select('redeemedPoints -_id');
-    console.log('redeemedPoints :: ', userRedeemedPoints.redeemedPoints);
-    if (data.uniqueCode === stampCardUniqueCode.stampCardUniqueCode) {
-      if (
-        userRedeemedPoints.redeemedPoints ===
-        restaurantStampCard.totalPoints - 1
-      ) {
-        console.log('here inside');
-        await this.getReward(
-          userRedeemedPoints.redeemedPoints,
-          restaurantStampCard,
-          userId,
-          data,
-        );
+  async redeemStampCard(data): Promise<UserStampCardDocument> {
+    const { restaurantId, cardId, userId, uniqueCode } = data;
+
+    const [stampCardUniqueCode, restaurantStampCard, userRedeemedPoints] =
+      await Promise.all([
+        this.restaurantService.getRestaurantVerificationCode(restaurantId),
+        this.stampCardService.getSingleStampCard(cardId),
+        this.userStampCardModel
+          .findOne({
+            cardId: new mongoose.Types.ObjectId(cardId),
+            userId: new mongoose.Types.ObjectId(userId),
+          })
+          .select('redeemedPoints -_id'),
+      ]);
+
+    if (uniqueCode === stampCardUniqueCode.stampCardUniqueCode) {
+      const redeemedPoints = userRedeemedPoints.redeemedPoints;
+      if (redeemedPoints === restaurantStampCard.totalPoints - 1) {
+        await this.getReward(redeemedPoints, restaurantStampCard, data);
       } else {
+        const updateQuery = {
+          userId: new mongoose.Types.ObjectId(userId),
+          cardId: new mongoose.Types.ObjectId(cardId),
+        };
+
+        const updateOptions = { $inc: { redeemedPoints: 1 } };
+        if (redeemedPoints === 0) {
+          Object.assign(updateOptions, { startDate: Date.now() });
+        }
+
         return this.userStampCardModel.findOneAndUpdate(
-          {
-            useId: new mongoose.Types.ObjectId(userId),
-            cardId: new mongoose.Types.ObjectId(data.cardId),
-          },
-          { $inc: { redeemedPoints: 1 } },
+          updateQuery,
+          updateOptions,
           { new: true },
         );
       }
-    } else
+    } else {
       throw new HttpException('Code does not match', HttpStatus.BAD_REQUEST);
+    }
   }
 
-  async getReward(redeemedPoints, restaurantStampCard, userId, data) {
+  async getReward(redeemedPoints, restaurantStampCard, data) {
     await this.userStampCardModel.findOneAndUpdate(
       {
-        useId: new mongoose.Types.ObjectId(userId),
+        userId: new mongoose.Types.ObjectId(data.userId),
         cardId: new mongoose.Types.ObjectId(data.cardId),
       },
       { redeemedPoints: 0, startDate: null },
