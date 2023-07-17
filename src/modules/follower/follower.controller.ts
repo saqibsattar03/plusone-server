@@ -23,7 +23,7 @@ import { JwtAuthGuard } from '../../common/auth/guards/jwt-auth.guard';
 export class FollowerController {
   constructor(private readonly followerService: FollowerService) {}
 
-  @Post('add')
+  @Post('/add')
   @ApiQuery({ name: 'userId', type: String })
   @ApiQuery({ name: 'followerId', type: String })
   @ApiResponse({ description: 'Follower added Successfully' })
@@ -39,7 +39,7 @@ export class FollowerController {
       );
     return this.followerService.addFollower(request.user.userId, followerId);
   }
-  @Post('remove')
+  @Post('/remove')
   @ApiQuery({ name: 'userId', type: String })
   @ApiQuery({ name: 'followerId', type: String })
   @ApiResponse({ description: 'Follower removed Successfully' })
@@ -50,7 +50,7 @@ export class FollowerController {
   removeFollower(@Query('followerId') followerId, @Request() request) {
     return this.followerService.removeFollower(request.user.userId, followerId);
   }
-  @Get('all')
+  @Get('/all')
   @ApiQuery({ name: 'userId', type: String })
   @ApiResponse({
     type: [FollowResponse],

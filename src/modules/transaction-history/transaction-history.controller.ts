@@ -24,7 +24,7 @@ export class TransactionHistoryController {
     );
   }
 
-  @Post('generate-invoice')
+  @Post('/generate-invoice')
   @ApiQuery({ type: String, name: 'restaurantId' })
   @ApiQuery({ type: String, name: 'startDate' })
   @ApiQuery({ type: String, name: 'endDate' })

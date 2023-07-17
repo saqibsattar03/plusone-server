@@ -25,7 +25,7 @@ import { JwtAuthGuard } from '../../common/auth/guards/jwt-auth.guard';
 @Controller('followee')
 export class FollowingController {
   constructor(private readonly followingService: FollowingService) {}
-  @Post('add')
+  @Post('/add')
   // @ApiQuery({ name: 'userId', type: String })
   @ApiQuery({ name: 'followeeId', type: String })
   @ApiResponse({ description: 'Following added Successfully' })
@@ -42,7 +42,7 @@ export class FollowingController {
     return this.followingService.addFollowee(request.user.userId, followeeId);
   }
 
-  @Get('get-single')
+  @Get('/get-single')
   @ApiQuery({ type: String, name: 'currentUser' })
   @ApiQuery({ type: String, name: 'searchedUser' })
   @ApiResponse({
@@ -58,7 +58,7 @@ export class FollowingController {
       searchedUser,
     );
   }
-  @Post('remove')
+  @Post('/remove')
   @ApiBearerAuth('access-token')
   @ApiQuery({ name: 'followeeId', type: String })
   @ApiResponse({ description: 'Following removed Successfully' })
@@ -69,7 +69,7 @@ export class FollowingController {
   removeFollowee(@Query('userId') userId, @Query('followeeId') followeeId) {
     return this.followingService.removeFollowee(userId, followeeId);
   }
-  @Get('all')
+  @Get('/all')
   @ApiQuery({ name: 'userId', type: String })
   @ApiResponse({
     type: [FollowResponse],
@@ -83,7 +83,7 @@ export class FollowingController {
     return this.followingService.getAllFollowings(userId);
   }
 
-  @Post('request')
+  @Post('/request')
   @ApiBearerAuth()
   @ApiBody({
     schema: {
@@ -98,7 +98,7 @@ export class FollowingController {
     data.requestedFrom = request.user.userId;
     return this.followingService.followRequest(data);
   }
-  @Post('change-request-status')
+  @Post('/change-request-status')
   @ApiBearerAuth()
   @ApiBody({
     schema: {
@@ -115,7 +115,7 @@ export class FollowingController {
     return this.followingService.followRequestStatus(data);
   }
 
-  @Get('get-all-request')
+  @Get('/get-all-request')
   @ApiBearerAuth()
   @ApiCreatedResponse({ type: [FollowRequest] })
   @UseGuards(JwtAuthGuard)
@@ -123,7 +123,7 @@ export class FollowingController {
     return this.followingService.getAllFollowRequest(request.user.userId);
   }
 
-  @Post('check-request')
+  @Post('/check-request')
   @ApiBearerAuth()
   @ApiBody({
     schema: {

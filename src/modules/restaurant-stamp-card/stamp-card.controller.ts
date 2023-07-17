@@ -10,7 +10,6 @@ import {
 } from '@nestjs/swagger';
 import { RestaurantStampCardDto } from '../../data/dtos/restaurantStampCard.dto';
 import mongoose from 'mongoose';
-import { PaginationDto } from '../../common/auth/dto/pagination.dto';
 
 @ApiTags('Restaurant Stamp Card')
 @Controller('stampcard')

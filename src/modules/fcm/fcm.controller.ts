@@ -10,11 +10,11 @@ import { FcmDto } from '../../data/dtos/fcm.dto';
 export class FcmController {
   constructor(private readonly fcmService: FcmService) {}
 
-  @Post('send-single')
+  @Post('/send-single')
   sendSingleNotification(@Body() data) {
     return this.fcmService.sendSingleNotification(data);
   }
-  @Patch('token')
+  @Patch('/token')
   @ApiBody({
     schema: {
       type: 'object',
@@ -27,19 +27,19 @@ export class FcmController {
   updateFcmToken(@Body() data) {
     return this.fcmService.updateFcmToken(data);
   }
-  @Get('get-history/:id')
+  @Get('/get-history/:id')
   @ApiParam({ type: String, name: 'id' })
   // @ApiQuery({ type: PaginationDto })
   @ApiResponse({ type: [FcmDto] })
   getHistory(@Query() paginationDto: PaginationDto, @Param('id') id: string) {
     return this.fcmService.userHistory(id, paginationDto);
   }
-  @Get('get-unseen/:id')
+  @Get('/get-unseen/:id')
   @ApiParam({ type: String, name: 'id' })
   userUnseenHistory(@Param('id') id) {
     return this.fcmService.userUnseenHistory(id);
   }
-  @Patch('unseen-to-seen/:id')
+  @Patch('/unseen-to-seen/:id')
   unsSeenToSeenHistory(@Param('id') id) {
     return this.fcmService.unSeenToSeenHistory(id);
   }

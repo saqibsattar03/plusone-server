@@ -22,7 +22,7 @@ import { JwtAuthGuard } from '../../common/auth/guards/jwt-auth.guard';
 export class RestaurantController {
   constructor(private readonly restaurantService: RestaurantService) {}
 
-  @Post('create')
+  @Post('/create')
   @ApiBody({
     type: RestaurantDto,
     description: 'Request body to create a Restaurant',
@@ -36,7 +36,7 @@ export class RestaurantController {
     return this.restaurantService.createRestaurant(data);
   }
 
-  @Get('all-active')
+  @Get('/all-active')
   @ApiCreatedResponse({
     schema: {
       type: 'object',
@@ -53,7 +53,7 @@ export class RestaurantController {
     return this.restaurantService.getAllActiveRestaurants(paginationQuery);
   }
 
-  @Get('all-tags')
+  @Get('/all-tags')
   @ApiCreatedResponse({
     schema: {
       type: 'object',
@@ -67,7 +67,7 @@ export class RestaurantController {
     return this.restaurantService.getAllTags();
   }
 
-  @Get('get-all')
+  @Get('/get-all')
   @ApiCreatedResponse({
     type: RestaurantDto,
     description: 'Restaurant List in response',
@@ -79,7 +79,7 @@ export class RestaurantController {
     return this.restaurantService.getAllRestaurants(paginationQuery);
   }
 
-  @Get('details')
+  @Get('/details')
   @ApiCreatedResponse({
     type: SingleRestaurantResponseDto,
     description: 'Single Restaurant in response',
@@ -98,7 +98,7 @@ export class RestaurantController {
     );
   }
 
-  @Get('profile')
+  @Get('/profile')
   @ApiCreatedResponse({
     type: SingleRestaurantResponseDto,
     description: 'Single Restaurant in response',
@@ -148,7 +148,7 @@ export class RestaurantController {
   //   return this.restaurantService.filterPopularRestaurant();
   // }
 
-  @Get('admin-stats')
+  @Get('/admin-stats')
   adminStats() {
     return this.restaurantService.adminStats();
   }
@@ -164,7 +164,7 @@ export class RestaurantController {
       },
     },
   })
-  @Get('search-by-name')
+  @Get('/search-by-name')
   filterByRestaurantName(@Query('restaurantName') restaurantName) {
     return this.restaurantService.filterByRestaurantName(restaurantName);
   }

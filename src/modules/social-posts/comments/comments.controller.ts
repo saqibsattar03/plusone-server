@@ -24,7 +24,6 @@ import { CommentsService } from './comments.service';
 import { Get } from '@nestjs/common/decorators';
 import { CommentDto } from '../../../data/dtos/socialPost.dto';
 import { JwtAuthGuard } from '../../../common/auth/guards/jwt-auth.guard';
-import { ViewAuthFilter } from '../../../common/configs/redirect-route.config';
 
 @ApiTags('Comments')
 @Controller('comment')
@@ -59,7 +58,7 @@ export class CommentsController {
     return this.commentService.postComment(data);
   }
 
-  @Get('all')
+  @Get('/all')
   @ApiQuery({ type: String, name: 'postId' })
   @ApiCreatedResponse({
     schema: {
@@ -94,7 +93,7 @@ export class CommentsController {
   }
 
   //update comment route
-  @Patch(':postId')
+  @Patch('/:postId')
   @ApiParam({ name: 'postId', type: 'string' })
   @ApiBadRequestResponse({ description: 'comment could not update' })
   async editComment(@Param('postId') postId, @Body() data) {
@@ -102,7 +101,7 @@ export class CommentsController {
   }
 
   //remove comment route
-  @Delete('remove-single')
+  @Delete('/remove-single')
   @ApiBearerAuth('access-token')
   @ApiQuery({ name: 'commentId', type: 'string' })
   @ApiQuery({ name: 'postId', type: 'string' })
@@ -116,7 +115,7 @@ export class CommentsController {
     return this.commentService.deleteSingleComment(data);
   }
 
-  @Delete('remove-all')
+  @Delete('/remove-all')
   @ApiBearerAuth('access-token')
   @ApiQuery({ name: 'postId', type: 'string' })
   @ApiCreatedResponse({

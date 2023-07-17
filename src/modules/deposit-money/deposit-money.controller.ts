@@ -42,7 +42,7 @@ export class DepositMoneyController {
       },
     },
   })
-  deposit(@Query('restaurantId') restaurantId, @Body() data) {
+  deposit(@Query('/restaurantId') restaurantId, @Body() data) {
     return this.depositMoneyService.deposit(data, restaurantId);
   }
 
@@ -53,7 +53,7 @@ export class DepositMoneyController {
       restaurantId,
     );
   }
-  @Get('all-restaurants')
+  @Get('/all-restaurants')
   sumOfDepositedAmountByAllRestaurant() {
     return this.depositMoneyService.sumOfDepositedAmountByAllRestaurant();
   }

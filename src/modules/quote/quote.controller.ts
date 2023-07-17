@@ -15,7 +15,7 @@ import { QuoteDto } from '../../data/dtos/quote.dto';
 export class QuoteController {
   constructor(private readonly quoteService: QuoteService) {}
 
-  @Post('create')
+  @Post('/create')
   @ApiBody({
     schema: {
       type: 'object',
@@ -30,7 +30,7 @@ export class QuoteController {
     return this.quoteService.createQuote(data);
   }
 
-  @Get('all')
+  @Get('/all')
   @ApiCreatedResponse({ type: [QuoteDto] })
   getAllQuotes() {
     return this.quoteService.getAllQuotes();
@@ -45,14 +45,14 @@ export class QuoteController {
   getSingleQuote(@Query('quoteId') quoteId) {
     return this.quoteService.getSingleQuote(quoteId);
   }
-  @Patch('edit')
+  @Patch('/edit')
   @ApiQuery({ type: String, name: 'quoteId' })
   @ApiCreatedResponse({ type: QuoteDto })
   @ApiBadRequestResponse({ type: String, description: 'could not edit quote' })
   editQuote(@Query('quoteId') quoteId, @Body() data) {
     return this.quoteService.editQuote(quoteId, data);
   }
-  @Delete('remove')
+  @Delete('/remove')
   @ApiQuery({ type: String, name: 'quoteId' })
   @ApiCreatedResponse({ type: QuoteDto })
   @ApiBadRequestResponse({

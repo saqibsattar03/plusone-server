@@ -27,7 +27,7 @@ import { JwtAuthGuard } from '../../common/auth/guards/jwt-auth.guard';
 export class VoucherController {
   constructor(private readonly voucherService: VoucherService) {}
 
-  @Post('create')
+  @Post('/create')
   @ApiBody({
     type: VoucherDto,
     description: 'Request body to create a Voucher for student',
@@ -66,7 +66,7 @@ export class VoucherController {
           );
     }
   }
-  @Get('all-by-restaurant')
+  @Get('/all-by-restaurant')
   @ApiQuery({ type: 'string', name: 'restaurantId' })
   @ApiCreatedResponse({ type: VoucherDto })
   @ApiBadRequestResponse({ description: 'can not fetch voucher' })
@@ -74,7 +74,7 @@ export class VoucherController {
     return this.voucherService.getAllVouchersByRestaurant(restaurantId);
   }
 
-  @Get('single')
+  @Get('/single')
   @ApiQuery({ type: 'string', name: 'voucherId' })
   @ApiCreatedResponse({ type: VoucherDto })
   @ApiBadRequestResponse({ description: 'can not fetch voucher' })
@@ -110,7 +110,7 @@ export class VoucherController {
   //   return this.voucherService.deleteAllVoucher(restaurantId);
   // }
 
-  @Post('verify-restaurant-code')
+  @Post('/verify-restaurant-code')
   @ApiBody({
     schema: {
       type: 'object',
@@ -129,13 +129,13 @@ export class VoucherController {
     return this.voucherService.verifyRestaurantCode(data);
   }
 
-  @Get('all-redeemed-by-user')
+  @Get('/all-redeemed-by-user')
   @UseGuards(JwtAuthGuard)
   getAllVoucherRedeemedByUser(@Request() request) {
     return this.voucherService.getAllVoucherRedeemedByUser(request.user.userId);
   }
 
-  @Get('redeem-count')
+  @Get('/redeem-count')
   getTotalVoucherRedeemedCount(@Query('restaurantId') restaurantId) {
     return this.voucherService.getTotalVoucherRedeemedCount(restaurantId);
   }
@@ -152,7 +152,7 @@ export class VoucherController {
   //   return this.voucherService.getUserWhoRedeemVoucher(voucherId);
   // }
 
-  @Patch('disable')
+  @Patch('/disable')
   @ApiBody({
     schema: {
       type: 'object',
@@ -172,13 +172,13 @@ export class VoucherController {
     return this.voucherService.disableVoucherForSpecificDays(data);
   }
 
-  @Get('all-redeemed')
+  @Get('/all-redeemed')
   @ApiQuery({ type: String, name: 'restaurantId', required: false })
   getRedeemedVoucher(@Query('restaurantId') restaurantId) {
     return this.voucherService.getAllRedeemedVouchers(restaurantId);
   }
 
-  @Get('savings')
+  @Get('/savings')
   @ApiQuery({ type: String, name: 'userId' })
   @ApiQuery({
     type: String,

@@ -17,7 +17,7 @@ import { CustomerServiceDto } from '../../data/dtos/customerService.dto';
 export class CustomerServiceController {
   constructor(private readonly customerService: CustomerServiceService) {}
 
-  @Post('create')
+  @Post('/create')
   @ApiBody({ type: CustomerServiceDto })
   @ApiResponse({ type: CustomerServiceDto })
   @UseGuards(JwtAuthGuard)
@@ -26,20 +26,20 @@ export class CustomerServiceController {
     return this.customerService.createCustomerQuery(data);
   }
 
-  @Get('get-all')
+  @Get('/get-all')
   @ApiResponse({ type: [CustomerServiceDto] })
   getAllQueries() {
     return this.customerService.getAllQueries();
   }
 
-  @Get('get-single')
+  @Get('/get-single')
   @ApiQuery({ type: String, name: 'queryId' })
   @ApiResponse({ type: CustomerServiceDto })
   getSingleQuery(@Query('queryId') queryId) {
     return this.customerService.getSingleQuery(queryId);
   }
 
-  @Patch('edit')
+  @Patch('/edit')
   @ApiQuery({ type: String, name: 'queryId' })
   @ApiBody({ type: CustomerServiceDto })
   @ApiResponse({ type: CustomerServiceDto })
@@ -47,7 +47,7 @@ export class CustomerServiceController {
     return this.customerService.editQuery(queryId, data);
   }
 
-  @Delete('remove')
+  @Delete('/remove')
   @ApiQuery({ type: String, name: 'queryId' })
   deleteQuery(@Query('queryId') queryId) {
     return this.customerService.deleteQuery(queryId);

@@ -50,7 +50,7 @@ export class RestaurantReviewController {
     return this.restaurantReviewService.createReview(data);
   }
 
-  @Patch('')
+  @Patch()
   @ApiBody({ type: UpdateReviewDto })
   @ApiCreatedResponse({
     type: RestaurantReviewDto,
@@ -64,7 +64,7 @@ export class RestaurantReviewController {
     return this.restaurantReviewService.editReview(data, restaurantId);
   }
 
-  @Delete('')
+  @Delete()
   deleteSingleReview(
     @Query('reviewId') reviewId,
     @Query('restaurantId') restaurantId,
@@ -75,7 +75,7 @@ export class RestaurantReviewController {
     );
   }
 
-  @Delete('all')
+  @Delete('/all')
   deleteAllReviews(@Query('restaurantId') restaurantId) {
     return this.restaurantReviewService.deleteAllReviews(restaurantId);
   }
@@ -90,7 +90,7 @@ export class RestaurantReviewController {
   @ApiBadRequestResponse({
     description: 'can not fetch all review',
   })
-  @Get('all/:restaurantId')
+  @Get('/all/:restaurantId')
   getRestaurantReviews(
     @Param('restaurantId') restaurantId,
     @Query() paginationDto: PaginationDto,

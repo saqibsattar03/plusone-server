@@ -62,7 +62,7 @@ export class SocialPostsController {
   @ApiBody({ type: GetSocialPostDto })
   @ApiCreatedResponse({ type: SocialPostResponseDto })
   @ApiBadRequestResponse({ description: 'can not fetch posts' })
-  @Post('all')
+  @Post('/all')
   @UseGuards(JwtAuthGuard)
   getAllPost(
     @Query() paginationDto: PaginationDto,
@@ -89,7 +89,7 @@ export class SocialPostsController {
 
   /***Retrieve Single Post Route***/
 
-  @Get(':postId')
+  @Get('/:postId')
   @ApiParam({ name: 'postId', type: 'string' })
   @ApiCreatedResponse({
     type: SocialPostDto,
@@ -109,7 +109,7 @@ export class SocialPostsController {
 
   /***Post Update Route ***/
 
-  @Patch('')
+  @Patch()
   @ApiBearerAuth('access-token')
   @ApiQuery({ name: 'postId', type: String })
   @ApiBody({
@@ -132,7 +132,7 @@ export class SocialPostsController {
   }
   /***Delete Post Route ***/
 
-  @Delete(':postId')
+  @Delete('/:postId')
   @ApiBearerAuth('access-token')
   @ApiParam({ name: 'postId', type: 'string' })
   @ApiCreatedResponse({ description: 'post deleted successfully' })
@@ -144,7 +144,7 @@ export class SocialPostsController {
 
   /***Like Post  Route ***/
 
-  @Post('like')
+  @Post('/like')
   @ApiBearerAuth('access-token')
   @ApiCreatedResponse({ description: 'post liked successfully' })
   @ApiQuery({
@@ -165,7 +165,7 @@ export class SocialPostsController {
 
   /***Remove Like Route ***/
 
-  @Patch('remove-like')
+  @Patch('/remove-like')
   @ApiBearerAuth('access-token')
   @ApiQuery({
     name: 'postId',
@@ -186,12 +186,12 @@ export class SocialPostsController {
 
   /*** search post by caption ***/
   @ApiQuery({ type: String, name: 'keyword' })
-  @Post('search-by-caption')
+  @Post('/search-by-caption')
   filterRestaurantBasedOnCaption(@Body() data) {
     return this.socialPostService.filterPostBasedOnCaption(data.keyword);
   }
 
-  @Post('search-by-location')
+  @Post('/search-by-location')
   @ApiBody({
     schema: {
       type: 'object',

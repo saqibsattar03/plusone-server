@@ -31,7 +31,7 @@ import { JwtAuthGuard } from '../../common/auth/guards/jwt-auth.guard';
 @Controller('persons')
 export class ProfilesController {
   constructor(private readonly profileService: ProfilesService) {}
-  @Get('single/:profileId')
+  @Get('/single/:profileId')
   @ApiParam({ name: 'profileId', type: String })
   @ApiCreatedResponse({
     type: ProfileDto,
@@ -42,7 +42,7 @@ export class ProfilesController {
     return this.profileService.getSingleProfile(id);
   }
 
-  @Patch('update')
+  @Patch('/update')
   @ApiBearerAuth('access-token')
   @ApiBody({ type: UpdateProfileDto })
   @ApiCreatedResponse({
@@ -64,14 +64,14 @@ export class ProfilesController {
     return this.profileService.deleteProfile(request.user.userId);
   }
 
-  @Get('all')
+  @Get('/all')
   @ApiQuery({ type: String, name: 'role' })
   @ApiResponse({ description: 'All Users  Fetched successfully' })
   @ApiBadRequestResponse({ description: 'could not Fetch  Users' })
   getAllUsers(@Query('role') role) {
     return this.profileService.getAllUsers(role);
   }
-  @Get('all-public')
+  @Get('/all-public')
   @ApiQuery({ type: PaginationDto })
   @ApiResponse({ description: 'All Public Profile  Fetched successfully' })
   @ApiBadRequestResponse({ description: 'could not Fetch Public Profile' })
@@ -79,14 +79,14 @@ export class ProfilesController {
     return this.profileService.getAllPublicProfile(paginationQuery);
   }
 
+  @Post('/near-by-restaurants')
   @ApiBody({ type: RestaurantFilter })
   @ApiCreatedResponse({ type: RestaurantResponseDto })
-  @Post('near-by-restaurants')
   getNearByRestaurants(@Body() data, @Query() paginationQuery: PaginationDto) {
     return this.profileService.restaurantFilters(data, paginationQuery);
   }
 
-  @Patch('update-password')
+  @Patch('/update-password')
   @ApiBearerAuth('access-token')
   @ApiBody({
     schema: {
@@ -102,18 +102,17 @@ export class ProfilesController {
   @UseGuards(JwtAuthGuard)
   changePassword(@Request() request, @Body() data) {
     data.userId = request.user.userId;
-    console.log('data = ', data);
     return this.profileService.changePassword(data);
   }
 
   /*** temporary route ***/
   @ApiQuery({ name: 'userId', type: String })
-  @Patch('change-status')
+  @Patch('/change-status')
   changeUserStatus(@Query('userId') userId) {
     return this.profileService.changeUserStatus(userId);
   }
 
-  @Get('search-by-name')
+  @Get('/search-by-name')
   @ApiQuery({ name: 'username', type: String })
   @ApiCreatedResponse({
     schema: {
@@ -129,9 +128,8 @@ export class ProfilesController {
   filterUserByName(@Query('username') username, @Query('userType') userType) {
     return this.profileService.filterUserByName(username, userType);
   }
-  @Delete('delete-all')
+  @Delete('/delete-all')
   delete() {
-    console.log('here');
     return this.profileService.deleteAllUser();
   }
 }

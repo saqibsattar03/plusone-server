@@ -24,3 +24,26 @@ export class UserStampCardDto {
   @ApiProperty({ type: Date, name: 'startDate' })
   startDate: Date;
 }
+
+export class StampCardHistoryDto {
+  @ApiProperty({ type: String, name: '_id' })
+  _id: string;
+
+  @ApiProperty({ type: String, name: 'cardId' })
+  cardId: string;
+
+  @ApiProperty({ type: String, name: 'userId' })
+  userId: string;
+
+  @ApiProperty({ type: String, name: 'restaurantId' })
+  restaurantId: string;
+
+  @ApiProperty({ type: Number, name: 'totalPoints' })
+  totalPoints: number;
+
+  @ApiProperty({ type: () => Date })
+  createdAt: Date;
+
+  @ApiProperty({ type: () => Date })
+  updatedAt: Date;
+}
