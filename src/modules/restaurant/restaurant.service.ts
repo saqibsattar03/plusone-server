@@ -196,22 +196,25 @@ export class RestaurantService {
           description: 1,
           location: 1,
           reviews: 1,
-          vouchers: {
-            $cond: {
-              if: {
-                $in: [
-                  new Date(
-                    `${moment(new Date()).format(
-                      'YYYY-MM-DD',
-                    )}T00:00:00.000+00:00`,
-                  ),
-                  '$vouchers.voucherDisableDates',
-                ],
-              },
-              then: null,
-              else: '$vouchers',
-            },
-          },
+          vouchers: 1,
+
+          //*** uncomment below line to remove disabled vouchers from response ***//
+          // vouchers: {
+          //   $cond: {
+          //     if: {
+          //       $in: [
+          //         new Date(
+          //           `${moment(new Date()).format(
+          //             'YYYY-MM-DD',
+          //           )}T00:00:00.000+00:00`,
+          //         ),
+          //         '$vouchers.voucherDisableDates',
+          //       ],
+          //     },
+          //     then: null,
+          //     else: '$vouchers',
+          //   },
+          // },
           media: 1,
           redeemedVouchers: 1,
           users: 1,

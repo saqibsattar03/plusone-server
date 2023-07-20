@@ -20,6 +20,9 @@ export class FcmHistory {
   @Prop({ type: Boolean, default: false })
   seen: boolean;
 
+  @Prop({ type: Boolean, default: false })
+  isAdminNotification: boolean;
+
   @Prop({ type: String })
   profileImage: string;
 }

@@ -91,6 +91,7 @@ export class RestaurantController {
     @Query('restaurantId') restaurantId,
     @Request() request,
   ) {
+    console.log('here :: ', restaurantId);
     const userId = request.user.userId;
     return this.restaurantService.getSingleRestaurantDetails(
       restaurantId,

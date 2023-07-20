@@ -33,7 +33,7 @@ export class AppController {
     return 'hello world';
   }
 
-  @Post('single-file')
+  @Post('/single-file')
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -58,7 +58,7 @@ export class AppController {
     throw new HttpException('no image uploaded', HttpStatus.NOT_FOUND);
   }
 
-  @Post('multiple-files')
+  @Post('/multiple-files')
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -90,7 +90,7 @@ export class AppController {
     throw new HttpException('no image uploaded', HttpStatus.NOT_FOUND);
   }
   @ApiQuery({ name: 'media', type: String })
-  @Delete('remove-file')
+  @Delete('/remove-file')
   async removeProfileImage(@Query('media') media, @Res() res): Promise<any> {
     if (media) {
       const filePath = path.join(__dirname, '..', '..', '/uploads/' + media);

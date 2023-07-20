@@ -20,7 +20,7 @@ import { ProfileDto } from '../../data/dtos/profile.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('sign-up')
+  @Post('/sign-up')
   @ApiBody({
     type: ProfileDto,
     description: 'Users Created as response',
@@ -30,7 +30,7 @@ export class AuthController {
     return this.authService.createUser(data);
   }
 
-  @Patch('verify-account')
+  @Patch('/verify-account')
   @ApiBody({
     schema: {
       type: 'object',
@@ -44,12 +44,12 @@ export class AuthController {
     return this.authService.verifyUser(data);
   }
 
-  @Post('resend-verification-code')
+  @Post('/resend-verification-code')
   @ApiQuery({ type: String, name: 'email' })
   resendVerificationCode(@Query('email') email) {
     return this.authService.resendVerificationCode(email);
   }
-  @Post('sign-in')
+  @Post('/sign-in')
   @ApiCreatedResponse({
     description: 'SignIn successful',
   })
@@ -66,11 +66,10 @@ export class AuthController {
   @ApiUnauthorizedResponse({ description: 'email or password is incorrect' })
   @UseGuards(LocalAuthGuard)
   login(@Request() request: any): Promise<any> {
-    console.log('body :: ', request.body);
     return this.authService.login(request.body);
   }
 
-  @Get('person')
+  @Get('/person')
   @ApiBearerAuth('access_token')
   @ApiCreatedResponse({
     type: ProfileDto,
@@ -83,7 +82,7 @@ export class AuthController {
     return this.authService.profile(request.user.email);
   }
 
-  @Post('forgot-password')
+  @Post('/forgot-password')
   @ApiQuery({ name: 'email', type: String })
   @ApiResponse({ description: 'Email sent successfully' })
   @ApiBadRequestResponse({
@@ -93,7 +92,7 @@ export class AuthController {
     return this.authService.forgotPassword(email);
   }
 
-  @Post('verify-password-token')
+  @Post('/verify-password-token')
   @ApiBody({
     schema: {
       type: 'object',
@@ -107,12 +106,12 @@ export class AuthController {
     return this.authService.verifyPasswordToken(data);
   }
 
-  @Post('resend-password-token')
+  @Post('/resend-password-token')
   @ApiQuery({ type: String, name: 'email' })
   resendPasswordToken(@Query('email') email) {
     return this.authService.resendPasswordToken(email);
   }
-  @Post('reset-password')
+  @Post('/reset-password')
   @ApiResponse({ description: 'Password Reset Successfully' })
   @ApiBadRequestResponse({
     description: 'Could not reset password',

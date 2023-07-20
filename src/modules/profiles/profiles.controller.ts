@@ -82,8 +82,8 @@ export class ProfilesController {
   @Post('/near-by-restaurants')
   @ApiBody({ type: RestaurantFilter })
   @ApiCreatedResponse({ type: RestaurantResponseDto })
-  getNearByRestaurants(@Body() data, @Query() paginationQuery: PaginationDto) {
-    return this.profileService.restaurantFilters(data, paginationQuery);
+  getNearByRestaurants(@Body() data, @Query() paginationDto: PaginationDto) {
+    return this.profileService.restaurantFilters(data, paginationDto);
   }
 
   @Patch('/update-password')

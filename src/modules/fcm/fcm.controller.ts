@@ -14,6 +14,22 @@ export class FcmController {
   sendSingleNotification(@Body() data) {
     return this.fcmService.sendSingleNotification(data);
   }
+
+  @Post('/send-all')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        userIds: { type: 'array', items: { type: 'string' } },
+        title: { type: 'string' },
+        body: { type: 'string' },
+      },
+    },
+  })
+  sendNotificationToMultipleUsers(@Body() data) {
+    return this.fcmService.sendNotificationToMultipleUsers(data);
+  }
+
   @Patch('/token')
   @ApiBody({
     schema: {

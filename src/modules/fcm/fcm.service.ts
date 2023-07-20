@@ -6,6 +6,7 @@ import { HttpService } from '@nestjs/axios';
 import { ProfilesService } from '../profiles/profiles.service';
 import { messaging } from '../../main';
 import { PaginationDto } from '../../common/auth/dto/pagination.dto';
+import axios from 'axios';
 
 @Injectable()
 export class FcmService {
@@ -53,6 +54,44 @@ export class FcmService {
     } catch (e) {
       // throw new HttpException(e.toString(), HttpStatus.BAD_REQUEST);
     }
+  }
+
+  async sendNotificationToMultipleUsers(data): Promise<any> {
+    try {
+      const users = await this.profileService.getAllUsersByIds(data.userIds);
+      for (const user of users) {
+        if (user.fcmToken) {
+          const message = {
+            notification: {
+              title: data.title,
+              body: data.body,
+            },
+            // android: {
+            //   notification: {
+            //     imageUrl:
+            //       'https://api.plusoneworldwide.com/uploads/ff91596d-5bdc-42ab-8a8c-ff78f344fa4c.png',
+            //   },
+            // },
+            token: user.fcmToken,
+            data: {
+              createdAt: new Date().toISOString(),
+            },
+          };
+          await messaging.send(message);
+          await this.fcmHistoryModel.create({
+            userId: user._id,
+            // receiverId: new mongoose.Types.ObjectId('644a4c7d1913f5e2b20fd596'),
+            // receiverId: new mongoose.Types.ObjectId(user._id),
+            title: data.title,
+            body: data.body,
+            seen: false,
+            isAdminNotification: true,
+            // profileImage: 'cb826440-1dc3-41fd-ac35-75a56a0e2b4d.png',
+          });
+        }
+      }
+      return true;
+    } catch (e) {}
   }
 
   async updateFcmToken(data): Promise<any> {

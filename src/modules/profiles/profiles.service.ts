@@ -200,6 +200,12 @@ export class ProfilesService {
       },
     ]);
   }
+
+  async getAllUsersByIds(userIds): Promise<any> {
+    return this.profileModel
+      .find({ _id: { $in: userIds } })
+      .select('fcmToken profileImage');
+  }
   async getUser(email) {
     return this.profileModel
       .findOne({
@@ -256,8 +262,8 @@ export class ProfilesService {
       )
       .select(['-createdAt', '-updatedAt', '-rewardPoints']);
   }
-  async restaurantFilters(data, paginationQuery): Promise<any> {
-    return this.restaurantService.restaurantFilters(data, paginationQuery);
+  async restaurantFilters(data, paginationDto): Promise<any> {
+    return this.restaurantService.restaurantFilters(data, paginationDto);
   }
   async resetPassword(user, enteredPassword) {
     const encryptedPassword = await hashPassword(enteredPassword);
