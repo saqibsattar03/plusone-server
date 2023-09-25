@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import {
   TransactionHistory,
   TransactionHistoryDocument,
-} from '../../data/schemas/transactionHistory.schema';
+} from '../../data/schemas/transaction-history.schema';
 import mongoose, { Model } from 'mongoose';
 import { PdfReportUtil } from '../../common/utils/pdf-report.util';
 

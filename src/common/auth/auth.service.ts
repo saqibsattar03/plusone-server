@@ -12,7 +12,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import {
   ForgotPassword,
   ForgotPasswordDocument,
-} from '../../data/schemas/forgotPassword.schema';
+} from '../../data/schemas/forgot-password.schema';
 import mongoose, { Model } from 'mongoose';
 import { Constants } from '../constants';
 import { comparePassword, hashPassword } from '../utils/passwordHashing.util';

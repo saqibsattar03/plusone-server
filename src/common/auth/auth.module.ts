@@ -13,7 +13,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import {
   ForgotPassword,
   ForgotPasswordSchema,
-} from '../../data/schemas/forgotPassword.schema';
+} from '../../data/schemas/forgot-password.schema';
 import { Profile, ProfileSchema } from '../../data/schemas/profile.schema';
 
 @Module({

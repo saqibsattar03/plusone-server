@@ -26,6 +26,7 @@ import { MailModule } from './modules/mail/mail.module';
 import * as process from 'process';
 import { StampCardModule } from './modules/restaurant-stamp-card/stamp-card.module';
 import { UserStampCardModule } from './modules/user-stamp-card/user-stamp-card.module';
+import { ReportPostModule } from './modules/report-post/report-post.module';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { UserStampCardModule } from './modules/user-stamp-card/user-stamp-card.m
     MailModule,
     StampCardModule,
     UserStampCardModule,
+    ReportPostModule,
   ],
   controllers: [AppController],
   providers: [AppService],

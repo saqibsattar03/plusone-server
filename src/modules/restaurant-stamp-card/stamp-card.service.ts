@@ -5,7 +5,7 @@ import {
   StampCardDocument,
 } from '../../data/schemas/stamp-card.schema';
 import mongoose, { Model } from 'mongoose';
-import { RestaurantStampCardDto } from '../../data/dtos/restaurantStampCard.dto';
+import { RestaurantStampCardDto } from '../../data/dtos/restaurant-stamp-card.dto';
 
 @Injectable()
 export class StampCardService {

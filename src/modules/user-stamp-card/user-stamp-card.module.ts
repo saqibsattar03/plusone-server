@@ -12,6 +12,7 @@ import {
 } from '../../data/schemas/stamp-card-history.schema';
 import { RestaurantModule } from '../restaurant/restaurant.module';
 import { StampCardModule } from '../restaurant-stamp-card/stamp-card.module';
+import { Award, AwardSchema } from '../../data/schemas/award.schema';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { StampCardModule } from '../restaurant-stamp-card/stamp-card.module';
         name: StampCardHistory.name,
         schema: StampCardHistorySchema,
       },
+      { name: Award.name, schema: AwardSchema },
     ]),
     RestaurantModule,
     StampCardModule,

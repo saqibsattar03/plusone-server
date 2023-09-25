@@ -10,7 +10,7 @@ import { CustomerServiceService } from './customer-service.service';
 import { Body, Get, Post } from '@nestjs/common/decorators';
 import { ApiBody, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/auth/guards/jwt-auth.guard';
-import { CustomerServiceDto } from '../../data/dtos/customerService.dto';
+import { CustomerServiceDto } from '../../data/dtos/customer-service.dto';
 
 @ApiTags('Customer Service')
 @Controller('customer-service')

@@ -5,7 +5,7 @@ import {
   UserStampCardDocument,
 } from '../../data/schemas/user-stamp-card.schema';
 import mongoose, { Model } from 'mongoose';
-import { UserStampCardDto } from '../../data/dtos/userStampCard.dto';
+import { UserStampCardDto } from '../../data/dtos/user-stamp-card.dto';
 import {
   StampCardHistory,
   StampCardHistoryDocument,
@@ -13,6 +13,8 @@ import {
 import { PaginationDto } from '../../common/auth/dto/pagination.dto';
 import { RestaurantService } from '../restaurant/restaurant.service';
 import { StampCardService } from '../restaurant-stamp-card/stamp-card.service';
+import { getRandomNumber } from '../../common/utils/generateRandomNumber.util';
+import { AwardDocument, Award } from '../../data/schemas/award.schema';
 
 @Injectable()
 export class UserStampCardService {
@@ -21,6 +23,9 @@ export class UserStampCardService {
     private readonly userStampCardModel: Model<UserStampCardDocument>,
     @InjectModel(StampCardHistory.name)
     private readonly stampCardHistoryModel: Model<StampCardHistoryDocument>,
+    @InjectModel(Award.name)
+    private readonly awardModel: Model<AwardDocument>,
+
     private readonly restaurantService: RestaurantService,
     private readonly stampCardService: StampCardService,
   ) {}
@@ -36,11 +41,11 @@ export class UserStampCardService {
       userId: userIdObj,
       cardId: cardIdObj,
     });
-    const totalPoints = await this.stampCardService.getSingleStampCard(cardId);
+    // const totalPoints = await this.stampCardService.getSingleStampCard(cardId);
     await this.createStampCardHistory(
       cardId,
       userId,
-      totalPoints.totalPoints,
+      // totalPoints.totalPoints,
       restaurantId,
     );
     if (!res) {
@@ -109,7 +114,9 @@ export class UserStampCardService {
     );
   }
   async redeemStampCard(data): Promise<UserStampCardDocument> {
-    const { restaurantId, cardId, userId, uniqueCode } = data;
+    const { restaurantId, cardId, userId, uniqueCode, isSharing, sharingTo } =
+      data;
+
     const [stampCardUniqueCode, restaurantStampCard, userRedeemedPoints] =
       await Promise.all([
         this.restaurantService.getRestaurantVerificationCode(restaurantId),
@@ -122,18 +129,45 @@ export class UserStampCardService {
           .select('redeemedPoints -_id'),
       ]);
 
-    const totalPoints = await this.stampCardService.getSingleStampCard(cardId);
+    // const totalPoints = await this.stampCardService.getSingleStampCard(cardId);
+
     if (uniqueCode === stampCardUniqueCode.stampCardUniqueCode) {
       const redeemedPoints = userRedeemedPoints.redeemedPoints;
-      if (redeemedPoints === restaurantStampCard.totalPoints - 1) {
+
+      //*** getting reward by him/herself ***//
+      if (
+        redeemedPoints === restaurantStampCard.totalPoints - 1 &&
+        !isSharing
+      ) {
         await this.createStampCardHistory(
           cardId,
           userId,
-          totalPoints.totalPoints,
+          // totalPoints.totalPoints,
           restaurantId,
         );
         await this.getReward(redeemedPoints, restaurantStampCard, data);
-      } else {
+      }
+      //*** sharing reward ***//
+      else if (
+        redeemedPoints === restaurantStampCard.totalPoints - 1 &&
+        isSharing
+      ) {
+        const sharingUniqueCode = await getRandomNumber(4687, 9742);
+        const reward = restaurantStampCard.reward;
+        const sharingData = {
+          restaurantId,
+          cardId,
+          userId,
+          sharingTo,
+          sharingUniqueCode,
+          reward,
+        };
+        console.log(`award shared to ${sharingTo}`);
+        await this.shareReward(sharingData);
+      }
+
+      //*** incrementing reward points ***//
+      else {
         const updateQuery = {
           userId: new mongoose.Types.ObjectId(userId),
           cardId: new mongoose.Types.ObjectId(cardId),
@@ -146,7 +180,7 @@ export class UserStampCardService {
         await this.createStampCardHistory(
           cardId,
           userId,
-          totalPoints.totalPoints,
+          // totalPoints.totalPoints,
           restaurantId,
         );
         return this.userStampCardModel.findOneAndUpdate(
@@ -161,6 +195,7 @@ export class UserStampCardService {
   }
 
   async getReward(redeemedPoints, restaurantStampCard, data) {
+    //TODO: add rewards here in awards collection to create history
     await this.userStampCardModel.findOneAndUpdate(
       {
         userId: new mongoose.Types.ObjectId(data.userId),
@@ -197,54 +232,76 @@ export class UserStampCardService {
     });
   }
 
-  async createStampCardHistory(cardId, userId, totalPoints, restaurantId) {
+  async createStampCardHistory(cardId, userId, restaurantId) {
     //*** stamp card history ***//
 
     await this.stampCardHistoryModel.create({
       cardId: new mongoose.Types.ObjectId(cardId),
       userId: new mongoose.Types.ObjectId(userId),
       restaurantId: new mongoose.Types.ObjectId(restaurantId),
-      totalPoints: totalPoints,
+      // totalPoints: totalPoints,
     });
   }
 
+  // async getAwardedGifts(userId): Promise<any> {
+  //   const gifts = new Set();
+  //   const userCards = await this.userStampCardModel.find({
+  //     userId: new mongoose.Types.ObjectId(userId),
+  //   });
+  //   const restaurantCards = await this.stampCardHistoryModel.find({
+  //     userId: new mongoose.Types.ObjectId(userId),
+  //   });
+  //
+  //   const restaurantCardsMap = {};
+  //   for (const card of restaurantCards) {
+  //     restaurantCardsMap[card.cardId.toString()] = card;
+  //   }
+  //
+  //   for (const userCard of userCards) {
+  //     const restaurantCard = restaurantCardsMap[userCard.cardId.toString()];
+  //     if (
+  //       restaurantCard &&
+  //       userCard.redeemedPoints === restaurantCard.totalPoints
+  //     ) {
+  //       gifts.add(restaurantCard);
+  //     }
+  //   }
+  //
+  //   return Array.from(gifts);
+  //   // for (let i = 0; i < userCards.length; i++) {
+  //   //   for (let j = 0; j < restaurantCards.length; j++) {
+  //   //     if (
+  //   //       userCards[i].cardId.toString() ===
+  //   //       restaurantCards[j].cardId.toString()
+  //   //     ) {
+  //   //       if (userCards[i].redeemedPoints === restaurantCards[j].totalPoints) {
+  //   //         gifts.push(restaurantCards[j]);
+  //   //       }
+  //   //     }
+  //   //   }
+  //   // }
+  //   // return gifts;
+  // }
+
   async getAwardedGifts(userId): Promise<any> {
-    const gifts = new Set();
-    const userCards = await this.userStampCardModel.find({
+    return this.awardModel.find({
       userId: new mongoose.Types.ObjectId(userId),
     });
-    const restaurantCards = await this.stampCardHistoryModel.find({
-      userId: new mongoose.Types.ObjectId(userId),
+  }
+
+  async shareReward(data): Promise<any> {
+    await this.awardModel.create({
+      userId: new mongoose.Types.ObjectId(data.userId),
+      cardId: new mongoose.Types.ObjectId(data.cardId),
+      restaurantId: new mongoose.Types.ObjectId(data.restaurantId),
+      shareTo: new mongoose.Types.ObjectId(data.sharingTo),
+      uniqueNumber: data.sharingUniqueCode,
+      reward: data.reward,
     });
+    throw new HttpException('Reward shared successfully', HttpStatus.OK);
+  }
 
-    const restaurantCardsMap = {};
-    for (const card of restaurantCards) {
-      restaurantCardsMap[card.cardId.toString()] = card;
-    }
-
-    for (const userCard of userCards) {
-      const restaurantCard = restaurantCardsMap[userCard.cardId.toString()];
-      if (
-        restaurantCard &&
-        userCard.redeemedPoints === restaurantCard.totalPoints
-      ) {
-        gifts.add(restaurantCard);
-      }
-    }
-
-    return Array.from(gifts);
-    // for (let i = 0; i < userCards.length; i++) {
-    //   for (let j = 0; j < restaurantCards.length; j++) {
-    //     if (
-    //       userCards[i].cardId.toString() ===
-    //       restaurantCards[j].cardId.toString()
-    //     ) {
-    //       if (userCards[i].redeemedPoints === restaurantCards[j].totalPoints) {
-    //         gifts.push(restaurantCards[j]);
-    //       }
-    //     }
-    //   }
-    // }
-    // return gifts;
+  async getAllRewardsByRestaurantId(restaurantId): Promise<any> {
+    return this.awardModel.find({ restaurantId: restaurantId });
   }
 }

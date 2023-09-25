@@ -3,9 +3,9 @@ import { InjectModel } from '@nestjs/mongoose';
 import {
   CustomerService,
   CustomerServiceDocument,
-} from '../../data/schemas/customerService.schema';
+} from '../../data/schemas/customer-service.schema';
 import { Model } from 'mongoose';
-import { CustomerServiceDto } from '../../data/dtos/customerService.dto';
+import { CustomerServiceDto } from '../../data/dtos/customer-service.dto';
 import { AwsMailUtil } from '../../common/utils/aws-mail-util';
 import { ProfilesService } from '../profiles/profiles.service';
 

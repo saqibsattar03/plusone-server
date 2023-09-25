@@ -22,7 +22,7 @@ import {
 } from '@nestjs/swagger';
 import { CommentsService } from './comments.service';
 import { Get } from '@nestjs/common/decorators';
-import { CommentDto } from '../../../data/dtos/socialPost.dto';
+import { CommentDto } from '../../../data/dtos/social-post.dto';
 import { JwtAuthGuard } from '../../../common/auth/guards/jwt-auth.guard';
 
 @ApiTags('Comments')

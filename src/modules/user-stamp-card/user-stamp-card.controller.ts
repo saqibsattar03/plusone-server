@@ -1,10 +1,18 @@
-import { Controller, Patch, Query, Request, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Param,
+  Patch,
+  Query,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { UserStampCardService } from './user-stamp-card.service';
 import { Body, Get, Post } from '@nestjs/common/decorators';
 import {
+  RewardDto,
   StampCardHistoryDto,
   UserStampCardDto,
-} from '../../data/dtos/userStampCard.dto';
+} from '../../data/dtos/user-stamp-card.dto';
 import { PaginationDto } from '../../common/auth/dto/pagination.dto';
 import {
   ApiBadRequestResponse,
@@ -156,10 +164,19 @@ export class UserStampCardController {
   }
   @Get('/all-gifts')
   @ApiBearerAuth()
-  @ApiResponse({ type: StampCardHistoryDto })
+  @ApiResponse({ type: RewardDto })
   @ApiBadRequestResponse({ description: 'can not get gifts' })
   @UseGuards(JwtAuthGuard)
   getAwardedGifts(@Request() request) {
     return this.userStampCardService.getAwardedGifts(request.user.userId);
+  }
+
+  @Get('/all-rewards-of-restaurant/:restaurantId')
+  @ApiBearerAuth()
+  @ApiResponse({ type: RewardDto })
+  // @ApiBadRequestResponse({ description: 'can not get gifts' })
+  @UseGuards(JwtAuthGuard)
+  getAllRewardsByRestaurantId(@Param('restaurantId') restaurantId) {
+    return this.userStampCardService.getAllRewardsByRestaurantId(restaurantId);
   }
 }

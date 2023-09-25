@@ -11,8 +11,8 @@ import { Post, PostDocument } from 'src/data/schemas/post.schema';
 import {
   LikedPost,
   LikedPostDocument,
-} from 'src/data/schemas/postLiked.schema';
-import { UpdateSocialPost } from '../../data/dtos/socialPost.dto';
+} from 'src/data/schemas/post-liked.schema';
+import { UpdateSocialPost } from '../../data/dtos/social-post.dto';
 import { Constants } from '../../common/constants';
 import { FollowingService } from '../following/following.service';
 import { CommentsService } from './comments/comments.service';

@@ -29,7 +29,7 @@ import {
   SocialPostDto,
   SocialPostResponseDto,
   UpdateSocialPost,
-} from '../../data/dtos/socialPost.dto';
+} from '../../data/dtos/social-post.dto';
 import { SocialPostsService } from './social-posts.service';
 import { JwtAuthGuard } from '../../common/auth/guards/jwt-auth.guard';
 import { PaginationDto } from '../../common/auth/dto/pagination.dto';

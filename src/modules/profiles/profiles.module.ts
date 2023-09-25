@@ -11,7 +11,7 @@ import { RestaurantModule } from '../restaurant/restaurant.module';
 import {
   ForgotPassword,
   ForgotPasswordSchema,
-} from '../../data/schemas/forgotPassword.schema';
+} from '../../data/schemas/forgot-password.schema';
 import { CommentsModule } from '../social-posts/comments/comments.module';
 
 @Module({

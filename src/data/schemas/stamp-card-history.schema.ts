@@ -16,11 +16,11 @@ export class StampCardHistory {
   @Prop({ type: mongoose.Types.ObjectId, ref: Restaurant.name })
   restaurantId: Restaurant;
 
-  @Prop({ type: Number })
-  redeemedPoints: number;
+  // @Prop({ type: Number })
+  // redeemedPoints: number;
 
-  @Prop({ type: Number, default: 0 })
-  totalPoints: number;
+  // @Prop({ type: Number, default: 0 })
+  // totalPoints: number;
 
   @Prop({ type: String })
   reward: string;

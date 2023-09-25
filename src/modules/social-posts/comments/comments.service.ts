@@ -9,7 +9,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { Comment } from 'src/data/schemas/comment.schema';
 import * as moment from 'moment';
-import { CommentDto } from '../../../data/dtos/socialPost.dto';
+import { CommentDto } from '../../../data/dtos/social-post.dto';
 import { SocialPostsService } from '../social-posts.service';
 import { ProfilesService } from '../../profiles/profiles.service';
 import { FcmService } from '../../fcm/fcm.service';

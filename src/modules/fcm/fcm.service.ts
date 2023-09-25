@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FcmHistory, FcmDocument } from '../../data/schemas/fcmHistory.schema';
+import { FcmHistory, FcmDocument } from '../../data/schemas/fcm-history.schema';
 import mongoose, { Model } from 'mongoose';
 import { HttpService } from '@nestjs/axios';
 import { ProfilesService } from '../profiles/profiles.service';

@@ -1,7 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Post, PostSchema } from 'src/data/schemas/post.schema';
-import { LikedPost, LikedPostSchema } from 'src/data/schemas/postLiked.schema';
+import { LikedPost, LikedPostSchema } from 'src/data/schemas/post-liked.schema';
 import { SocialPostsController } from './social-posts.controller';
 import { SocialPostsService } from './social-posts.service';
 import { FollowingModule } from '../following/following.module';

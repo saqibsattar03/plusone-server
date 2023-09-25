@@ -5,7 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import {
   FcmHistory,
   FcmHistorySchema,
-} from '../../data/schemas/fcmHistory.schema';
+} from '../../data/schemas/fcm-history.schema';
 import { HttpModule } from '@nestjs/axios';
 import { ProfilesModule } from '../profiles/profiles.module';
 

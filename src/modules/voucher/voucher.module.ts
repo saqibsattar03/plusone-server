@@ -6,7 +6,7 @@ import { Voucher, VoucherSchema } from '../../data/schemas/voucher.schema';
 import {
   RedeemVoucher,
   RedeemVoucherSchema,
-} from '../../data/schemas/redeemVoucher.schema';
+} from '../../data/schemas/redeem-voucher.schema';
 import { RestaurantModule } from '../restaurant/restaurant.module';
 import { ProfilesModule } from '../profiles/profiles.module';
 import { DepositMoneyModule } from '../deposit-money/deposit-money.module';
@@ -15,7 +15,7 @@ import { TransactionHistoryModule } from '../transaction-history/transaction-his
 import {
   FreeVoucherRedeemed,
   FreeVoucherRedeemedSchema,
-} from '../../data/schemas/freeVoucherRedeemed.schema';
+} from '../../data/schemas/free-voucher-redeemed.schema';
 
 @Module({
   imports: [

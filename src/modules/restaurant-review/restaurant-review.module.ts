@@ -5,7 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import {
   RestaurantReview,
   RestaurantReviewSchema,
-} from '../../data/schemas/restaurantReview.schema';
+} from '../../data/schemas/restaurant-review.schema';
 import { RestaurantModule } from '../restaurant/restaurant.module';
 import { SocialPostsModule } from '../social-posts/social-posts.module';
 

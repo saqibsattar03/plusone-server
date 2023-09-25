@@ -2,7 +2,7 @@ import { Controller, Query } from '@nestjs/common';
 import { TransactionHistoryService } from './transaction-history.service';
 import { Get, Post } from '@nestjs/common/decorators';
 import { ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { TransactionHistoryDto } from '../../data/dtos/transactionHistory.dto';
+import { TransactionHistoryDto } from '../../data/dtos/transaction-history.dto';
 
 @ApiTags('Transaction History')
 @Controller('transaction-history')

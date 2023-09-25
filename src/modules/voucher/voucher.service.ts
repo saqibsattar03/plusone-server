@@ -6,7 +6,7 @@ import { VoucherDto } from '../../data/dtos/voucher.dto';
 import {
   RedeemVoucher,
   RedeemVoucherDocument,
-} from '../../data/schemas/redeemVoucher.schema';
+} from '../../data/schemas/redeem-voucher.schema';
 import { RestaurantService } from '../restaurant/restaurant.service';
 import { ProfilesService } from '../profiles/profiles.service';
 import { Constants } from '../../common/constants';
@@ -16,7 +16,7 @@ import { TransactionHistoryService } from '../transaction-history/transaction-hi
 import {
   FreeVoucherRedeemed,
   FreeVoucherDocument,
-} from '../../data/schemas/freeVoucherRedeemed.schema';
+} from '../../data/schemas/free-voucher-redeemed.schema';
 
 @Injectable()
 export class VoucherService {

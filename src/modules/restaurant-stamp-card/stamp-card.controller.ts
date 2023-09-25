@@ -8,7 +8,7 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { RestaurantStampCardDto } from '../../data/dtos/restaurantStampCard.dto';
+import { RestaurantStampCardDto } from '../../data/dtos/restaurant-stamp-card.dto';
 import mongoose from 'mongoose';
 
 @ApiTags('Restaurant Stamp Card')

@@ -5,7 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import {
   CustomerService,
   CustomerServiceSchema,
-} from '../../data/schemas/customerService.schema';
+} from '../../data/schemas/customer-service.schema';
 import { ProfilesModule } from '../profiles/profiles.module';
 
 @Module({

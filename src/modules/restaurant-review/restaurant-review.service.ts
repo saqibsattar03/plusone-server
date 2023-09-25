@@ -9,7 +9,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import {
   RestaurantReview,
   RestaurantReviewDocument,
-} from '../../data/schemas/restaurantReview.schema';
+} from '../../data/schemas/restaurant-review.schema';
 import mongoose, { Model } from 'mongoose';
 import { RestaurantReviewDto } from '../../data/dtos/restaurant.dto';
 import { RestaurantService } from '../restaurant/restaurant.service';
